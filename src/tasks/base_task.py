@@ -1,19 +1,52 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional
 
-
-class Result(dict):
-    """
-    Wrapper for python dict class for Result of completing a Task on a given input set
-    """
-    def __init__(self):
-        super().__init__()
+from src.utils.result import Result
 
 
-class Task(ABC):
+class BaseTask(ABC):
     @property
     @abstractmethod
-    def name(self) -> str:
+    def input(self) -> dict:
+        """
+
+        :return:
+        :rtype:
+        """
+
+    @input.setter
+    def input(self, input_data: dict):
+        self.input = input_data
+
+    @property
+    @abstractmethod
+    def output(self) -> dict:
+        """
+
+        :return:
+        :rtype:
+        """
+
+    @output.setter
+    def output(self, output_data: dict):
+        self.output = output_data
+
+    @property
+    @abstractmethod
+    def record_id(self) -> str:
+        """
+
+        :return:
+        :rtype:
+        """
+
+    @record_id.setter
+    def record_id(self, record_id: str):
+        self.record_id = record_id
+
+    @property
+    @abstractmethod
+    def task_name(self) -> str:
         """
 
         :return: Unique id assigned to task
@@ -21,7 +54,7 @@ class Task(ABC):
 
     @property
     @abstractmethod
-    def requires(self) -> List["Task"]:
+    def requires(self) -> List["BaseTask"]:
         """ List of tasks whose outputs are used in this task.
 
         :return: List of Task child classes
@@ -29,14 +62,14 @@ class Task(ABC):
 
     @property
     @abstractmethod
-    def depends(self) -> Optional[List["Task"]]:
+    def depends(self) -> Optional[List["BaseTask"]]:
         """ List of programs to run to generate intermediary output for this task
 
         :return: List of Task child classes
         """
 
     @abstractmethod
-    def run(self) -> Result:
+    def run(self):
         """ Implementation of method to run to complete a given task
 
         :return:
@@ -50,4 +83,4 @@ class Task(ABC):
 
         :return:
         """
-        return self.run()
+        return Result(self.record_id, self.task_name, self.output)
