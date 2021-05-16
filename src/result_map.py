@@ -1,9 +1,9 @@
+from concurrent.futures import ThreadPoolExecutor, as_completed, Future
 from copy import deepcopy
 from typing import List
 
 from src.tasks.base_task import BaseTask
 from src.utils.result import Result
-from concurrent.futures import ThreadPoolExecutor, as_completed, Future
 
 
 class ResultMap(dict):

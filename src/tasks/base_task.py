@@ -1,10 +1,15 @@
 from abc import ABC, abstractmethod
+from pathlib import Path
 from typing import List, Optional
 
 from src.utils.result import Result
 
 
 class BaseTask(ABC):
+    class TaskCompletionError(Exception):
+        def __init__(self, task_name: str, file: Path):
+            super().__init__(f"Task {task_name} output file missing {file}")
+
     @property
     @abstractmethod
     def input(self) -> dict:
@@ -83,4 +88,8 @@ class BaseTask(ABC):
 
         :return:
         """
+        for key, output in self.output:
+            if isinstance(output, Path) and not output.exists():
+                raise BaseTask.TaskCompletionError(key, output)
+
         return Result(self.record_id, self.task_name, self.output)
