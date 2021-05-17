@@ -3,8 +3,9 @@ Module contains PathManager that manages directory tree focused on using record_
 """
 
 import os
-from typing import List, Dict
 from pathlib import Path
+from typing import List, Dict
+
 from plumbum import local
 
 
@@ -12,17 +13,18 @@ class PathManager:
     """
     This class manages a set of working directories. Useful for keeping files organized
     """
-    MAGS = "MAGS"
 
-    def __init__(self, base_path: str):
+    def __init__(self, base_path: Path):
         """ Create PathManager object rooted at `base_path`
 
         :param base_path: Base path to use to generate root of directory tree
         :raises: AssertionError if base path is not string or is null-string
         """
-        assert isinstance(base_path, str) and len(base_path) > 0
         self._wdir = "wdir"
-        self._base = str(Path(base_path).resolve())
+        base_path = Path(base_path).resolve()
+        if not base_path.exists():
+            os.makedirs(base_path)
+        self._base = str(base_path)
         self._dbs = {}
         self._generate_directory_tree()
 

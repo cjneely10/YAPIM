@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import List, Optional, Tuple
 
 from src.tasks.utils.dependency_input import DependencyInput
-from src.utils.result import Result
 
 
 class BaseTask(ABC):

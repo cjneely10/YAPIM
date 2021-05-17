@@ -31,8 +31,11 @@ class Task(BaseTask, ABC):
 
         :return:
         """
+        if self.is_skip:
+            return Result(self.record_id, self.task_name, {})
+        if not self.is_complete:
+            self.run()
         for key, output in self.output:
             if isinstance(output, Path) and not output.exists():
                 raise BaseTask.TaskCompletionError(key, output)
-        self.run()
         return Result(self.record_id, self.task_name, self.output)

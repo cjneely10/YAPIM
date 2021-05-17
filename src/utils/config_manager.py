@@ -53,7 +53,7 @@ class ConfigManager:
     DATA = "data"
     BASE = "base"
 
-    def __init__(self, config_path: str):
+    def __init__(self, config_path: Path):
         """ Create ConfigManager object
 
         :param config_path: Path to .yaml config file

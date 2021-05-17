@@ -9,8 +9,8 @@ from src.utils.result import Result
 
 
 class ResultMap(dict):
-    def __init__(self, config_manager: ConfigManager):
-        super().__init__()
+    def __init__(self, config_manager: ConfigManager, input_data: dict):
+        super().__init__(input_data)
         self.config_manager = config_manager
 
     def distribute(self, task: Type[Task], task_identifier: Node, path_manager: PathManager):
@@ -43,8 +43,6 @@ class ResultMap(dict):
 
             for future in as_completed(futures):
                 result: Result = future.result()
-                if result.record_id not in self.keys():
-                    self[result.record_id] = {}
                 self[result.record_id][result.task_name] = result
 
     def _update_input(self, task_copy: Task):

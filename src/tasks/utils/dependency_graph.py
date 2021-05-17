@@ -2,8 +2,6 @@ from typing import List, Dict, Tuple, Type
 
 import networkx as nx
 
-from src.tasks.base_task import BaseTask
-
 from src.tasks.task import Task
 
 # TODO: Link in with created dependencies from EukMS, refactored for new protocol

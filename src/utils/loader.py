@@ -3,10 +3,10 @@ Populate dependencies for easy loading
 """
 
 import os
-from pathlib import Path
-from inspect import isclass
-from pkgutil import iter_modules
 from importlib import import_module
+from inspect import isclass
+from pathlib import Path
+from pkgutil import iter_modules
 
 from src.tasks.task import Task
 

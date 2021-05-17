@@ -12,11 +12,15 @@ class DependencyInput:
     """
     class DependencyCreationError(TypeError):
         def __init__(self):
-            super().__init__("Task creation error - must provide a task name XOR a mapping of {task_name: {from: to}}")
+            super().__init__(
+                "Task creation error - must provide a task name and/or a mapping of {task_name: {from: to}}"
+            )
 
     def __init__(self, name: str,
-                 collect_all: Optional[Iterable[str]],
-                 collect_by: Optional[Iterable[Dict[str, Dict[str, str]]]]):
+                 collect_all: Optional[Iterable[str]] = None,
+                 collect_by: Optional[Iterable[Dict[str, Dict[str, str]]]] = None):
+        if collect_all is None and collect_by is None:
+            raise DependencyInput.DependencyCreationError()
         self.name = name
         self.collect_all = collect_all
         self.collect_by = collect_by
