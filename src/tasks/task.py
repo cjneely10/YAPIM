@@ -129,27 +129,16 @@ class Task(BaseTask, ABC):
         """
         if self.is_skip:
             return Result(self.record_id, self.task_name, {})
-
-        statement = "\nRunning:\n  %s" % (
+        print("\nRunning:\n  %s" % (
                 (self.task_scope + " " if self.task_scope != ConfigManager.ROOT else "") + self.task_name
-        )
-        print(statement)
+        ))
 
         if not self.is_complete:
             _str = "In progress:  {}".format(self.record_id)
             logging.info(_str)
             print(colors.blue & colors.bold | _str)
             start_time = time.time()
-            try:
-                self.run()
-            # pylint: disable=broad-except
-            except BaseException as err:
-                logging.info(err)
-                logging.info(traceback.print_exc())
-                with open(os.path.join(self.wdir, "task.err"), "a") as w_out:
-                    w_out.write(str(err) + "\n")
-                    w_out.write(traceback.format_exc() + "\n")
-                print(colors.warn | str(err))
+            self.try_run()
             end_time = time.time()
             _str = "Is complete:  {} ({:.3f}{})".format(self.record_id, *Task._parse_time(end_time - start_time))
             logging.info(_str)
@@ -177,6 +166,18 @@ class Task(BaseTask, ABC):
 
     def __repr__(self):
         return self.__str__()
+
+    def try_run(self):
+        try:
+            self.run()
+        # pylint: disable=broad-except
+        except BaseException as err:
+            logging.info(err)
+            logging.info(traceback.print_exc())
+            with open(os.path.join(self.wdir, "task.err"), "a") as w_out:
+                w_out.write(str(err) + "\n")
+                w_out.write(traceback.format_exc() + "\n")
+            print(colors.warn | str(err))
 
     @staticmethod
     def _parse_time(_time: float) -> Tuple[float, str]:
