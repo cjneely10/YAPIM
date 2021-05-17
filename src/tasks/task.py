@@ -1,8 +1,12 @@
 from abc import ABC
 from pathlib import Path
 
-from src.result_map import ResultMap
+from plumbum import local
+from plumbum.machines import LocalMachine, LocalCommand
+
+from src.tasks.result_map import ResultMap
 from src.tasks.base_task import BaseTask
+from src.utils.config_manager import ConfigManager
 from src.utils.result import Result
 
 
@@ -16,7 +20,7 @@ class Task(BaseTask, ABC):
         self._task_scope = task_scope
         self.input: dict = result_map[self.record_id][self.full_name]
         self.output = {}
-        self.wdir: str = wdir
+        self.wdir: Path = Path(wdir).resolve()
         self.config: dict = result_map.config_manager.get(self.full_name)
         parent_data = result_map.config_manager.parent_info(self.full_name)
         self.is_skip = "skip" in self.config.keys() and self.config["skip"] is True or \
@@ -39,3 +43,11 @@ class Task(BaseTask, ABC):
             if isinstance(output, Path) and not output.exists():
                 raise BaseTask.TaskCompletionError(key, output)
         return Result(self.record_id, self.task_name, self.output)
+
+    @property
+    def local(self) -> LocalMachine:
+        return local
+
+    @property
+    def program(self) -> LocalCommand:
+        return self.local[self.config[ConfigManager.PROGRAM]]
