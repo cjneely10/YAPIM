@@ -46,19 +46,7 @@ class ResultMap(dict):
                 self._update_input(task_copy)
                 futures.append(executor.submit(task_copy.run_task))
 
-            for future in as_completed(futures):
-                result: Result = future.result()
-                self[result.record_id][result.task_name] = result
-                for result_key, result_data in result.items():
-                    if result_key == "final":
-                        _sub_out = os.path.join(self.results_dir, result.record_id)
-                        if not os.path.exists(_sub_out):
-                            os.makedirs(_sub_out)
-                        for file_str in result_data:
-                            obj = result[file_str]
-                            if isinstance(obj, Path):
-                                copy(obj, _sub_out)
-                            self.output_data_to_pickle[result.record_id][file_str] = obj
+            self._finalize_output(futures)
 
     def _update_input(self, task_copy: Task):
         for dependency in task_copy.depends:
@@ -69,3 +57,18 @@ class ResultMap(dict):
                 for prior_id, prior_mapping in prior:
                     for _from, _to in prior_mapping.items():
                         task_copy.input[_to] = self[task_copy.record_id][prior_id][_from]
+
+    def _finalize_output(self, futures: List[Future]):
+        for future in as_completed(futures):
+            result: Result = future.result()
+            self[result.record_id][result.task_name] = result
+            for result_key, result_data in result.items():
+                if result_key == "final":
+                    _sub_out = os.path.join(self.results_dir, result.record_id)
+                    if not os.path.exists(_sub_out):
+                        os.makedirs(_sub_out)
+                    for file_str in result_data:
+                        obj = result[file_str]
+                        if isinstance(obj, Path):
+                            copy(obj, _sub_out)
+                        self.output_data_to_pickle[result.record_id][file_str] = obj
