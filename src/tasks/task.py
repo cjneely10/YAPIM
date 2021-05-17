@@ -4,7 +4,7 @@ import time
 import traceback
 from abc import ABC
 from pathlib import Path
-from typing import Tuple, List, Optional, Callable
+from typing import Tuple, List, Optional, Callable, Union
 
 from plumbum import local, colors
 from plumbum.machines import LocalMachine, LocalCommand
@@ -35,11 +35,8 @@ class Task(BaseTask, ABC):
         self.input: dict = result_map[self.record_id]
         self.output = {}
         self.wdir: Path = Path(wdir).resolve()
-        self.config: dict = result_map.config_manager.get(self.full_name)
         self.results_map = result_map
-        parent_data = result_map.config_manager.parent_info(self.full_name)
-        self.is_skip = "skip" in self.config.keys() and self.config["skip"] is True or \
-                       "skip" in parent_data.keys() and parent_data["skip"] is True
+        self.is_skip = str(self.results_map.find(self.full_name, ConfigManager.SKIP)) == "true"
         self.is_complete = False
 
     @property
@@ -52,7 +49,11 @@ class Task(BaseTask, ABC):
 
         :return: Str of number of tasks
         """
-        return self.config[ConfigManager.THREADS]
+        return self.results_map.find(self.full_name, ConfigManager.THREADS)
+
+    @property
+    def config(self) -> dict:
+        return self.results_map.get(self.full_name)
 
     @property
     def added_flags(self) -> List[str]:
@@ -62,12 +63,11 @@ class Task(BaseTask, ABC):
 
         :return: List of arguments to pass to calling program
         """
-        if isinstance(self.config[self.task_name], dict):
-            if ConfigManager.FLAGS in self.config[self.task_name].keys():
-                out = self.config[self.task_name][ConfigManager.FLAGS].split(" ")
-                while "" in out:
-                    out.remove("")
-                return out
+        if ConfigManager.FLAGS in self.config.keys():
+            out = self.config[ConfigManager.FLAGS].split(" ")
+            while "" in out:
+                out.remove("")
+            return out
         return []
 
     @property
@@ -75,7 +75,7 @@ class Task(BaseTask, ABC):
         """
         Run was launched on SLURM
         """
-        return bool(self.slurm_config[ConfigManager.USE_CLUSTER])
+        return bool(self.results_map.config[ConfigManager.SLURM][ConfigManager.USE_CLUSTER])
 
     def _create_slurm_command(self, cmd: LocalCommand, time_override: Optional[str] = None,
                               threads_override: str = None, memory_override: str = None) -> SLURMCaller:
@@ -90,20 +90,21 @@ class Task(BaseTask, ABC):
         :return: SLURM-wrapped command to run script via plumbum interface
         """
         # Confirm valid SLURM section
-        if ConfigManager.MEMORY not in self.parent_data.keys():
+        parent_info: dict = self.results_map.parent_info(self.full_name)
+        if ConfigManager.MEMORY not in self.config.keys() or ConfigManager.MEMORY not in parent_info.keys():
             raise MissingDataError("SLURM section not properly formatted within %s" % self.full_name)
-        if ConfigManager.TIME not in self.parent_data.keys():
+        if ConfigManager.TIME not in self.config.keys() or ConfigManager.TIME not in parent_info.keys():
             raise MissingDataError("SLURM section not properly formatted within %s" % self.full_name)
         # Generate command to launch SLURM job
         return SLURMCaller(
-            self.res.get_slurm_userid(),
-            self.wdir,
-            str(self._threads_pw) if threads_override is None else threads_override,
+            self.results_map.get_slurm_userid(),
+            str(self.wdir),
+            str(self.threads) if threads_override is None else threads_override,
             cmd,
-            self.memory if memory_override is None else memory_override,
-            self.time if time_override is None else time_override,
+            self.results_map.get(self.full_name, ConfigManager.MEMORY) if memory_override is None else memory_override,
+            self.results_map.get(self.full_name, ConfigManager.TIME) if time_override is None else time_override,
             self.local,
-            self.cfg.get_slurm_flagged_arguments(),
+            self.results_map.config_manager.get_slurm_flagged_arguments(),
         )
 
     @property
@@ -201,3 +202,92 @@ class Task(BaseTask, ABC):
         if is_complete is None:
             return False
         return is_complete
+
+    def parallel(self, cmd: Union[LocalCommand, List[LocalCommand]], time_override: Optional[str] = None,
+                 threads_override: str = None, memory_override: str = None):
+        """ Launch a command that uses multiple threads
+        This method will call a given command on a SLURM cluster automatically (if requested by the user)
+        In a config file, WORKERS will correspond to the number of tasks to run in parallel. For slurm users, this
+        is the number of jobs that will run simultaneously.
+
+        A time-override may be specified to manually set the maximum time limit a command (job) may run on a cluster,
+        which will override the time that is specified by the user in a config file
+
+        The command string will be written to the EukMetaSanity pipeline output file and will be printed to screen
+
+        Example:
+        self.parallel(self.local["pwd"], "1:00")
+
+        :param cmd: plumbum LocalCommand object to run, or list of commands to run
+        :param time_override: Time override in "HH:MM:SS" format, if needed
+        :param threads_override: Provide number of threads to parallelize over, default to use config-level threads-pw.
+            Note that this will only affect SLURM script generation - this will not override thread values passed in by
+            the cmd parameter
+        :param memory_override: Provide memory override for command in "2GB" format, etc.
+        :raises: MissingDataError if SLURM section improperly configured
+        """
+        # Write command to slurm script file and run
+        if self.is_slurm:
+            cmd = self._create_slurm_command(cmd, time_override, threads_override, memory_override)
+        # Run command directly
+        logging.info(str(cmd))
+        print("  " + str(cmd))
+        out = cmd()
+        # Store log info in any was generated
+        if out is not None:
+            with open(os.path.join(self.wdir, "task.log"), "a") as w:
+                w.write(str(out))
+
+    def single(self, cmd: Union[LocalCommand, List[LocalCommand]],
+               time_override: Optional[str] = None, memory_override: str = None):
+        """ Launch a command that uses a single thread.
+
+        The command string will be written to the EukMetaSanity pipeline output file and will be printed to screen
+
+        Example:
+        self.single(self.local["pwd"])
+
+        :param cmd: plumbum LocalCommand object to run, or list of commands to run
+        :param time_override: Time override in "HH:MM:SS" format, if needed
+        :param memory_override: Provide memory override for command in "2GB" format, etc.
+        """
+        self.parallel(cmd, time_override, threads_override="1", memory_override=memory_override)
+
+    def create_script(self, cmd: Union[str, LocalCommand, List[str]], file_name: str) -> LocalCommand:
+        """ Write a command to file and return its value packaged as a LocalCommand.
+
+        This is highly useful when incorporating programs that only launch in the directory in which it was called
+
+        Example:
+
+        script = self.create_script(self.local["ls"]["~"], "cd.sh")
+
+        This will create a file within self.wdir named `cd.sh`, the contents of which will be:
+
+        #!/bin/bash
+        cd <wdir> || return
+
+        ls ~
+
+
+        This can then be run in parallel or singly:
+        self.parallel(script)
+        self.single(script)
+
+        :param cmd: Command to write to file, or list of commands to write
+        :param file_name: Name of file to create
+        :return: Command to run script via plumbum interface
+        """
+        _path = os.path.join(self.wdir, file_name)
+        fp = open(_path, "w")
+        # Write shebang and move to working directory
+        fp.write("#!/bin/bash\ncd %s || return\n\n" % self.wdir)
+        # Write command to run
+        if isinstance(cmd, list):
+            for _cmd in cmd:
+                fp.write("".join((str(_cmd), "\n")))
+        else:
+            fp.write("".join((str(cmd), "\n")))
+        fp.close()
+        self.local["chmod"]["+x", _path]()
+        return self.local[_path]

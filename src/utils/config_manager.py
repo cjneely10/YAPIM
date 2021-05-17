@@ -52,6 +52,7 @@ class ConfigManager:
     FLAGS = "FLAGS"
     DATA = "data"
     BASE = "base"
+    SKIP = "skip"
 
     def __init__(self, config_path: Path):
         """ Create ConfigManager object
@@ -59,9 +60,9 @@ class ConfigManager:
         :param config_path: Path to .yaml config file
         """
         fp = open(str(Path(config_path).resolve()), "r")
-        self._config = yaml.load(fp, Loader=yaml.FullLoader)
+        self.config = yaml.load(fp, Loader=yaml.FullLoader)
         # Confirm all paths in file are valid
-        ConfigManager._validate(self._config)
+        ConfigManager._validate(self.config)
         fp.close()
 
     def get(self, task_data: Tuple[str, str]) -> dict:
@@ -71,15 +72,21 @@ class ConfigManager:
         :rtype:
         """
         if task_data[0] == ConfigManager.ROOT:
-            return self._config[task_data[1]]
+            return self.config[task_data[1]]
         else:
-            return self._config[task_data[0]][ConfigManager.DEPENDENCIES][task_data[1]]
+            return self.config[task_data[0]][ConfigManager.DEPENDENCIES][task_data[1]]
+
+    def find(self, task_data: Tuple[str, str], key: str):
+        config_section = self.get(task_data)
+        if key in config_section.keys():
+            return config_section[key]
+        return self.config[task_data[1]][key]
 
     def parent_info(self, task_data: Tuple[str, str]) -> dict:
         if task_data[0] == ConfigManager.ROOT:
-            return self._config[task_data[1]]
+            return self.config[task_data[1]]
         else:
-            return self._config[task_data[0]]
+            return self.config[task_data[0]]
 
     @staticmethod
     def _validate(data_dict):
@@ -141,7 +148,7 @@ class ConfigManager:
         :return: SLURM arguments parsed to input list
         """
         return [
-            (key, str(val)) for key, val in self._config["SLURM"].items()
+            (key, str(val)) for key, val in self.config["SLURM"].items()
             if key not in {"USE_CLUSTER", "--nodes", "--ntasks", "--mem", "user-id"}
         ]
 
@@ -152,6 +159,6 @@ class ConfigManager:
 
         :return: user-id provided in config file
         """
-        if "user-id" not in self._config["SLURM"].keys():
+        if "user-id" not in self.config["SLURM"].keys():
             raise MissingDataError("SLURM section missing required user data")
-        return self._config["SLURM"]["user-id"]
+        return self.config["SLURM"]["user-id"]
