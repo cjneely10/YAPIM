@@ -1,4 +1,4 @@
-from src.tasks.task import Task
+from src.tasks.task import Task, set_complete, program_catch
 from src.tasks.utils.dependency_input import DependencyInput
 
 
@@ -7,6 +7,7 @@ class Print(Task):
     requires = ["echo"]
     depends = [DependencyInput("sed", {"echo": {"result": "file"}})]
 
+    @set_complete
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {
@@ -14,5 +15,10 @@ class Print(Task):
             "final": ["result"]
         }
 
+    @program_catch
     def run(self):
-        print(self.output["result"])
+        """
+
+        :return:
+        :rtype:
+        """

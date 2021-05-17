@@ -14,7 +14,7 @@ class TestExecutor(TestCase):
             TestExecutor.sample_tasks1_dir.joinpath("sample-config.yaml"),
             TestExecutor.sample_tasks1_dir,
             Path(os.path.join(os.path.dirname(__file__), "out")).resolve(),
-            {"one": {}, "two": {}},
+            {str(i): {} for i in range(1000)},
             TestExecutor.sample_dependencies_dir
         )
         executor.run()
