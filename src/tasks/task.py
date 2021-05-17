@@ -17,7 +17,7 @@ class Task(BaseTask, ABC):
     def __init__(self, record_id: str, task_scope: str, result_map, wdir: str):
         self.record_id: str = record_id
         self._task_scope = task_scope
-        self._input: dict = result_map[self.record_id]
+        self.input: dict = result_map[self.record_id]
         self.output = {}
         self.wdir: Path = Path(wdir).resolve()
         self.config: dict = result_map.config_manager.get(self.full_name)
@@ -25,10 +25,6 @@ class Task(BaseTask, ABC):
         self.is_skip = "skip" in self.config.keys() and self.config["skip"] is True or \
                        "skip" in parent_data.keys() and parent_data["skip"] is True
         self.is_complete = False
-
-    @property
-    def input(self) -> dict:
-        return self._input
 
     def run_task(self) -> Result:
         """ Type of run. For Task objects, this simply calls run(). For other tasks, there
@@ -54,3 +50,9 @@ class Task(BaseTask, ABC):
     @property
     def program(self) -> LocalCommand:
         return self.local[self.config[ConfigManager.PROGRAM]]
+
+    def __str__(self):
+        return f"<Task name: {self.task_name}, scope: {self.task_scope}, input_id: {self.record_id}, requirements: {self.requires}, dependencies: {self.depends}>"
+
+    def __repr__(self):
+        return self.__str__()

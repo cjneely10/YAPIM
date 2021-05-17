@@ -13,4 +13,4 @@ class Sed(Task):
         }
 
     def run(self):
-        (self.program["s/\n/\n./g", self.input["file"]] > str(self.output["result"]))()
+        (self.program[rf"s/{self.record_id}/{self.record_id + 'a'}/g", self.input["file"]] > str(self.output["result"]))()

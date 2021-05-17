@@ -1,5 +1,6 @@
 import os
 import pickle
+from copy import deepcopy
 from pathlib import Path
 from typing import List, Dict, Type, Optional
 
@@ -23,7 +24,8 @@ class Executor:
         pipeline_tasks = list(self.task_blueprints.values())
         if dependencies_directory is not None:
             self.task_blueprints.update(get_modules(dependencies_directory))
-        self.task_list: List[Node] = DependencyGraph(pipeline_tasks, self.task_blueprints).sorted_graph_identifiers
+        self.task_list: List[List[Node]] = DependencyGraph(pipeline_tasks, self.task_blueprints)\
+            .sorted_graph_identifiers
 
         self.pipeline_name = os.path.basename(pipeline_steps_directory)
         self.path_manager = PathManager(base_dir)
@@ -36,8 +38,14 @@ class Executor:
         :return:
         :rtype:
         """
-        for task_id in self.task_list:
-            self.result_map.distribute(self.task_blueprints[task_id.name], task_id, self.path_manager)
+        for task_list in self.task_list:
+            if len(task_list) == 1:
+                self.result_map.distribute(self.task_blueprints[task_list[0].name], task_list[0], self.path_manager)
+            else:
+                for task_id in task_list[:-1]:
+                    self.result_map.distribute(self.task_blueprints[task_id.name], task_id, self.path_manager,
+                                               self.task_blueprints[task_list[-1].name])
+                self.result_map.distribute(self.task_blueprints[task_list[-1].name], task_list[-1], self.path_manager)
         out_ptr = open(self.results_base_dir.joinpath(f"{self.pipeline_name}.pkl"), "wb")
         pickle.dump(self.result_map.output_data_to_pickle, out_ptr)
         out_ptr.close()

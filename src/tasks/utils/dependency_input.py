@@ -22,3 +22,9 @@ class DependencyInput:
 
     def all_priors(self):
         return list(self.collect_by.keys())
+
+    def __str__(self):
+        return f"<Dependency name: {self.name}, collection: {self.collect_by}>"
+
+    def __repr__(self):
+        return self.__str__()

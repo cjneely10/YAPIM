@@ -93,12 +93,10 @@ class DependencyGraph:
             dependency_node: Node = Node(task_node.name, dependency.name)
             step_list.append(dependency_node)
             self.graph.add_edge(task_node, dependency_node)
-            # for name in dependency.collect_by.keys():
-            #     self.graph.add_edge(Node(task_node.name, name), task_node)
             self._add_dependencies(dependency_node, step_list)
 
     @property
-    def sorted_graph_identifiers(self) -> List[Node]:
+    def sorted_graph_identifiers(self) -> List[List[Node]]:
         sorted_graph = list(topological_sort(self.graph))
         sorted_graph.remove(DependencyGraph.ROOT_NODE)
         out_steps = []
@@ -106,7 +104,5 @@ class DependencyGraph:
             step_list = []
             self._add_dependencies(node, step_list)
             step_list.reverse()
-            out_steps += step_list
-            out_steps.append(node)
-        print(out_steps)
+            out_steps.append([*step_list, node])
         return out_steps
