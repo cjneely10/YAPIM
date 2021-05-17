@@ -8,6 +8,7 @@ from src.tasks.task import Task
 from src.tasks.utils.dependency_graph import Node, DependencyGraph
 from src.utils.config_manager import ConfigManager
 from src.tasks.utils.loader import get_modules
+from src.utils.input_loader import InputLoader
 from src.utils.path_manager import PathManager
 
 
@@ -16,7 +17,7 @@ class Executor:
                  config_path: Path,
                  pipeline_steps_directory: Path,
                  base_dir: Path,
-                 input_data: Dict[str, Dict],
+                 input_data: InputLoader,
                  dependencies_directories: Optional[List[Path]] = None,
                  ):
         self.task_blueprints: Dict[str, Type[Task]] = get_modules(pipeline_steps_directory)
@@ -30,7 +31,7 @@ class Executor:
         self.pipeline_name = os.path.basename(pipeline_steps_directory)
         self.path_manager = PathManager(base_dir)
         self.results_base_dir = base_dir.joinpath("results").joinpath(self.pipeline_name)
-        self.result_map: ResultMap = ResultMap(ConfigManager(config_path), input_data, self.results_base_dir)
+        self.result_map: ResultMap = ResultMap(ConfigManager(config_path), input_data.load(), self.results_base_dir)
 
     def run(self):
         """
