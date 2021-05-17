@@ -4,7 +4,6 @@ from pathlib import Path
 from plumbum import local
 from plumbum.machines import LocalMachine, LocalCommand
 
-from src.tasks.result_map import ResultMap
 from src.tasks.base_task import BaseTask
 from src.utils.config_manager import ConfigManager
 from src.utils.result import Result
@@ -15,7 +14,7 @@ class Task(BaseTask, ABC):
     def task_scope(self) -> str:
         return self._task_scope
 
-    def __init__(self, record_id: str, task_scope: str, result_map: ResultMap, wdir: str):
+    def __init__(self, record_id: str, task_scope: str, result_map, wdir: str):
         self.record_id: str = record_id
         self._task_scope = task_scope
         self.input: dict = result_map[self.record_id][self.full_name]

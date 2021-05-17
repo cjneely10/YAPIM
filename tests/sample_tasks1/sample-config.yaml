@@ -24,4 +24,10 @@ echo:
   memory: 40G
   time: "4:00:00"
 
+cat:
+  workers: 1
+  threads: 4  # Each worker needs at least 4 threads to complete this step
+  memory: 40G
+  time: "4:00:00"
+
 ...  # document end

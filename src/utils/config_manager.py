@@ -58,9 +58,11 @@ class ConfigManager:
 
         :param config_path: Path to .yaml config file
         """
-        self._config = yaml.load(open(str(Path(config_path).resolve()), "r"), Loader=yaml.FullLoader)
+        fp = open(str(Path(config_path).resolve()), "r")
+        self._config = yaml.load(fp, Loader=yaml.FullLoader)
         # Confirm all paths in file are valid
         ConfigManager._validate(self._config)
+        fp.close()
 
     def get(self, task_data: Tuple[str, str]) -> dict:
         """ Get (scope, name) data from config file

@@ -1,6 +1,6 @@
 from typing import List, Dict, Tuple, Type
 
-import networkx as nx
+from networkx import DiGraph, topological_sort, is_directed_acyclic_graph
 
 from src.tasks.task import Task
 
@@ -52,10 +52,10 @@ class DependencyGraph:
         self.idx: Dict[str, Type[Task]] = {task.task_name: task for task in tasks}
         self.idx.update(dependencies)
 
-        self.graph = nx.DiGraph()
+        self.graph = DiGraph()
         self.graph.add_node(DependencyGraph.ROOT_NODE)
         self._build_dependency_graph(tasks)
-        if not nx.is_directed_acyclic_graph(self.graph):
+        if not is_directed_acyclic_graph(self.graph):
             raise DependencyGraph.ERR
 
     def _build_dependency_graph(self, tasks: List[Type[Task]]):
@@ -85,4 +85,4 @@ class DependencyGraph:
 
     @property
     def sorted_graph_identifiers(self) -> List[Node]:
-        return list(nx.topological_sort(self.graph))
+        return list(topological_sort(self.graph))[1:]
