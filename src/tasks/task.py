@@ -79,7 +79,7 @@ class Task(BaseTask, ABC):
         """
         Run was launched on SLURM
         """
-        return bool(self.results_map.config[ConfigManager.SLURM][ConfigManager.USE_CLUSTER])
+        return bool(self.results_map.config_manager.config[ConfigManager.SLURM][ConfigManager.USE_CLUSTER])
 
     def _create_slurm_command(self, cmd: LocalCommand, time_override: Optional[str] = None,
                               threads_override: str = None, memory_override: str = None) -> SLURMCaller:

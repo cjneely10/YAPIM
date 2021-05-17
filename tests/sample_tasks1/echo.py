@@ -15,4 +15,6 @@ class Echo(Task):
         }
 
     def run(self):
-        (self.local["echo"][self.record_id] > str(self.output["result"]))()
+        self.single(
+            self.local["echo"][self.record_id] > str(self.output["result"])
+        )
