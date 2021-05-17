@@ -5,7 +5,7 @@ from abc import ABC
 from collections import Callable
 import time
 from pathlib import Path
-from typing import Tuple
+from typing import Tuple, List
 
 from plumbum import local, colors
 from plumbum.machines import LocalMachine, LocalCommand
@@ -52,10 +52,6 @@ def set_complete(func: Callable):
 
 
 class Task(BaseTask, ABC):
-    @property
-    def task_scope(self) -> str:
-        return self._task_scope
-
     def __init__(self, record_id: str, task_scope: str, result_map, wdir: str):
         self.record_id: str = record_id
         self._task_scope = task_scope
@@ -63,10 +59,46 @@ class Task(BaseTask, ABC):
         self.output = {}
         self.wdir: Path = Path(wdir).resolve()
         self.config: dict = result_map.config_manager.get(self.full_name)
-        parent_data = result_map.config_manager.parent_info(self.full_name)
+        self.parent_data = result_map.config_manager.parent_info(self.full_name)
         self.is_skip = "skip" in self.config.keys() and self.config["skip"] is True or \
-                       "skip" in parent_data.keys() and parent_data["skip"] is True
+                       "skip" in self.parent_data.keys() and self.parent_data["skip"] is True
         self.is_complete = False
+
+    @property
+    def task_scope(self) -> str:
+        return self._task_scope
+
+    @property
+    def threads(self) -> str:
+        """ Number of threads when running task (as set in config file)
+
+        :return: Str of number of tasks
+        """
+        return self.config[ConfigManager.THREADS]
+
+    @property
+    def added_flags(self) -> List[str]:
+        """ Get additional flags that user provided in config file
+
+        Example: self.local["ls"][(*self.added_flags("ls"))]
+
+        :return: List of arguments to pass to calling program
+        """
+        if isinstance(self.config[self.task_name], dict):
+            if ConfigManager.FLAGS in self.config[self.task_name].keys():
+                out = self.config[self.task_name][ConfigManager.FLAGS].split(" ")
+                while "" in out:
+                    out.remove("")
+                return out
+        return []
+
+    @property
+    def data(self) -> List[str]:
+        """ List of data files passed to this task's config section
+
+        :return: List of paths of data in task's config section
+        """
+        return self.config[ConfigManager.DATA].split(" ")
 
     def run_task(self) -> Result:
         """ Type of run. For Task objects, this simply calls run(). For other tasks, there
