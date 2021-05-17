@@ -1,41 +1,18 @@
 import logging
 import os
+import time
 import traceback
 from abc import ABC
-from collections import Callable
-import time
 from pathlib import Path
-from typing import Tuple, List
+from typing import Tuple, List, Optional, Callable
 
 from plumbum import local, colors
 from plumbum.machines import LocalMachine, LocalCommand
 
 from src.tasks.base_task import BaseTask
 from src.tasks.utils.result import Result
-from src.utils.config_manager import ConfigManager
-
-
-def program_catch(func: Callable):
-    """ Decorator function checks for ProcessExecutionErrors and FileExistErrors when running an executable
-    Logging info recorded and printed to stdout
-
-    :param func: Function to test and whose exceptions to catch
-    :return: Decorated function
-    """
-
-    def _add_try_except(self, *args, **kwargs):
-        try:
-            return func(self, *args, **kwargs)
-        # pylint: disable=broad-except
-        except BaseException as err:
-            logging.info(err)
-            logging.info(traceback.print_exc())
-            with open(os.path.join(self.wdir, "task.err"), "a") as w_out:
-                w_out.write(str(err) + "\n")
-                w_out.write(traceback.format_exc() + "\n")
-            print(colors.warn | str(err))
-
-    return _add_try_except
+from src.tasks.utils.slurm_caller import SLURMCaller
+from src.utils.config_manager import ConfigManager, MissingDataError
 
 
 def set_complete(func: Callable):
@@ -59,9 +36,10 @@ class Task(BaseTask, ABC):
         self.output = {}
         self.wdir: Path = Path(wdir).resolve()
         self.config: dict = result_map.config_manager.get(self.full_name)
-        self.parent_data = result_map.config_manager.parent_info(self.full_name)
+        self.results_map = result_map
+        parent_data = result_map.config_manager.parent_info(self.full_name)
         self.is_skip = "skip" in self.config.keys() and self.config["skip"] is True or \
-                       "skip" in self.parent_data.keys() and self.parent_data["skip"] is True
+                       "skip" in parent_data.keys() and parent_data["skip"] is True
         self.is_complete = False
 
     @property
@@ -93,6 +71,42 @@ class Task(BaseTask, ABC):
         return []
 
     @property
+    def is_slurm(self) -> bool:
+        """
+        Run was launched on SLURM
+        """
+        return bool(self.slurm_config[ConfigManager.USE_CLUSTER])
+
+    def _create_slurm_command(self, cmd: LocalCommand, time_override: Optional[str] = None,
+                              threads_override: str = None, memory_override: str = None) -> SLURMCaller:
+        """ Create a SLURM-managed process
+
+        :param cmd: plumbum LocalCommand object to run
+        :param time_override: Time override in "HH:MM:SS" format, if needed
+        :param threads_override: Provide number of threads to parallelize over, default to use config-level threads-pw.
+            Note that this will only affect SLURM script generation - this will not override thread values passed in by
+            the cmd parameter
+        :param memory_override: Provide memory override for command in "2GB" format, etc.
+        :return: SLURM-wrapped command to run script via plumbum interface
+        """
+        # Confirm valid SLURM section
+        if ConfigManager.MEMORY not in self.parent_data.keys():
+            raise MissingDataError("SLURM section not properly formatted within %s" % self.full_name)
+        if ConfigManager.TIME not in self.parent_data.keys():
+            raise MissingDataError("SLURM section not properly formatted within %s" % self.full_name)
+        # Generate command to launch SLURM job
+        return SLURMCaller(
+            self.res.get_slurm_userid(),
+            self.wdir,
+            str(self._threads_pw) if threads_override is None else threads_override,
+            cmd,
+            self.memory if memory_override is None else memory_override,
+            self.time if time_override is None else time_override,
+            self.local,
+            self.cfg.get_slurm_flagged_arguments(),
+        )
+
+    @property
     def data(self) -> List[str]:
         """ List of data files passed to this task's config section
 
@@ -116,7 +130,16 @@ class Task(BaseTask, ABC):
             logging.info(_str)
             print(colors.blue & colors.bold | _str)
             start_time = time.time()
-            self.run()
+            try:
+                self.run()
+            # pylint: disable=broad-except
+            except BaseException as err:
+                logging.info(err)
+                logging.info(traceback.print_exc())
+                with open(os.path.join(self.wdir, "task.err"), "a") as w_out:
+                    w_out.write(str(err) + "\n")
+                    w_out.write(traceback.format_exc() + "\n")
+                print(colors.warn | str(err))
             end_time = time.time()
             _str = "Is complete:  {} ({:.3f}{})".format(self.record_id, *Task._parse_time(end_time - start_time))
             logging.info(_str)

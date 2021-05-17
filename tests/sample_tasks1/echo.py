@@ -1,4 +1,4 @@
-from src.tasks.task import Task, set_complete, program_catch
+from src.tasks.task import Task, set_complete
 
 
 class Echo(Task):
@@ -14,6 +14,5 @@ class Echo(Task):
             "final": ["result"]
         }
 
-    @program_catch
     def run(self):
         (self.local["echo"][self.record_id] > str(self.output["result"]))()

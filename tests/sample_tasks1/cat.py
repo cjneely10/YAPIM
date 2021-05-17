@@ -1,4 +1,4 @@
-from src.tasks.task import Task, set_complete, program_catch
+from src.tasks.task import Task, set_complete
 from src.tasks.utils.dependency_input import DependencyInput
 
 
@@ -15,7 +15,6 @@ class Print(Task):
             "final": ["result"]
         }
 
-    @program_catch
     def run(self):
         """
 
