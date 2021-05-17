@@ -1,17 +1,18 @@
 from src.tasks.task import Task
+from src.tasks.utils.dependency_input import DependencyInput
 
 
-class Cat(Task):
+class Print(Task):
     task_name = "cat"
     requires = ["echo"]
-    depends = []
+    depends = [DependencyInput("sed")]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {
-            "result": self.input["echo"]["result"],
+            "result": self.input["sed"]["result"],
             "final": ["result"]
         }
 
     def run(self):
-        print(self.input["echo"]["result"])
+        print(self.output["result"])

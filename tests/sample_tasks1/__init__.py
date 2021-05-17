@@ -1,2 +1,2 @@
-from .cat import Cat
+from .cat import Print
 from .echo import Echo

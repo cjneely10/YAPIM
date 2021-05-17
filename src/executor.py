@@ -19,11 +19,12 @@ class Executor:
                  input_data: Dict[str, Dict],
                  dependencies_directory: Optional[Path] = None,
                  ):
-        self.pipeline_name = os.path.basename(pipeline_steps_directory)
         self.task_blueprints: Dict[str, Type[Task]] = get_modules(pipeline_steps_directory)
         self.task_list: List[Node] = DependencyGraph(list(self.task_blueprints.values())).sorted_graph_identifiers
         if dependencies_directory is not None:
             self.task_blueprints.update(get_modules(dependencies_directory))
+
+        self.pipeline_name = os.path.basename(pipeline_steps_directory)
         self.path_manager = PathManager(base_dir)
         self.results_base_dir = base_dir.joinpath("results").joinpath(self.pipeline_name)
         self.result_map: ResultMap = ResultMap(ConfigManager(config_path), input_data, self.results_base_dir)
