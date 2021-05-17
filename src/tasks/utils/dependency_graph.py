@@ -3,7 +3,6 @@ from typing import List, Dict, Tuple, Type
 from networkx import DiGraph, topological_sort, is_directed_acyclic_graph
 
 from src.tasks.task import Task
-# TODO: Link in with created dependencies from EukMS, refactored for new protocol
 from src.tasks.utils.dependency_input import DependencyInput
 from src.utils.config_manager import ConfigManager
 
