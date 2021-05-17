@@ -16,4 +16,3 @@ class TestExecutor(TestCase):
             {"one": {}, "two": {}}
         )
         executor.run()
-        print(executor.result_map)

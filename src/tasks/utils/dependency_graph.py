@@ -5,6 +5,8 @@ from networkx import DiGraph, topological_sort, is_directed_acyclic_graph
 from src.tasks.task import Task
 
 # TODO: Link in with created dependencies from EukMS, refactored for new protocol
+from src.utils.config_manager import ConfigManager
+
 dependencies = {}
 
 
@@ -40,7 +42,7 @@ class DependencyGraph:
         "If you are a developer, double-check dependency information in your pipeline"
     )
 
-    ROOT = "input"
+    ROOT = ConfigManager.ROOT
     ROOT_NODE = Node(ROOT, ROOT)
 
     def __init__(self, tasks: List[Type[Task]]):

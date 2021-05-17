@@ -3,7 +3,6 @@ from concurrent.futures import ThreadPoolExecutor, as_completed, Future
 from pathlib import Path
 from typing import List, Type
 from shutil import copy
-import pickle
 
 from src.tasks.task import Task
 from src.tasks.utils.dependency_graph import Node
@@ -45,21 +44,22 @@ class ResultMap(dict):
                 )
                 task_copy.input = record_data
                 self._update_input(task_copy)
-                futures.append(executor.submit(task.run_task))
+                futures.append(executor.submit(task_copy.run_task))
 
             for future in as_completed(futures):
                 result: Result = future.result()
                 self[result.record_id][result.task_name] = result
                 for result_key, result_data in result.items():
                     if result_key == "final":
-                        _sub_out = os.path.join(self.results_dir, record_id)
-                        if not os.path.exists(_sub_out):
-                            os.makedirs(_sub_out)
-                        for file_str in result_data:
-                            obj = self[result.record_id][file_str]
-                            if isinstance(obj, Path):
-                                copy(obj, _sub_out)
-                            self.output_data_to_pickle[result.record_id][file_str] = obj
+                        for record_id in self.keys():
+                            _sub_out = os.path.join(self.results_dir, record_id)
+                            if not os.path.exists(_sub_out):
+                                os.makedirs(_sub_out)
+                            for file_str in result_data:
+                                obj = result[file_str]
+                                if isinstance(obj, Path):
+                                    copy(obj, _sub_out)
+                                self.output_data_to_pickle[result.record_id][file_str] = obj
 
     def _update_input(self, task_copy: Task):
         for dependency in task_copy.depends:

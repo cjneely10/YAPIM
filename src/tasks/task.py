@@ -17,7 +17,7 @@ class Task(BaseTask, ABC):
     def __init__(self, record_id: str, task_scope: str, result_map, wdir: str):
         self.record_id: str = record_id
         self._task_scope = task_scope
-        self.input: dict = result_map[self.record_id][self.full_name]
+        self.input: dict = result_map[self.record_id]
         self.output = {}
         self.wdir: Path = Path(wdir).resolve()
         self.config: dict = result_map.config_manager.get(self.full_name)
@@ -38,7 +38,7 @@ class Task(BaseTask, ABC):
             return Result(self.record_id, self.task_name, {})
         if not self.is_complete:
             self.run()
-        for key, output in self.output:
+        for key, output in self.output.items():
             if isinstance(output, Path) and not output.exists():
                 raise BaseTask.TaskCompletionError(key, output)
         return Result(self.record_id, self.task_name, self.output)
