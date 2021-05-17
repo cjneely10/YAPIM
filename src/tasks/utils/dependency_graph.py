@@ -26,6 +26,20 @@ class Node:
     def get(self) -> Tuple[str, str]:
         return self.scope, self.name
 
+    def __str__(self):
+        return f"{self.scope} {self.name}"
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __hash__(self):
+        return hash(self.scope + "." + self.name)
+
+    def __eq__(self, other: "Node"):
+        if not isinstance(other, Node):
+            return False
+        return self.scope == other.scope and self.name == other.name
+
 
 class DependencyGraph:
     """ Class takes list of tasks and creates dependency DAG of data
@@ -74,7 +88,7 @@ class DependencyGraph:
         for requirement in task.requires:
             if requirement not in self.idx.keys():
                 raise DependencyGraph.ERR
-            self.graph.add_edge(task_node, Node(DependencyGraph.ROOT, requirement))
+            self.graph.add_edge(Node(DependencyGraph.ROOT, requirement), task_node)
 
         for dependency in task.depends:
             if dependency not in self.idx.keys():
@@ -82,7 +96,7 @@ class DependencyGraph:
             dependency_node: Node = Node(task_node.name, dependency.name)
             self.graph.add_edge(task_node, dependency_node)
             for name in dependency.all_priors():
-                self.graph.add_edge(task_node, name)
+                self.graph.add_edge(Node(task_node.name, name), task_node)
             self._add_dependencies(dependency_node)
 
     @property

@@ -2,6 +2,10 @@ from src.tasks.task import Task
 
 
 class Echo(Task):
+    task_name = "echo"
+    requires = []
+    depends = []
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {
@@ -9,11 +13,5 @@ class Echo(Task):
             "final": ["result"]
         }
 
-    task_name = "echo"
-
-    requires = []
-
-    depends = []
-
     def run(self):
-        (self.local["echo"]["Hello world!"] > str(self.output["result"]))()
+        (self.local["echo"][self.record_id] > str(self.output["result"]))()
