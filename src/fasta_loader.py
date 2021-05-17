@@ -21,10 +21,11 @@ class FastaLoader(InputLoader):
                 if ext in file:
                     basename = os.path.basename(os.path.splitext(file)[0])
                     new_file = os.path.join(self.write_directory, basename + ".fna")
-                    records = []
-                    for record in SeqIO.parse(file, "fasta"):
-                        record.description = ""
-                        records.append(record)
-                    SeqIO.write(records, new_file, "fasta")
+                    if not os.path.exists(new_file):
+                        records = []
+                        for record in SeqIO.parse(file, "fasta"):
+                            record.description = ""
+                            records.append(record)
+                        SeqIO.write(records, new_file, "fasta")
                     out[basename] = {"fasta": new_file}
         return out
