@@ -1,5 +1,4 @@
-from src.tasks.task import Task, set_complete
-from src.tasks.utils.dependency_input import DependencyInput
+from src import Task, set_complete, DependencyInput
 
 
 class Update(Task):

@@ -1,4 +1,4 @@
-from src.tasks.task import Task, set_complete
+from src import Task, set_complete
 
 
 class Sed(Task):
