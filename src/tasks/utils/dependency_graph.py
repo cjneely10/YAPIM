@@ -1,4 +1,4 @@
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Type
 
 import networkx as nx
 
@@ -23,6 +23,9 @@ class Node:
         self.scope = task_scope
         self.name = task_name
 
+    def get(self) -> Tuple[str, str]:
+        return self.scope, self.name
+
 
 class DependencyGraph:
     """ Class takes list of tasks and creates dependency DAG of data
@@ -42,13 +45,13 @@ class DependencyGraph:
     ROOT = "input"
     ROOT_NODE = Node(ROOT, ROOT)
 
-    def __init__(self, tasks: List[Task]):
+    def __init__(self, tasks: List[Type[Task]]):
         """ Create DAG from list of TaskList class objects
 
         :param tasks: List of TaskList class objects
         :raises: DependencyGraphGenerationError
         """
-        self.idx: Dict[str, Task] = {task.task_name: task for task in tasks}
+        self.idx: Dict[str, Type[Task]] = {task.task_name: task for task in tasks}
         self.idx.update(dependencies)
 
         self.graph = nx.DiGraph()
@@ -57,7 +60,7 @@ class DependencyGraph:
         if not nx.is_directed_acyclic_graph(self.graph):
             raise DependencyGraph.ERR
 
-    def _build_dependency_graph(self, tasks: List[Task]):
+    def _build_dependency_graph(self, tasks: List[Type[Task]]):
         for task in tasks:
             task_node: Node = Node(DependencyGraph.ROOT, task.task_name)
             self.graph.add_edge(DependencyGraph.ROOT_NODE, task_node)

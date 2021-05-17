@@ -73,6 +73,12 @@ class ConfigManager:
         else:
             return self._config[task_data[0]][ConfigManager.DEPENDENCIES][task_data[1]]
 
+    def parent_info(self, task_data: Tuple[str, str]):
+        if task_data[0] == ConfigManager.ROOT:
+            return self._config[task_data[1]]
+        else:
+            return self._config[task_data[0]]
+
     @staticmethod
     def _validate(data_dict):
         """ Confirm that data and dependency paths provided in file are all valid.
