@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Dict, Type, Optional
+from typing import List, Dict, Type
 
 from src.result_map import ResultMap
 from src.tasks.task import Task
