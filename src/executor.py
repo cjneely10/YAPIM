@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Dict, Type
+from typing import List, Dict, Type, Optional
 
 from src.tasks.result_map import ResultMap
 from src.tasks.task import Task
@@ -13,15 +13,16 @@ class Executor:
     def __init__(self,
                  config_path: Path,
                  pipeline_steps_directory: Path,
-                 dependencies_directory: Path,
                  base_dir: Path,
-                 input_data: Dict[str, Dict]
+                 input_data: Dict[str, Dict],
+                 dependencies_directory: Optional[Path],
                  ):
         self.task_blueprints: Dict[str, Type[Task]] = get_modules(pipeline_steps_directory)
         self.task_list: List[Node] = DependencyGraph(list(self.task_blueprints.values())).sorted_graph_identifiers
-        self.task_blueprints.update(get_modules(dependencies_directory))
+        if dependencies_directory is not None:
+            self.task_blueprints.update(get_modules(dependencies_directory))
         self.path_manager = PathManager(base_dir)
-        self.result_map: ResultMap = ResultMap(ConfigManager(config_path), input_data)
+        self.result_map: ResultMap = ResultMap(ConfigManager(config_path), input_data, base_dir.joinpath("results"))
 
     def run(self):
         """

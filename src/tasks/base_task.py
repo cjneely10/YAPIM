@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Tuple
 
 from src.tasks.utils.dependency_input import DependencyInput
 
@@ -43,7 +43,7 @@ class BaseTask(ABC):
 
     @property
     @abstractmethod
-    def depends(self) -> Optional[List[DependencyInput]]:
+    def depends(self) -> List[DependencyInput]:
         """ List of programs to run to generate intermediary output for this task
 
         :return: List of Task child classes

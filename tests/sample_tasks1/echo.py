@@ -1,11 +1,10 @@
-import os
-from typing import Optional, List
+from typing import List
 
 from src.tasks.task import Task
 from src.tasks.utils.dependency_input import DependencyInput
 
 
-class Cat(Task):
+class Echo(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {
@@ -14,14 +13,14 @@ class Cat(Task):
 
     @property
     def task_name(self) -> str:
-        return "cat"
+        return "echo"
 
     @property
     def requires(self) -> List[str]:
         return []
 
     @property
-    def depends(self) -> Optional[List[DependencyInput]]:
+    def depends(self) -> List[DependencyInput]:
         return []
 
     def run(self):
