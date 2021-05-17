@@ -14,4 +14,4 @@ class Cat(Task):
         }
 
     def run(self):
-        self.local["cat"][self.input["echo"]["result"]]()
+        print(self.input["echo"]["result"])

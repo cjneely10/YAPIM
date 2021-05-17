@@ -34,7 +34,7 @@ class ResultMap(dict):
         with ThreadPoolExecutor(workers) as executor:
             futures: List[Future] = []
             for record_id, record_data in self.items():
-                wdir = "_".join(task_identifier.get())
+                wdir = ".".join(task_identifier.get()).replace(f"{ConfigManager.ROOT}.", "")
                 path_manager.add_dirs(record_id, [wdir])
                 task_copy = task(
                     record_id,
