@@ -50,7 +50,8 @@ class DependencyGraph:
     ERR = DependencyGraphGenerationError(
         "There was an error generating dependency graph information for this pipeline.\n"
         "If you are a user seeing this, this is likely a fatal error - contact the authors of the pipeline\n"
-        "If you are a developer, double-check dependency information in your pipeline"
+        "If you are a developer, double-check dependency information in your pipeline and ensure all ids are valid \n"
+        "across the config file and Task file setup"
     )
 
     ROOT = ConfigManager.ROOT

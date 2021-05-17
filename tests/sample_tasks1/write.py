@@ -1,8 +1,8 @@
 from src.tasks.task import Task, set_complete
 
 
-class Echo(Task):
-    task_name = "echo"
+class Write(Task):
+    task_name = "write"
     requires = []
     depends = []
 
