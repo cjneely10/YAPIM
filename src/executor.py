@@ -3,7 +3,7 @@ import pickle
 from pathlib import Path
 from typing import List, Dict, Type, Optional
 
-from src.result_map import ResultMap
+from src.task_distributor import TaskDistributor
 from src.tasks.task import Task
 from src.tasks.utils.dependency_graph import Node, DependencyGraph
 from src.utils.config_manager import ConfigManager
@@ -31,7 +31,7 @@ class Executor:
         self.pipeline_name = os.path.basename(pipeline_steps_directory)
         self.path_manager = PathManager(base_output_dir)
         self.results_base_dir = base_output_dir.joinpath("results").joinpath(self.pipeline_name)
-        self.result_map: ResultMap = ResultMap(ConfigManager(config_path), input_data.load(), self.results_base_dir)
+        self.result_map: TaskDistributor = TaskDistributor(ConfigManager(config_path), input_data.load(), self.results_base_dir)
 
     def run(self):
         """

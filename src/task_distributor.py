@@ -12,7 +12,7 @@ from src.utils.config_manager import ConfigManager
 from src.utils.path_manager import PathManager
 
 
-class ResultMap(dict):
+class TaskDistributor(dict):
     def __init__(self, config_manager: ConfigManager, input_data: dict, results_base_dir: Path):
         super().__init__(input_data)
         self.config_manager = config_manager
