@@ -12,12 +12,16 @@ class Task(BaseTask, ABC):
         return self._task_scope
 
     def __init__(self, record_id: str, task_scope: str, result_map: ResultMap, wdir: str):
-        self.record_id = record_id
+        self.record_id: str = record_id
         self._task_scope = task_scope
-        self.input = result_map[self.record_id][self.full_name]
+        self.input: dict = result_map[self.record_id][self.full_name]
         self.output = {}
-        self.wdir = wdir
-        self.config = result_map.config_manager.get(self.full_name)
+        self.wdir: str = wdir
+        self.config: dict = result_map.config_manager.get(self.full_name)
+        parent_data = result_map.config_manager.parent_info(self.full_name)
+        self.is_skip = "skip" in self.config.keys() and self.config["skip"] is True or \
+                       "skip" in parent_data.keys() and parent_data["skip"] is True
+        self.is_complete = False
 
     def run_task(self) -> Result:
         """ Type of run. For Task objects, this simply calls run(). For other tasks, there
@@ -30,5 +34,5 @@ class Task(BaseTask, ABC):
         for key, output in self.output:
             if isinstance(output, Path) and not output.exists():
                 raise BaseTask.TaskCompletionError(key, output)
-
+        self.run()
         return Result(self.record_id, self.task_name, self.output)

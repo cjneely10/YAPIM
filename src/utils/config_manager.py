@@ -62,7 +62,7 @@ class ConfigManager:
         # Confirm all paths in file are valid
         ConfigManager._validate(self._config)
 
-    def get(self, task_data: Tuple[str, str]):
+    def get(self, task_data: Tuple[str, str]) -> dict:
         """ Get (scope, name) data from config file
 
         :return:
@@ -73,7 +73,7 @@ class ConfigManager:
         else:
             return self._config[task_data[0]][ConfigManager.DEPENDENCIES][task_data[1]]
 
-    def parent_info(self, task_data: Tuple[str, str]):
+    def parent_info(self, task_data: Tuple[str, str]) -> dict:
         if task_data[0] == ConfigManager.ROOT:
             return self._config[task_data[1]]
         else:
