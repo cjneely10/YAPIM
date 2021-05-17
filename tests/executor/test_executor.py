@@ -12,7 +12,7 @@ class TestExecutor(TestCase):
     def test_simple(self):
         sample_tasks1_dir = Path(os.path.dirname(__file__)).resolve().joinpath("sample_tasks1")
         sample_dependencies_dir = Path(os.path.dirname(__file__)).resolve().joinpath("sample_dependencies")
-        sample_config_file = sample_tasks1_dir.joinpath("sample-config.yaml")
+        sample_config_file = Path(os.path.dirname(__file__)).resolve().joinpath("sample-config.yaml")
 
         class TestLoader(InputLoader):
             def __init__(self, n: int):

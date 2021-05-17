@@ -27,6 +27,6 @@ class Merge(AggregateTask):
         return {"file": Path(file_path).resolve()}
 
     def run(self):
-        fp = open(self.output["file"], "r")
+        fp = open(self.input["file"], "r")
         print(fp.readlines())
         fp.close()
