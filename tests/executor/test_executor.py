@@ -27,3 +27,6 @@ class TestExecutor(TestCase):
             [sample_dependencies_dir]
         )
         executor.run()
+
+    def test_fasta_loader(self):
+        self.fail()
