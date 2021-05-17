@@ -20,9 +20,10 @@ class Executor:
                  dependencies_directory: Optional[Path] = None,
                  ):
         self.task_blueprints: Dict[str, Type[Task]] = get_modules(pipeline_steps_directory)
-        self.task_list: List[Node] = DependencyGraph(list(self.task_blueprints.values())).sorted_graph_identifiers
+        pipeline_tasks = list(self.task_blueprints.values())
         if dependencies_directory is not None:
             self.task_blueprints.update(get_modules(dependencies_directory))
+        self.task_list: List[Node] = DependencyGraph(pipeline_tasks, self.task_blueprints).sorted_graph_identifiers
 
         self.pipeline_name = os.path.basename(pipeline_steps_directory)
         self.path_manager = PathManager(base_dir)

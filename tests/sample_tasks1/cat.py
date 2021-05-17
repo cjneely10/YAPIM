@@ -5,7 +5,7 @@ from src.tasks.utils.dependency_input import DependencyInput
 class Print(Task):
     task_name = "cat"
     requires = ["echo"]
-    depends = [DependencyInput("sed")]
+    depends = [DependencyInput("sed", {"echo": {"result": "file"}})]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

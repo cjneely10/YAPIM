@@ -13,4 +13,4 @@ class Sed(Task):
         }
 
     def run(self):
-        (self.program["s/\n/\n./g", self.input["result"]] > str(self.output["result"]))()
+        (self.program["s/\n/\n./g", self.input["file"]] > str(self.output["result"]))()

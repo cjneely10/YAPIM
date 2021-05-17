@@ -42,7 +42,6 @@ class ResultMap(dict):
                     self,
                     path_manager.get_dir(record_id, wdir)
                 )
-                task_copy.input = record_data
                 self._update_input(task_copy)
                 futures.append(executor.submit(task_copy.run_task))
 

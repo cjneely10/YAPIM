@@ -18,7 +18,7 @@ def get_modules(package_dir: Path) -> dict:
     :return: Dict of task.name: Task object class
     """
     # iterate through the modules in the current package
-    package_dir = Path(package_dir).resolve().parent
+    package_dir = Path(package_dir).resolve()
     out = {}
     for (_, module_name, _) in iter_modules([package_dir]):
         # import the module and iterate through its attributes
@@ -30,7 +30,7 @@ def get_modules(package_dir: Path) -> dict:
         )
         for attribute_name in dir(module):
             attribute = getattr(module, attribute_name)
-            if isclass(attribute) and issubclass(attribute, Task):
+            if isclass(attribute) and issubclass(attribute, Task) and "Task" not in attribute.__name__:
                 # Add the class to this package's variables
                 out[attribute.task_name] = attribute
     return out
