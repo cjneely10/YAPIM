@@ -5,8 +5,8 @@ from plumbum import local
 from plumbum.machines import LocalMachine, LocalCommand
 
 from src.tasks.base_task import BaseTask
+from src.tasks.utils.result import Result
 from src.utils.config_manager import ConfigManager
-from src.utils.result import Result
 
 
 class Task(BaseTask, ABC):

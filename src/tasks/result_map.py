@@ -1,14 +1,14 @@
 import os
 from concurrent.futures import ThreadPoolExecutor, as_completed, Future
 from pathlib import Path
-from typing import List, Type
 from shutil import copy
+from typing import List, Type
 
 from src.tasks.task import Task
 from src.tasks.utils.dependency_graph import Node
+from src.tasks.utils.result import Result
 from src.utils.config_manager import ConfigManager
 from src.utils.path_manager import PathManager
-from src.utils.result import Result
 
 
 class ResultMap(dict):
@@ -52,7 +52,6 @@ class ResultMap(dict):
         for dependency in task_copy.depends:
             for prior in dependency.collect_all:
                 task_copy.input[prior] = self[task_copy.record_id][prior]
-        for dependency in task_copy.depends:
             for prior in dependency.collect_by:
                 for prior_id, prior_mapping in prior:
                     for _from, _to in prior_mapping.items():

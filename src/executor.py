@@ -1,7 +1,7 @@
 import os
+import pickle
 from pathlib import Path
 from typing import List, Dict, Type, Optional
-import pickle
 
 from src.tasks.result_map import ResultMap
 from src.tasks.task import Task
