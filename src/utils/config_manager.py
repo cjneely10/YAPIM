@@ -5,7 +5,7 @@ Manages the config file, as well as arguments that are set for each part of the 
 
 import os
 from pathlib import Path
-from typing import List, Tuple, Dict, Union
+from typing import List, Tuple, Dict
 
 import yaml
 from plumbum import local, CommandNotFound
@@ -60,15 +60,18 @@ class ConfigManager:
         """
         self._config = yaml.load(open(str(Path(config_path).resolve()), "r"), Loader=yaml.FullLoader)
         # Confirm all paths in file are valid
-        ConfigManager._validate(self.config)
+        ConfigManager._validate(self._config)
 
-    @property
-    def config(self) -> Dict[str, Dict[str, Union[str, dict]]]:
-        """ Get config file parsed to dict
+    def get(self, task_data: Tuple[str, str]):
+        """ Get (scope, name) data from config file
 
-        :return: config file parsed to dict
+        :return:
+        :rtype:
         """
-        return self._config
+        if task_data[0] == ConfigManager.ROOT:
+            return self._config[task_data[1]]
+        else:
+            return self._config[task_data[0]][ConfigManager.DEPENDENCIES][task_data[1]]
 
     @staticmethod
     def _validate(data_dict):
@@ -130,7 +133,7 @@ class ConfigManager:
         :return: SLURM arguments parsed to input list
         """
         return [
-            (key, str(val)) for key, val in self.config["SLURM"].items()
+            (key, str(val)) for key, val in self._config["SLURM"].items()
             if key not in {"USE_CLUSTER", "--nodes", "--ntasks", "--mem", "user-id"}
         ]
 
@@ -141,6 +144,6 @@ class ConfigManager:
 
         :return: user-id provided in config file
         """
-        if "user-id" not in self.config["SLURM"].keys():
+        if "user-id" not in self._config["SLURM"].keys():
             raise MissingDataError("SLURM section missing required user data")
-        return self.config["SLURM"]["user-id"]
+        return self._config["SLURM"]["user-id"]

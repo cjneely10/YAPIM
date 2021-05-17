@@ -1,8 +1,10 @@
-from typing import List, Dict
+from typing import List, Dict, Tuple
 
 import networkx as nx
 
 from src.tasks.base_task import BaseTask
+
+from src.tasks.task import Task
 
 # TODO: Link in with created dependencies from EukMS, refactored for new protocol
 dependencies = {}
@@ -14,6 +16,12 @@ class DependencyGraphGenerationError(BaseException):
 
     """
     pass
+
+
+class Node:
+    def __init__(self, task_scope: str, task_name: str):
+        self.scope = task_scope
+        self.name = task_name
 
 
 class DependencyGraph:
@@ -32,45 +40,48 @@ class DependencyGraph:
     )
 
     ROOT = "input"
+    ROOT_NODE = Node(ROOT, ROOT)
 
-    def __init__(self, tasks: List[BaseTask]):
+    def __init__(self, tasks: List[Task]):
         """ Create DAG from list of TaskList class objects
 
         :param tasks: List of TaskList class objects
         :raises: DependencyGraphGenerationError
         """
-        self.idx: Dict[str, BaseTask] = {task.task_name: task for task in tasks}
-
+        self.idx: Dict[str, Task] = {task.task_name: task for task in tasks}
         self.idx.update(dependencies)
 
         self.graph = nx.DiGraph()
-        self.graph.add_node(DependencyGraph.ROOT)
+        self.graph.add_node(DependencyGraph.ROOT_NODE)
         self._build_dependency_graph(tasks)
         if not nx.is_directed_acyclic_graph(self.graph):
             raise DependencyGraph.ERR
 
-    def _build_dependency_graph(self, tasks: List[BaseTask]):
+    def _build_dependency_graph(self, tasks: List[Task]):
         for task in tasks:
-            self.graph.add_edge(DependencyGraph.ROOT, task.task_name)
-            # Add to index of tasks if not already present
+            task_node: Node = Node(DependencyGraph.ROOT, task.task_name)
+            self.graph.add_edge(DependencyGraph.ROOT_NODE, task_node)
             # Link requirements for already completed tasks in pipeline
-            for requirement in task.requires:
-                if requirement not in self.idx.keys():
-                    raise DependencyGraph.ERR
-                self.graph.add_edge(task.task_name, requirement)
             # Gather dependencies needed for fulfilling given requirement
-            self._add_dependencies(task.task_name)
+            self._add_dependencies(task_node)
 
-    def _add_dependencies(self, task_name: str):
+    def _add_dependencies(self, task_node: Node):
         # Link dependency names
-        for dependency in self.idx[task_name].depends:
+        task = self.idx[task_node.name]
+        for requirement in task.requires:
+            if requirement not in self.idx.keys():
+                raise DependencyGraph.ERR
+            self.graph.add_edge(task_node, Node(DependencyGraph.ROOT, requirement))
+
+        for dependency in task.depends:
             if dependency not in self.idx.keys():
                 raise DependencyGraph.ERR
-            self.graph.add_edge(task_name, dependency.name)
+            dependency_node: Node = Node(task_node.name, dependency.name)
+            self.graph.add_edge(task_node, dependency_node)
             for name in dependency.all_priors():
-                self.graph.add_edge(task_name, name)
-            self._add_dependencies(dependency.name)
+                self.graph.add_edge(task_node, name)
+            self._add_dependencies(dependency_node)
 
     @property
-    def sorted_graph(self) -> List[BaseTask]:
-        return [self.idx[task_name] for task_name in nx.topological_sort(self.graph)]
+    def sorted_graph_identifiers(self) -> List[Node]:
+        return list(nx.topological_sort(self.graph))

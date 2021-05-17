@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from src.tasks.utils.dependency_input import DependencyInput
 from src.utils.result import Result
@@ -12,49 +12,25 @@ class BaseTask(ABC):
             super().__init__(f"Task {task_name} output file missing {file}")
 
     @property
-    @abstractmethod
-    def input(self) -> dict:
+    def full_name(self) -> Tuple[str, str]:
         """
-
-        :return:
-        :rtype:
+        :return: Tuple of (scope, task name)
         """
-
-    @input.setter
-    def input(self, input_data: dict):
-        self.input = input_data
+        return self.task_scope, self.task_name
 
     @property
     @abstractmethod
-    def output(self) -> dict:
+    def task_scope(self) -> str:
         """
 
         :return:
         :rtype:
         """
-
-    @output.setter
-    def output(self, output_data: dict):
-        self.output = output_data
-
-    @property
-    @abstractmethod
-    def record_id(self) -> str:
-        """
-
-        :return:
-        :rtype:
-        """
-
-    @record_id.setter
-    def record_id(self, record_id: str):
-        self.record_id = record_id
 
     @property
     @abstractmethod
     def task_name(self) -> str:
         """
-
         :return: Unique id assigned to task
         """
 
@@ -80,17 +56,3 @@ class BaseTask(ABC):
 
         :return:
         """
-
-    def run_task(self) -> Result:
-        """ Type of run. For Task objects, this simply calls run(). For other tasks, there
-        may be more processing required prior to returning the result.
-
-        This method will be used to return the result of the child Task class implemented run method.
-
-        :return:
-        """
-        for key, output in self.output:
-            if isinstance(output, Path) and not output.exists():
-                raise BaseTask.TaskCompletionError(key, output)
-
-        return Result(self.record_id, self.task_name, self.output)
