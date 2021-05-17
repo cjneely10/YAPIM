@@ -20,17 +20,23 @@ SLURM:
 
 write:
   workers: 20
-  threads: 4  # Each worker needs at least 4 threads to complete this step
+  threads: 1
   memory: 40G
   time: "4:00:00"
 
 update:
   workers: 20
-  threads: 4  # Each worker needs at least 4 threads to complete this step
+  threads: 1
   memory: 40G
   time: "4:00:00"
   dependencies:
     sed:
       program: sed
+
+merge:
+  workers: 20
+  threads: 1
+  memory: 40G
+  time: "4:00:00"
 
 ...  # document end

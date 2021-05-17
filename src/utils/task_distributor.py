@@ -2,7 +2,7 @@ import os
 from concurrent.futures import ThreadPoolExecutor, as_completed, Future
 from pathlib import Path
 from shutil import copy
-from typing import List, Type, Optional
+from typing import List, Type, Optional, Dict
 
 from src.tasks.aggregate_task import AggregateTask
 from src.tasks.task import Task
@@ -13,7 +13,7 @@ from src.utils.path_manager import PathManager
 
 
 class TaskDistributor(dict):
-    def __init__(self, config_manager: ConfigManager, input_data: dict, results_base_dir: Path):
+    def __init__(self, config_manager: ConfigManager, input_data: Dict[str, Dict], results_base_dir: Path):
         super().__init__(input_data)
         self.config_manager = config_manager
         self.results_dir = results_base_dir
@@ -21,31 +21,18 @@ class TaskDistributor(dict):
 
     def distribute(self, task: Type[Task], task_identifier: Node, path_manager: PathManager,
                    top_level_node: Optional[Type[Task]] = None):
-        """
-
-        :param task:
-        :type task:
-        :param task_identifier:
-        :type task_identifier:
-        :param path_manager:
-        :type path_manager:
-        :param top_level_node:
-        :type top_level_node:
-        :return:
-        :rtype:
-        """
         workers = self.config_manager.parent_info(task_identifier.get())[ConfigManager.WORKERS]
         with ThreadPoolExecutor(workers) as executor:
             futures: List[Future] = []
-            if isinstance(task, AggregateTask):
-                pass
+            if issubclass(task, AggregateTask):
+                self._aggregate_task(task, task_identifier, path_manager, futures, executor)
             else:
                 self._distribute_task(task, task_identifier, path_manager, top_level_node, futures, executor)
             self._finalize_output(futures)
 
     def _distribute_task(self, task: Type[Task], task_identifier: Node, path_manager: PathManager,
                          top_level_node: Optional[Type[Task]], futures: List[Future], executor: ThreadPoolExecutor):
-        for record_id, record_data in self.items():
+        for record_id in self.keys():
             wdir = ".".join(task_identifier.get()).replace(f"{ConfigManager.ROOT}.", "")
             path_manager.add_dirs(record_id, [wdir])
             task_copy = task(
@@ -58,9 +45,24 @@ class TaskDistributor(dict):
                 self._update_input(record_id, task_copy, top_level_node)
             futures.append(executor.submit(task_copy.run_task))
 
+    def _aggregate_task(self, task: Type[AggregateTask], task_identifier: Node, path_manager: PathManager,
+                        futures: List[Future], executor: ThreadPoolExecutor):
+        wdir = ".".join(task_identifier.get()).replace(f"{ConfigManager.ROOT}.", "")
+        path_manager.add_dirs(wdir)
+        task_copy = task(
+            wdir,
+            task_identifier.scope,
+            self,
+            path_manager.get_dir(wdir)
+        )
+        futures.append(executor.submit(task_copy.run_task))
+
     def _finalize_output(self, futures: List[Future]):
         for future in as_completed(futures):
             result: Result = future.result()
+            if result.record_id not in self.keys():
+                self[result.record_id] = {}
+                self.output_data_to_pickle[result.record_id] = {}
             self[result.record_id][result.task_name] = result
             for result_key, result_data in result.items():
                 if result_key == "final":

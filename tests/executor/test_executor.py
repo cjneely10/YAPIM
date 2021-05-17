@@ -22,7 +22,7 @@ class TestExecutor(TestCase):
                 return {str(i): {} for i in range(self.n)}
 
         executor = Executor(
-            TestLoader(500),
+            TestLoader(10),
             sample_config_file,
             Path(os.path.join(os.path.dirname(__file__), "out")).resolve(),
             sample_tasks1_dir,

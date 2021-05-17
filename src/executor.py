@@ -31,7 +31,8 @@ class Executor:
         self.pipeline_name = os.path.basename(pipeline_steps_directory)
         self.path_manager = PathManager(base_output_dir)
         self.results_base_dir = base_output_dir.joinpath("results").joinpath(self.pipeline_name)
-        self.result_map: TaskDistributor = TaskDistributor(ConfigManager(config_path), input_data.load(), self.results_base_dir)
+        self.result_map: TaskDistributor = TaskDistributor(ConfigManager(config_path), input_data.load(),
+                                                           self.results_base_dir)
 
     def run(self):
         """
