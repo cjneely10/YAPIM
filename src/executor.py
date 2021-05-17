@@ -3,7 +3,7 @@ import pickle
 from pathlib import Path
 from typing import List, Dict, Type, Optional
 
-from src.tasks.result_map import ResultMap
+from src.result_map import ResultMap
 from src.tasks.task import Task
 from src.tasks.utils.dependency_graph import Node, DependencyGraph
 from src.utils.config_manager import ConfigManager

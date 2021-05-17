@@ -9,7 +9,7 @@ from typing import Tuple, List, Optional, Callable, Union
 from plumbum import local, colors
 from plumbum.machines import LocalMachine, LocalCommand
 
-from src.tasks.base_task import BaseTask
+from src.tasks.utils.base_task import BaseTask
 from src.tasks.utils.result import Result
 from src.tasks.utils.slurm_caller import SLURMCaller
 from src.utils.config_manager import ConfigManager, MissingDataError
