@@ -14,10 +14,10 @@ from src.utils.path_manager import PathManager
 
 class Executor:
     def __init__(self,
-                 config_path: Path,
-                 pipeline_steps_directory: Path,
-                 base_dir: Path,
                  input_data: InputLoader,
+                 config_path: Path,
+                 base_output_dir: Path,
+                 pipeline_steps_directory: Path,
                  dependencies_directories: Optional[List[Path]] = None,
                  ):
         self.task_blueprints: Dict[str, Type[Task]] = get_modules(pipeline_steps_directory)
@@ -29,8 +29,8 @@ class Executor:
             .sorted_graph_identifiers
 
         self.pipeline_name = os.path.basename(pipeline_steps_directory)
-        self.path_manager = PathManager(base_dir)
-        self.results_base_dir = base_dir.joinpath("results").joinpath(self.pipeline_name)
+        self.path_manager = PathManager(base_output_dir)
+        self.results_base_dir = base_output_dir.joinpath("results").joinpath(self.pipeline_name)
         self.result_map: ResultMap = ResultMap(ConfigManager(config_path), input_data.load(), self.results_base_dir)
 
     def run(self):

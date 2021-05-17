@@ -19,10 +19,10 @@ class TestExecutor(TestCase):
 
     def test_run(self):
         executor = Executor(
-            TestExecutor.sample_config_file,
-            TestExecutor.sample_tasks1_dir,
-            Path(os.path.join(os.path.dirname(__file__), "out")).resolve(),
             TestExecutor.DefaultLoader(),
+            TestExecutor.sample_config_file,
+            Path(os.path.join(os.path.dirname(__file__), "out")).resolve(),
+            TestExecutor.sample_tasks1_dir,
             [TestExecutor.sample_dependencies_dir]
         )
         executor.run()
