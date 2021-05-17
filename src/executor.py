@@ -15,7 +15,7 @@ class Executor:
                  pipeline_steps_directory: Path,
                  base_dir: Path,
                  input_data: Dict[str, Dict],
-                 dependencies_directory: Optional[Path],
+                 dependencies_directory: Optional[Path] = None,
                  ):
         self.task_blueprints: Dict[str, Type[Task]] = get_modules(pipeline_steps_directory)
         self.task_list: List[Node] = DependencyGraph(list(self.task_blueprints.values())).sorted_graph_identifiers
