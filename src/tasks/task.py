@@ -36,7 +36,11 @@ class Task(BaseTask, ABC):
         self.output = {}
         self.wdir: Path = Path(wdir).resolve()
         self.results_map = result_map
-        self.is_skip = str(self.results_map.find(self.full_name, ConfigManager.SKIP)) == "true"
+        is_skip = self.results_map.config_manager.find(self.full_name, ConfigManager.SKIP)
+        if is_skip is not None and str(is_skip) == "true":
+            self.is_skip = True
+        else:
+            self.is_skip = False
         self.is_complete = False
 
     @property
@@ -49,7 +53,7 @@ class Task(BaseTask, ABC):
 
         :return: Str of number of tasks
         """
-        return self.results_map.find(self.full_name, ConfigManager.THREADS)
+        return self.results_map.config_manager.find(self.full_name, ConfigManager.THREADS)
 
     @property
     def config(self) -> dict:
@@ -126,6 +130,11 @@ class Task(BaseTask, ABC):
         if self.is_skip:
             return Result(self.record_id, self.task_name, {})
 
+        statement = "\nRunning:\n  %s" % (
+                (self.task_scope + " " if self.task_scope != ConfigManager.ROOT else "") + self.task_name
+        )
+        print(statement)
+
         if not self.is_complete:
             _str = "In progress:  {}".format(self.record_id)
             logging.info(_str)
@@ -161,7 +170,7 @@ class Task(BaseTask, ABC):
 
     @property
     def program(self) -> LocalCommand:
-        return self.local[self.config[ConfigManager.PROGRAM]]
+        return self.local[self.results_map.config_manager.find(self.full_name, ConfigManager.PROGRAM)]
 
     def __str__(self):
         return f"<Task name: {self.task_name}, scope: {self.task_scope}, input_id: {self.record_id}, requirements: {self.requires}, dependencies: {self.depends}>"

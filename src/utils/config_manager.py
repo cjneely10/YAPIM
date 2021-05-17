@@ -5,7 +5,7 @@ Manages the config file, as well as arguments that are set for each part of the 
 
 import os
 from pathlib import Path
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Optional
 
 import yaml
 from plumbum import local, CommandNotFound
@@ -76,11 +76,13 @@ class ConfigManager:
         else:
             return self.config[task_data[0]][ConfigManager.DEPENDENCIES][task_data[1]]
 
-    def find(self, task_data: Tuple[str, str], key: str):
+    def find(self, task_data: Tuple[str, str], key: str) -> Optional:
         config_section = self.get(task_data)
         if key in config_section.keys():
             return config_section[key]
-        return self.config[task_data[1]][key]
+        inner = self.parent_info(task_data)
+        if key in inner.keys():
+            return inner[key]
 
     def parent_info(self, task_data: Tuple[str, str]) -> dict:
         if task_data[0] == ConfigManager.ROOT:
