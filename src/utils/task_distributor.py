@@ -77,4 +77,4 @@ class TaskDistributor(dict):
         for dependency in requirement_node.depends:
             for prior_id, prior_mapping in dependency.collect_by.items():
                 for _from, _to in prior_mapping.items():
-                    task_copy.input[_to] = self[record_id][prior_id][_from]
+                    task_copy.dependency_input[_to] = self[record_id][prior_id][_from]

@@ -33,6 +33,7 @@ class Task(BaseTask, ABC):
         self.record_id: str = record_id
         self._task_scope = task_scope
         self.input: dict = result_map[self.record_id]
+        self.dependency_input: dict = {}
         self.output = {}
         self.wdir: Path = Path(wdir).resolve()
         self.results_map = result_map

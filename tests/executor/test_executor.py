@@ -14,7 +14,7 @@ class TestExecutor(TestCase):
         sample_dependencies_dir = Path(os.path.dirname(__file__)).resolve().joinpath("sample_dependencies")
         sample_config_file = sample_tasks1_dir.joinpath("sample-config.yaml")
 
-        class DefaultLoader(InputLoader):
+        class TestLoader(InputLoader):
             def __init__(self, n: int):
                 self.n = n
 
@@ -22,7 +22,7 @@ class TestExecutor(TestCase):
                 return {str(i): {} for i in range(self.n)}
 
         executor = Executor(
-            DefaultLoader(500),
+            TestLoader(500),
             sample_config_file,
             Path(os.path.join(os.path.dirname(__file__), "out")).resolve(),
             sample_tasks1_dir,
