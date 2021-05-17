@@ -4,6 +4,7 @@ from pathlib import Path
 from shutil import copy
 from typing import List, Type, Optional
 
+from src.tasks.aggregate_task import AggregateTask
 from src.tasks.task import Task
 from src.tasks.utils.dependency_graph import Node
 from src.tasks.utils.result import Result
@@ -36,20 +37,26 @@ class ResultMap(dict):
         workers = self.config_manager.parent_info(task_identifier.get())[ConfigManager.WORKERS]
         with ThreadPoolExecutor(workers) as executor:
             futures: List[Future] = []
-            for record_id, record_data in self.items():
-                wdir = ".".join(task_identifier.get()).replace(f"{ConfigManager.ROOT}.", "")
-                path_manager.add_dirs(record_id, [wdir])
-                task_copy = task(
-                    record_id,
-                    task_identifier.scope,
-                    self,
-                    path_manager.get_dir(record_id, wdir)
-                )
-                if top_level_node is not None:
-                    self._update_input(record_id, task_copy, top_level_node)
-                futures.append(executor.submit(task_copy.run_task))
-
+            if isinstance(task, AggregateTask):
+                pass
+            else:
+                self._distribute_task(task, task_identifier, path_manager, top_level_node, futures, executor)
             self._finalize_output(futures)
+
+    def _distribute_task(self, task: Type[Task], task_identifier: Node, path_manager: PathManager,
+                         top_level_node: Optional[Type[Task]], futures: List[Future], executor: ThreadPoolExecutor):
+        for record_id, record_data in self.items():
+            wdir = ".".join(task_identifier.get()).replace(f"{ConfigManager.ROOT}.", "")
+            path_manager.add_dirs(record_id, [wdir])
+            task_copy = task(
+                record_id,
+                task_identifier.scope,
+                self,
+                path_manager.get_dir(record_id, wdir)
+            )
+            if top_level_node is not None:
+                self._update_input(record_id, task_copy, top_level_node)
+            futures.append(executor.submit(task_copy.run_task))
 
     def _finalize_output(self, futures: List[Future]):
         for future in as_completed(futures):
