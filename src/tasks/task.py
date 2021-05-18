@@ -166,7 +166,8 @@ class Task(BaseTask, ABC):
         return self.local[self.results_map.config_manager.find(self.full_name, ConfigManager.PROGRAM)]
 
     def __str__(self):
-        return f"<Task name: {self.task_name}, scope: {self.task_scope}, input_id: {self.record_id}, requirements: {self.requires}, dependencies: {self.depends}>"
+        return f"<Task name: {self.task_name}, scope: {self.task_scope}, input_id: {self.record_id}, " \
+               f"requirements: {self.requires}, dependencies: {self.depends}>"
 
     def __repr__(self):
         return self.__str__()

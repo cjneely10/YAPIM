@@ -20,6 +20,7 @@ class Summarize(Task):
 
     def run(self):
         fp = open(self.output["result"], "w")
-        fp.write(str(sum([len(record.seq) for record in SeqIO.parse(self.input["fasta"], "fasta")])))
+        fp.write(self.record_id + "\t" +
+                 str(sum([len(record.seq) for record in SeqIO.parse(self.input["fasta"], "fasta")])))
         fp.write("\n")
         fp.close()
