@@ -22,9 +22,11 @@ def set_complete(func: Callable):
     :param func: Task class initializer method
     :return: Decorated function, class object modified to store updated self.is_complete status
     """
+
     def _check_if_complete(self, *args, **kwargs):
         func(self, *args, **kwargs)
         self.is_complete = self.set_is_complete()
+
     return _check_if_complete
 
 
@@ -150,7 +152,8 @@ class Task(BaseTask, ABC):
             print(colors.blue & colors.bold | _str)
 
         for key, output in self.output.items():
-            if isinstance(output, Path) and not output.exists():
+            if (isinstance(output, Path) and not output.exists()) or \
+                    (isinstance(output, str) and not os.path.exists(output)):
                 raise super().TaskCompletionError(key, output)
         return Result(self.record_id, self.task_name, self.output)
 
