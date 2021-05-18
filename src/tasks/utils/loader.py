@@ -11,20 +11,19 @@ from pkgutil import iter_modules
 from src.tasks.task import Task
 
 
-def get_modules(package_dir: Path) -> dict:
+def get_modules(package_dir: str) -> dict:
     """ Dynamically load all modules contained at sublevel
 
     :param package_dir: Directory from location where this function is called
     :return: Dict of task.name: Task object class
     """
     # iterate through the modules in the current package
-    package_dir = Path(package_dir).resolve()
     out = {}
     for (_, module_name, _) in iter_modules([package_dir]):
         # import the module and iterate through its attributes
         module = import_module(
             "{}.{}".format(
-                os.path.splitext(os.path.basename(package_dir))[0],
+                package_dir.replace("/", "."),
                 module_name
             )
         )

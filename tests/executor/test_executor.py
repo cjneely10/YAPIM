@@ -10,8 +10,6 @@ from src.utils.input_loader import InputLoader
 class TestExecutor(TestCase):
 
     def test_simple(self):
-        sample_tasks1_dir = Path("sample_tasks1")
-        sample_dependencies_dir = Path("sample_dependencies")
         sample_config_file = Path(os.path.dirname(__file__)).resolve().joinpath("sample-config.yaml")
 
         class TestLoader(InputLoader):
@@ -25,8 +23,8 @@ class TestExecutor(TestCase):
             TestLoader(10),
             sample_config_file,
             Path(os.path.join(os.path.dirname(__file__), "out")).resolve(),
-            sample_tasks1_dir,
-            [sample_dependencies_dir]
+            "sample_tasks1",
+            ["sample_dependencies"]
         )
         executor.run()
 
