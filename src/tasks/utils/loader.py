@@ -21,7 +21,7 @@ def get_modules(package_dir: str) -> dict:
         # import the module and iterate through its attributes
         module = import_module(
             "{}.{}".format(
-                package_dir.replace("./", "").replace("../", "..").replace("/", "."),
+                package_dir.replace("/", "."),
                 module_name
             )
         )
