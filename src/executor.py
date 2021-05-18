@@ -37,11 +37,6 @@ class Executor:
                                                            self.results_base_dir)
 
     def run(self):
-        """
-
-        :return:
-        :rtype:
-        """
         for task_list in self.task_list:
             if len(task_list) == 1:
                 self.result_map.distribute(self.task_blueprints[task_list[0].name], task_list[0], self.path_manager)
