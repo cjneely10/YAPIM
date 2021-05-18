@@ -20,9 +20,6 @@ class DependencyInput:
         else:
             self.collect_by = collect_by
 
-    def all_priors(self):
-        return list(self.collect_by.keys())
-
     def __str__(self):
         return f"<Dependency name: {self.name}, collection: {self.collect_by}>"
 

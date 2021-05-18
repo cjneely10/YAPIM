@@ -206,8 +206,8 @@ class Task(BaseTask, ABC):
         """
         is_complete = None
         for _path in self.output.values():
-            if isinstance(_path, Path):
-                if not _path.exists():
+            if isinstance(_path, Path) or isinstance(_path, str):
+                if not os.path.exists(_path):
                     # Only call function if missing path
                     # Then move on
                     is_complete = False
