@@ -71,7 +71,7 @@ class TaskDistributor(dict):
                         os.makedirs(_sub_out)
                     for file_str in result_data:
                         obj = result[file_str]
-                        if isinstance(obj, Path):
+                        if isinstance(obj, Path) or (isinstance(obj, str) and os.path.exists(obj)):
                             copy(obj, _sub_out)
                         self.output_data_to_pickle[result.record_id][file_str] = obj
 
