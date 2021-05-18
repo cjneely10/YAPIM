@@ -2,10 +2,8 @@
 Populate dependencies for easy loading
 """
 
-import os
 from importlib import import_module
 from inspect import isclass
-from pathlib import Path
 from pkgutil import iter_modules
 
 from src.tasks.task import Task
@@ -23,7 +21,7 @@ def get_modules(package_dir: str) -> dict:
         # import the module and iterate through its attributes
         module = import_module(
             "{}.{}".format(
-                package_dir.replace("/", "."),
+                package_dir.replace("./", "").replace("../", "..").replace("/", "."),
                 module_name
             )
         )

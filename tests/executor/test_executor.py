@@ -10,7 +10,7 @@ from src.utils.input_loader import InputLoader
 class TestExecutor(TestCase):
 
     def test_simple(self):
-        sample_config_file = Path(os.path.dirname(__file__)).resolve().joinpath("sample-config.yaml")
+        sample_config_file = Path(os.path.dirname(__file__)).resolve().joinpath("simple/sample-config.yaml")
 
         class TestLoader(InputLoader):
             def __init__(self, n: int):
