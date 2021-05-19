@@ -1,10 +1,16 @@
-from src import Task
+from typing import List
+
+from src import Task, DependencyInput
 
 
 class Sed(Task):
-    task_name = "sed"
-    requires = []
-    depends = []
+    @staticmethod
+    def requires() -> List[str]:
+        return []
+
+    @staticmethod
+    def depends() -> List[DependencyInput]:
+        return []
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

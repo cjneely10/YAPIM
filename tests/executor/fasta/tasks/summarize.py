@@ -1,14 +1,19 @@
 import os
+from typing import List
 
 from Bio import SeqIO
 
-from src import Task
+from src import Task, DependencyInput
 
 
 class Summarize(Task):
-    task_name = "summarize"
-    requires = []
-    depends = []
+    @staticmethod
+    def requires() -> List[str]:
+        return []
+
+    @staticmethod
+    def depends() -> List[DependencyInput]:
+        return []
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -18,22 +18,22 @@ SLURM:
   --job-name: EukMS
   user-id: uid
 
-write:
+Write:
   workers: 20
   threads: 1
   memory: 40G
   time: "4:00:00"
 
-update:
+Update:
   workers: 20
   threads: 1
   memory: 40G
   time: "4:00:00"
   dependencies:
-    sed:
+    Sed:
       program: sed
 
-merge:
+Merge:
   workers: 20
   threads: 1
   memory: 40G

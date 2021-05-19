@@ -78,7 +78,7 @@ class TaskDistributor(dict):
                         self.output_data_to_pickle[result.record_id][file_str] = obj
 
     def _update_input(self, record_id: str, task_copy: Task, requirement_node: Type[Task]):
-        for dependency in requirement_node.depends:
+        for dependency in requirement_node.depends():
             for prior_id, prior_mapping in dependency.collect_by.items():
                 for _from, _to in prior_mapping.items():
                     task_copy.dependency_input[_to] = self[record_id][prior_id][_from]

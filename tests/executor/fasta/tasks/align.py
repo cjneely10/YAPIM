@@ -4,7 +4,6 @@ from src import Task, DependencyInput
 
 
 class Align(Task):
-
     @staticmethod
     def requires() -> List[str]:
         return []
