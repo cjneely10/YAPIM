@@ -22,7 +22,6 @@ setup(
         "pytest-cov==2.10.1"
     ],
     scripts=[
-        "HPCBioPipe/generate_class",
         "HPCBioPipe/HPCBioPipe",
     ]
 )
