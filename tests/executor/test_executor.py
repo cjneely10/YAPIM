@@ -21,7 +21,7 @@ class TestExecutor(TestCase):
                 return {str(i): {} for i in range(self.n)}
 
         Executor(
-            TestLoader(1000),  # Input loader
+            TestLoader(100),  # Input loader
             sample_config_file,  # Config file path
             Path(os.path.join(os.path.dirname(__file__), "simple-out")).resolve(),  # Base output dir path
             "simple/sample_tasks1",  # Relative path to pipeline directory
@@ -40,4 +40,5 @@ class TestExecutor(TestCase):
             sample_config_file,  # Config file path
             out_dir,  # Base output dir path
             "fasta/tasks",  # Relative path to pipeline directory
+            display_status_messages=False
         ).run()
