@@ -18,11 +18,18 @@ SLURM:
   --job-name: EukMS
   user-id: uid
 
-MMSeqsCreateDB:
+MMSeqsConcatDB:
   workers: 10
   threads: 16
   memory: 40G
   time: "4:00:00"
   program: /home/user/miniconda3/envs/EukMS_run/bin/mmseqs
+  dependencies:
+    MMSeqsCreateDB:
+      workers: 10
+      threads: 16
+      memory: 40G
+      time: "4:00:00"
+      program: /home/user/miniconda3/envs/EukMS_run/bin/mmseqs
 
 ...  # document end

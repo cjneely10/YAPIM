@@ -16,7 +16,7 @@ class DependencyInput:
                  collect_by: Optional[Dict[str, Dict[str, str]]] = None):
         self.name = name
         if collect_by is None:
-            self.collect_by = {ConfigManager.ROOT: {}}
+            self.collect_by = None
         else:
             self.collect_by = collect_by
 

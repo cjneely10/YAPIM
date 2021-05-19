@@ -33,6 +33,13 @@ class InvalidProtocolError(ValueError):
     pass
 
 
+class MissingDependenciesError(ValueError):
+    """ Wraps ValueError, raise if dependency section is missing from config file
+
+    """
+    pass
+
+
 class ConfigManager:
     """ ConfigManager handles parsing user-passed config file
 
@@ -74,6 +81,8 @@ class ConfigManager:
         if task_data[0] == ConfigManager.ROOT:
             return self.config[task_data[1]]
         else:
+            if ConfigManager.DEPENDENCIES not in self.config[task_data[0]].keys():
+                raise MissingDependenciesError("Config file is missing valid dependencies section for step")
             return self.config[task_data[0]][ConfigManager.DEPENDENCIES][task_data[1]]
 
     def find(self, task_data: Tuple[str, str], key: str) -> Optional:

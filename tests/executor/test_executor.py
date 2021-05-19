@@ -52,4 +52,5 @@ class TestExecutor(TestCase):
             TestExecutor.file.joinpath("nested/nested-config.yaml"),  # Config file path
             out_dir,  # Base output dir path
             "nested/tasks",  # Relative path to pipeline directory
+            ["nested/mmseqs_dependencies"]
         ).run()

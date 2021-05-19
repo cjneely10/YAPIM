@@ -46,7 +46,7 @@ class TaskDistributor(dict):
             )
             task_copy.set_is_complete()
             if top_level_node is not None:
-                self._update_input(record_id, task_copy, top_level_node)
+                self._update_distributed_input(record_id, task_copy, top_level_node)
             futures.append(executor.submit(task_copy.run_task))
 
     def _aggregate_task(self, task: Type[AggregateTask], task_identifier: Node, path_manager: PathManager,
@@ -81,8 +81,11 @@ class TaskDistributor(dict):
                             copy(obj, _sub_out)
                         self.output_data_to_pickle[result.record_id][file_str] = obj
 
-    def _update_input(self, record_id: str, task_copy: Task, requirement_node: Type[Task]):
+    def _update_distributed_input(self, record_id: str, task_copy: Task, requirement_node: Type[Task]):
         for dependency in requirement_node.depends():
-            for prior_id, prior_mapping in dependency.collect_by.items():
-                for _from, _to in prior_mapping.items():
-                    task_copy.dependency_input[_to] = self[record_id][prior_id][_from]
+            if dependency.collect_by is not None:
+                for prior_id, prior_mapping in dependency.collect_by.items():
+                    for _from, _to in prior_mapping.items():
+                        task_copy.dependency_input[_to] = self[record_id][prior_id][_from]
+            else:
+                task_copy.dependency_input = self[record_id]
