@@ -86,6 +86,6 @@ class TaskDistributor(dict):
             if dependency.collect_by is not None:
                 for prior_id, prior_mapping in dependency.collect_by.items():
                     for _from, _to in prior_mapping.items():
-                        task_copy.dependency_input[_to] = self[record_id][prior_id][_from]
+                        task_copy.input[_to] = self[record_id][prior_id][_from]
             else:
-                task_copy.dependency_input = self[record_id]
+                task_copy.input.update(self[record_id])

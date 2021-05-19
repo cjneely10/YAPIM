@@ -20,6 +20,6 @@ class Sed(Task):
 
     def run(self):
         self.single(
-            self.program[rf"s/{self.record_id}/{self.record_id + 'a'}/g", self.dependency_input["file"]] > str(
+            self.program[rf"s/{self.record_id}/{self.record_id + 'a'}/g", self.input["file"]] > str(
                 self.output["result"])
         )

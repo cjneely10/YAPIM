@@ -26,7 +26,7 @@ class TestExecutor(TestCase):
             TestExecutor.file.joinpath("simple-out"),  # Base output dir path
             "simple/sample_tasks1",  # Relative path to pipeline directory
             ["simple/sample_dependencies"],  # List of relative paths to dependency directories,
-            False  # Silence status messages
+            display_status_messages=False  # Silence status messages
         ).run()
 
     def test_fasta(self):
