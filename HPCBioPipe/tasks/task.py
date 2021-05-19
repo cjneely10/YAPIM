@@ -98,8 +98,8 @@ class Task(BaseTask, ABC):
             str(self.wdir),
             str(self.threads) if threads_override is None else threads_override,
             cmd,
-            self.results_map.get(self.full_name, ConfigManager.MEMORY) if memory_override is None else memory_override,
-            self.results_map.get(self.full_name, ConfigManager.TIME) if time_override is None else time_override,
+            self.results_map.find(self.full_name, ConfigManager.MEMORY) if memory_override is None else memory_override,
+            self.results_map.find(self.full_name, ConfigManager.TIME) if time_override is None else time_override,
             self.local,
             self.results_map.config_manager.get_slurm_flagged_arguments(),
         )
@@ -248,6 +248,9 @@ class Task(BaseTask, ABC):
         if out is not None:
             with open(os.path.join(self.wdir, "task.log"), "a") as w:
                 w.write(str(out))
+        if isinstance(cmd, SLURMCaller) and os.path.exists(cmd.slurm_log_file):
+            with open(os.path.join(self.wdir, "task.log"), "a") as w:
+                w.write("".join(open(cmd.slurm_log_file, "r").readlines()))
 
     def single(self, cmd: Union[LocalCommand, List[LocalCommand]],
                time_override: Optional[str] = None, memory_override: str = None):

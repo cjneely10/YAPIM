@@ -3,6 +3,7 @@ Module holds logic for running a dask distributed task within a SLURM job
 """
 
 import os
+import shutil
 from time import sleep
 from typing import List, Tuple, Union
 
@@ -142,6 +143,10 @@ class SLURMCaller:
         :return: str of header line (with newline added)
         """
         return "#SBATCH %s=%s\n" % (param, arg)
+
+    @property
+    def slurm_log_file(self) -> str:
+        return "slurm-%s.out" % self.job_id
 
     def __call__(self, *args, **kwargs):
         """ Call will run script using sbatch and periodically check for when to stop running
