@@ -13,11 +13,13 @@ from src.utils.path_manager import PathManager
 
 
 class TaskDistributor(dict):
-    def __init__(self, config_manager: ConfigManager, input_data: Dict[str, Dict], results_base_dir: Path):
+    def __init__(self, config_manager: ConfigManager, input_data: Dict[str, Dict], results_base_dir: Path,
+                 display_status_messages: bool):
         super().__init__(input_data)
         self.config_manager = config_manager
         self.results_dir = results_base_dir
         self.output_data_to_pickle = {key: {} for key in input_data.keys()}
+        self.display_status_messages = display_status_messages
 
     def distribute(self, task: Type[Task], task_identifier: Node, path_manager: PathManager,
                    top_level_node: Optional[Type[Task]] = None):
@@ -39,7 +41,8 @@ class TaskDistributor(dict):
                 record_id,
                 task_identifier.scope,
                 self,
-                path_manager.get_dir(record_id, wdir)
+                path_manager.get_dir(record_id, wdir),
+                self.display_status_messages
             )
             task_copy.set_is_complete()
             if top_level_node is not None:
@@ -54,7 +57,8 @@ class TaskDistributor(dict):
             wdir,
             task_identifier.scope,
             self,
-            path_manager.get_dir(wdir)
+            path_manager.get_dir(wdir),
+            self.display_status_messages
         )
         task_copy.set_is_complete()
         futures.append(executor.submit(task_copy.run_task))

@@ -16,7 +16,7 @@ from src.utils.config_manager import ConfigManager, MissingDataError
 
 
 class Task(BaseTask, ABC):
-    def __init__(self, record_id: str, task_scope: str, result_map, wdir: str):
+    def __init__(self, record_id: str, task_scope: str, result_map, wdir: str, display_messages: bool):
         self.record_id: str = record_id
         self._task_scope = task_scope
         self.input: dict = result_map.get(self.record_id, {})
@@ -30,6 +30,7 @@ class Task(BaseTask, ABC):
         else:
             self.is_skip = False
         self.is_complete = False
+        self.display_messages = display_messages
 
     def task_scope(self) -> str:
         return self._task_scope
@@ -116,24 +117,28 @@ class Task(BaseTask, ABC):
         """
         if self.is_skip:
             return Result(self.record_id, self.__name__, {})
-        print("\nRunning:\n  %s" % (
-                (self.task_scope() + " " if self.task_scope() != ConfigManager.ROOT else "") + type(self).__name__
-        ))
+        if self.display_messages:
+            print("\nRunning:\n  %s" % (
+                    (self.task_scope() + " " if self.task_scope() != ConfigManager.ROOT else "") + type(self).__name__
+            ))
 
         if not self.is_complete:
             _str = "In progress:  {}".format(self.record_id)
             logging.info(_str)
-            print(colors.blue & colors.bold | _str)
+            if self.display_messages:
+                print(colors.blue & colors.bold | _str)
             start_time = time.time()
             self.try_run()
             end_time = time.time()
             _str = "Is complete:  {} ({:.3f}{})".format(self.record_id, *Task._parse_time(end_time - start_time))
             logging.info(_str)
-            print(colors.blue & colors.bold | _str)
+            if self.display_messages:
+                print(colors.blue & colors.bold | _str)
         else:
             _str = "Is complete: {}".format(self.record_id)
             logging.info(_str)
-            print(colors.blue & colors.bold | _str)
+            if self.display_messages:
+                print(colors.blue & colors.bold | _str)
 
         for key, output in self.output.items():
             if (isinstance(output, Path) and not output.exists()) or \
@@ -230,7 +235,8 @@ class Task(BaseTask, ABC):
             cmd = self._create_slurm_command(cmd, time_override, threads_override, memory_override)
         # Run command directly
         logging.info(str(cmd))
-        print("  " + str(cmd))
+        if self.display_messages:
+            print("  " + str(cmd))
         out = cmd()
         # Store log info in any was generated
         if out is not None:

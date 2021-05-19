@@ -19,6 +19,7 @@ class Executor:
                  base_output_dir: Path,
                  pipeline_steps_directory: str,
                  dependencies_directories: Optional[List[str]] = None,
+                 display_status_messages: bool = True
                  ):
         self.task_blueprints: Dict[str, Type[Task]] = get_modules(pipeline_steps_directory)
         pipeline_tasks = list(self.task_blueprints.values())
@@ -34,7 +35,7 @@ class Executor:
         if not self.results_base_dir.exists():
             os.makedirs(self.results_base_dir)
         self.result_map: TaskDistributor = TaskDistributor(ConfigManager(config_path), input_data.load(),
-                                                           self.results_base_dir)
+                                                           self.results_base_dir, display_status_messages)
 
     def run(self):
         for task_list in self.task_list:
