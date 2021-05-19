@@ -9,9 +9,9 @@ from src.utils.input_loader import InputLoader
 
 
 class TestExecutor(TestCase):
+    file = Path(os.path.dirname(__file__)).resolve()
 
     def test_simple(self):
-        sample_config_file = Path(os.path.dirname(__file__)).resolve().joinpath("simple/sample-config.yaml")
 
         class TestLoader(InputLoader):
             def __init__(self, n: int):
@@ -22,36 +22,34 @@ class TestExecutor(TestCase):
 
         Executor(
             TestLoader(100),  # Input loader
-            sample_config_file,  # Config file path
-            Path(os.path.join(os.path.dirname(__file__), "simple-out")).resolve(),  # Base output dir path
+            TestExecutor.file.joinpath("simple/sample-config.yaml"),  # Config file path
+            TestExecutor.file.joinpath("simple-out"),  # Base output dir path
             "simple/sample_tasks1",  # Relative path to pipeline directory
             ["simple/sample_dependencies"],  # List of relative paths to dependency directories,
             False  # Silence status messages
         ).run()
 
     def test_fasta(self):
-        out_dir = Path(os.path.join(os.path.dirname(__file__), "fasta-out")).resolve()
-        sample_config_file = Path(os.path.dirname(__file__)).resolve().joinpath("fasta/fasta-config.yaml")
+        out_dir = TestExecutor.file.joinpath("fasta-out")
         Executor(
             ExtensionLoader(  # Input loader
                 Path("/media/user/5FB965DD5569ACE6/Data/tmp").resolve(),
                 out_dir.joinpath("MAGs"),
             ),
-            sample_config_file,  # Config file path
+            TestExecutor.file.joinpath("fasta/fasta-config.yaml"),  # Config file path
             out_dir,  # Base output dir path
             "fasta/tasks",  # Relative path to pipeline directory
             display_status_messages=False
         ).run()
 
     def test_nested(self):
-        out_dir = Path(os.path.join(os.path.dirname(__file__), "nested-out")).resolve()
-        sample_config_file = Path(os.path.dirname(__file__)).resolve().joinpath("nested/nested-config.yaml")
+        out_dir = TestExecutor.file.joinpath("nested-out")
         Executor(
             ExtensionLoader(  # Input loader
                 Path("/media/user/5FB965DD5569ACE6/Data/tmp").resolve(),
                 out_dir.joinpath("MAGs"),
             ),
-            sample_config_file,  # Config file path
+            TestExecutor.file.joinpath("nested/nested-config.yaml"),  # Config file path
             out_dir,  # Base output dir path
             "nested/tasks",  # Relative path to pipeline directory
         ).run()
