@@ -28,7 +28,7 @@ class TestExecutor(TestCase):
             ["simple/sample_dependencies"]  # List of relative paths to dependency directories
         ).run()
 
-    def test_fasta_loader(self):
+    def test_fasta(self):
         out_dir = Path(os.path.join(os.path.dirname(__file__), "fasta-out")).resolve()
         sample_config_file = Path(os.path.dirname(__file__)).resolve().joinpath("fasta/fasta-config.yaml")
         Executor(

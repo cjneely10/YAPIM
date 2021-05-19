@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from src import AggregateTask, set_complete
+from src import AggregateTask
 
 
 class Merge(AggregateTask):
@@ -9,7 +9,6 @@ class Merge(AggregateTask):
     requires = ["write"]
     depends = []
 
-    @set_complete
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {

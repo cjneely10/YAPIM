@@ -2,7 +2,7 @@ import os
 
 from Bio import SeqIO
 
-from src import Task, set_complete
+from src import Task
 
 
 class Summarize(Task):
@@ -10,7 +10,6 @@ class Summarize(Task):
     requires = []
     depends = []
 
-    @set_complete
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {

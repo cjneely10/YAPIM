@@ -4,7 +4,7 @@ import time
 import traceback
 from abc import ABC
 from pathlib import Path
-from typing import Tuple, List, Optional, Callable, Union
+from typing import Tuple, List, Optional, Union
 
 from plumbum import local, colors
 from plumbum.machines import LocalMachine, LocalCommand
@@ -13,21 +13,6 @@ from src.tasks.utils.base_task import BaseTask
 from src.tasks.utils.result import Result
 from src.tasks.utils.slurm_caller import SLURMCaller
 from src.utils.config_manager import ConfigManager, MissingDataError
-
-
-def set_complete(func: Callable):
-    """ Decorator function that checks whether a given task is completed. Check on Task object creation, but post-
-    child-class self.output update
-
-    :param func: Task class initializer method
-    :return: Decorated function, class object modified to store updated self.is_complete status
-    """
-
-    def _check_if_complete(self, *args, **kwargs):
-        func(self, *args, **kwargs)
-        self.is_complete = self.set_is_complete()
-
-    return _check_if_complete
 
 
 class Task(BaseTask, ABC):
@@ -165,11 +150,11 @@ class Task(BaseTask, ABC):
     def program(self) -> LocalCommand:
         return self.local[self.results_map.config_manager.find(self.full_name, ConfigManager.PROGRAM)]
 
-    def __str__(self):
+    def __str__(self):  # pragma: no cover
         return f"<Task name: {self.task_name}, scope: {self.task_scope}, input_id: {self.record_id}, " \
                f"requirements: {self.requires}, dependencies: {self.depends}>"
 
-    def __repr__(self):
+    def __repr__(self):  # pragma: no cover
         return self.__str__()
 
     def try_run(self):
@@ -200,7 +185,7 @@ class Task(BaseTask, ABC):
             return _time / 60, "m"
         return _time, "s"
 
-    def set_is_complete(self) -> bool:
+    def set_is_complete(self):
         """ Check all required output data to see if any part of task need to be completed
 
         :return: Boolean representing if task has all required output
@@ -215,8 +200,8 @@ class Task(BaseTask, ABC):
                     break
                 is_complete = True
         if is_complete is None:
-            return False
-        return is_complete
+            is_complete = False
+        self.is_complete = is_complete
 
     def parallel(self, cmd: Union[LocalCommand, List[LocalCommand]], time_override: Optional[str] = None,
                  threads_override: str = None, memory_override: str = None):

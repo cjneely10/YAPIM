@@ -20,8 +20,8 @@ class DependencyInput:
         else:
             self.collect_by = collect_by
 
-    def __str__(self):
+    def __str__(self):  # pragma: no cover
         return f"<Dependency name: {self.name}, collection: {self.collect_by}>"
 
-    def __repr__(self):
+    def __repr__(self):  # pragma: no cover
         return self.__str__()

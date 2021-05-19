@@ -1,4 +1,4 @@
-from src import Task, set_complete
+from src import Task
 
 
 class Write(Task):
@@ -6,7 +6,6 @@ class Write(Task):
     requires = []
     depends = []
 
-    @set_complete
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {

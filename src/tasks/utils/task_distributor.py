@@ -41,6 +41,7 @@ class TaskDistributor(dict):
                 self,
                 path_manager.get_dir(record_id, wdir)
             )
+            task_copy.set_is_complete()
             if top_level_node is not None:
                 self._update_input(record_id, task_copy, top_level_node)
             futures.append(executor.submit(task_copy.run_task))
@@ -55,6 +56,7 @@ class TaskDistributor(dict):
             self,
             path_manager.get_dir(wdir)
         )
+        task_copy.set_is_complete()
         futures.append(executor.submit(task_copy.run_task))
 
     def _finalize_output(self, futures: List[Future]):

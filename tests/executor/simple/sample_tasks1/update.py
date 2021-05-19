@@ -1,4 +1,4 @@
-from src import Task, set_complete, DependencyInput
+from src import Task, DependencyInput
 
 
 class Update(Task):
@@ -6,7 +6,6 @@ class Update(Task):
     requires = ["write"]
     depends = [DependencyInput("sed", {"write": {"result": "file"}})]
 
-    @set_complete
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {
