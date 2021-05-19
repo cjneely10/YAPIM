@@ -1,7 +1,7 @@
 """
 Populate dependencies for easy loading
 """
-
+import os
 from importlib import import_module
 from inspect import isclass
 from pkgutil import iter_modules
@@ -10,6 +10,18 @@ from src.tasks.task import Task
 
 
 def get_modules(package_dir: str) -> dict:
+    """ Walk directory for loadable modules
+
+    :param package_dir:
+    :return:
+    """
+    all_modules = {}
+    for directory, _, _ in os.walk(package_dir, followlinks=True):
+        all_modules.update(_get_modules_at_dir(directory))
+    return all_modules
+
+
+def _get_modules_at_dir(package_dir: str):
     """ Dynamically load all modules contained at sublevel
 
     :param package_dir: Directory from location where this function is called

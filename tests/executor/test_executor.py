@@ -42,3 +42,16 @@ class TestExecutor(TestCase):
             "fasta/tasks",  # Relative path to pipeline directory
             display_status_messages=False
         ).run()
+
+    def test_nested(self):
+        out_dir = Path(os.path.join(os.path.dirname(__file__), "nested-out")).resolve()
+        sample_config_file = Path(os.path.dirname(__file__)).resolve().joinpath("nested/nested-config.yaml")
+        Executor(
+            ExtensionLoader(  # Input loader
+                Path("/media/user/5FB965DD5569ACE6/Data/tmp").resolve(),
+                out_dir.joinpath("MAGs"),
+            ),
+            sample_config_file,  # Config file path
+            out_dir,  # Base output dir path
+            "nested/tasks",  # Relative path to pipeline directory
+        ).run()

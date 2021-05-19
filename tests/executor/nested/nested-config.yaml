@@ -1,0 +1,28 @@
+---  # document start
+
+###########################################
+## Pipeline input section
+INPUT:
+  base:  # List pipelines containing input data
+    root
+
+###########################################
+
+SLURM:
+  ## Set to True if using SLURM
+  USE_CLUSTER: false
+  ## Pass any flags you wish below
+  ## DO NOT PASS the following:
+  ## --nodes, --ntasks, --mem, --cpus-per-task
+  --qos: unlim
+  --job-name: EukMS
+  user-id: uid
+
+MMSeqsCreateDB:
+  workers: 10
+  threads: 16
+  memory: 40G
+  time: "4:00:00"
+  program: /home/user/miniconda3/envs/EukMS_run/bin/mmseqs
+
+...  # document end
