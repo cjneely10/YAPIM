@@ -9,10 +9,10 @@ from typing import Tuple, List, Optional, Union
 from plumbum import local, colors
 from plumbum.machines import LocalMachine, LocalCommand
 
-from src.tasks.utils.base_task import BaseTask
-from src.tasks.utils.result import Result
-from src.tasks.utils.slurm_caller import SLURMCaller
-from src.utils.config_manager import ConfigManager, MissingDataError
+from HPCBioPipe.tasks.utils.base_task import BaseTask
+from HPCBioPipe.tasks.utils.result import Result
+from HPCBioPipe.tasks.utils.slurm_caller import SLURMCaller
+from HPCBioPipe.utils.config_manager import ConfigManager, MissingDataError
 
 
 class TaskSetupError(AttributeError):

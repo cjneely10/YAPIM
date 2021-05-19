@@ -3,9 +3,9 @@ from pathlib import Path
 from typing import Dict
 from unittest import TestCase
 
-from src.executor import Executor
-from src.extension_loader import ExtensionLoader
-from src.utils.input_loader import InputLoader
+from HPCBioPipe.tasks.utils.executor import Executor
+from HPCBioPipe.tasks.utils.extension_loader import ExtensionLoader
+from HPCBioPipe.utils.input_loader import InputLoader
 
 
 class TestExecutor(TestCase):

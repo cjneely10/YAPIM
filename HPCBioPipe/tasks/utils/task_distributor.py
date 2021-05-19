@@ -4,12 +4,12 @@ from pathlib import Path
 from shutil import copy
 from typing import List, Type, Optional, Dict
 
-from src.tasks.aggregate_task import AggregateTask
-from src.tasks.task import Task, TaskSetupError
-from src.tasks.utils.dependency_graph import Node
-from src.tasks.utils.result import Result
-from src.utils.config_manager import ConfigManager
-from src.utils.path_manager import PathManager
+from HPCBioPipe.tasks.aggregate_task import AggregateTask
+from HPCBioPipe.tasks.task import Task, TaskSetupError
+from HPCBioPipe.tasks.utils.dependency_graph import Node
+from HPCBioPipe.tasks.utils.result import Result
+from HPCBioPipe.utils.config_manager import ConfigManager
+from HPCBioPipe.utils.path_manager import PathManager
 
 
 class TaskDistributor(dict):

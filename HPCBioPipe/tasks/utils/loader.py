@@ -7,7 +7,7 @@ from importlib import import_module
 from inspect import isclass
 from pkgutil import iter_modules
 
-from src.tasks.task import Task
+from HPCBioPipe.tasks.task import Task
 
 
 def get_modules(package_dir: str) -> dict:

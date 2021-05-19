@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from src.tasks.task import Task
+from HPCBioPipe.tasks.task import Task
 
 
 class AggregateTask(Task, ABC):

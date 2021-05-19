@@ -2,9 +2,9 @@ from typing import List, Dict, Tuple, Type
 
 from networkx import DiGraph, topological_sort, is_directed_acyclic_graph
 
-from src.tasks.task import Task
-from src.tasks.utils.dependency_input import DependencyInput
-from src.utils.config_manager import ConfigManager
+from HPCBioPipe.tasks.task import Task
+from HPCBioPipe.tasks.utils.dependency_input import DependencyInput
+from HPCBioPipe.utils.config_manager import ConfigManager
 
 
 class DependencyGraphGenerationError(BaseException):
