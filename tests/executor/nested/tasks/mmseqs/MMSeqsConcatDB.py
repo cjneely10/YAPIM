@@ -7,7 +7,8 @@ class MMSeqsConcatDB(AggregateTask):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {
-            "out": str(self.wdir.joinpath("out.txt"))
+            "out": str(self.wdir.joinpath("out.txt")),
+            "final": ["out"]
         }
 
     def aggregate(self) -> dict:
