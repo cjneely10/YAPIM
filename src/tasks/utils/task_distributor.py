@@ -5,7 +5,7 @@ from shutil import copy
 from typing import List, Type, Optional, Dict
 
 from src.tasks.aggregate_task import AggregateTask
-from src.tasks.task import Task
+from src.tasks.task import Task, TaskSetupError
 from src.tasks.utils.dependency_graph import Node
 from src.tasks.utils.result import Result
 from src.utils.config_manager import ConfigManager
@@ -72,11 +72,15 @@ class TaskDistributor(dict):
             self[result.record_id][result.task_name] = result
             for result_key, result_data in result.items():
                 if result_key == "final":
+                    if not isinstance(result_data, list):
+                        raise TaskSetupError("'final' section of output should be a list of keys")
                     _sub_out = os.path.join(self.results_dir, result.record_id)
                     if not os.path.exists(_sub_out):
                         os.makedirs(_sub_out)
                     for file_str in result_data:
-                        obj = result[file_str]
+                        obj = result.get(file_str)
+                        if obj is None:
+                            raise TaskSetupError("'final' should consist of keys present in task output")
                         if isinstance(obj, Path) or (isinstance(obj, str) and os.path.exists(obj)):
                             copy(obj, _sub_out)
                         self.output_data_to_pickle[result.record_id][file_str] = obj

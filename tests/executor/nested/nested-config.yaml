@@ -32,4 +32,10 @@ MMSeqsConcatDB:
       time: "4:00:00"
       program: /home/user/miniconda3/envs/EukMS_run/bin/mmseqs
 
+Empty:
+  workers: 10
+  threads: 16
+  memory: 40G
+  time: "4:00:00"
+
 ...  # document end

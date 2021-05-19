@@ -15,6 +15,12 @@ from src.tasks.utils.slurm_caller import SLURMCaller
 from src.utils.config_manager import ConfigManager, MissingDataError
 
 
+class TaskSetupError(AttributeError):
+    """
+    Wrap AttributeError around improperly-formatted Task fields
+    """
+
+
 class Task(BaseTask, ABC):
     def __init__(self, record_id: str, task_scope: str, result_map, wdir: str, display_messages: bool):
         self.record_id: str = record_id
@@ -140,9 +146,10 @@ class Task(BaseTask, ABC):
                 print(colors.blue & colors.bold | _str)
 
         for key, output in self.output.items():
-            if (isinstance(output, Path) and not output.exists()) or \
-                    (isinstance(output, str) and not os.path.exists(output)):
-                raise super().TaskCompletionError(key, output)
+            if key != "final":
+                if (isinstance(output, Path) and not output.exists()) or \
+                        (isinstance(output, str) and not os.path.exists(output)):
+                    raise super().TaskCompletionError(key, output)
         return Result(self.record_id, type(self).__name__, self.output)
 
     @property

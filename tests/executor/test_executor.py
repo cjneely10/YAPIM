@@ -53,5 +53,5 @@ class TestExecutor(TestCase):
             out_dir,  # Base output dir path
             "nested/tasks",  # Relative path to pipeline directory
             ["nested/mmseqs_dependencies"],
-            display_status_messages=False
+            # display_status_messages=False
         ).run()
