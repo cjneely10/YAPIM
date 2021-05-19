@@ -29,5 +29,5 @@ def get_modules(package_dir: str) -> dict:
             attribute = getattr(module, attribute_name)
             if isclass(attribute) and issubclass(attribute, Task) and "Task" not in attribute.__name__:
                 # Add the class to this package's variables
-                out[attribute.task_name] = attribute
+                out[attribute.__name__] = attribute
     return out

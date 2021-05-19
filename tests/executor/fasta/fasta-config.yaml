@@ -24,4 +24,10 @@ summarize:
   memory: 40G
   time: "4:00:00"
 
+Align:
+  workers: 10
+  threads: 1
+  memory: 40G
+  time: "4:00:00"
+
 ...  # document end

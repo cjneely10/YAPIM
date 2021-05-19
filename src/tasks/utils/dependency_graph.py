@@ -73,11 +73,11 @@ class DependencyGraph:
 
     def _build_dependency_graph(self, tasks: List[Type[Task]]):
         for task in tasks:
-            task_node: Node = Node(DependencyGraph.ROOT, task.task_name)
+            task_node: Node = Node(DependencyGraph.ROOT, task.__name__)
             self.graph.add_edge(DependencyGraph.ROOT_NODE, task_node)
             # Link requirements for already completed tasks in pipeline
             # Gather dependencies needed for fulfilling given requirement
-            for requirement in task.requires:
+            for requirement in task.requires():
                 if requirement not in self.idx.keys():
                     raise DependencyGraph.ERR
                 self.graph.add_edge(Node(DependencyGraph.ROOT, requirement), task_node)
@@ -87,7 +87,7 @@ class DependencyGraph:
         task = self.idx[task_node.name]
 
         dependency: DependencyInput
-        for dependency in task.depends:
+        for dependency in task.depends():
             if dependency.name not in self.idx.keys():
                 raise DependencyGraph.ERR
             dependency_node: Node = Node(task_node.name, dependency.name)

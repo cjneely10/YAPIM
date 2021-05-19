@@ -15,35 +15,27 @@ class BaseTask(ABC):
         """
         :return: Tuple of (scope, task name)
         """
-        return self.task_scope, self.task_name
+        return self.task_scope(), type(self).__name__
 
-    @property
+    @staticmethod
     @abstractmethod
-    def task_scope(self) -> str:
+    def task_scope() -> str:
         """
 
         :return:
         :rtype:
         """
-
-    @property
+    @staticmethod
     @abstractmethod
-    def task_name(self) -> str:
-        """
-        :return: Unique id assigned to task
-        """
-
-    @property
-    @abstractmethod
-    def requires(self) -> List[str]:
+    def requires() -> List[str]:
         """ List of tasks whose outputs are used in this task.
 
         :return: List of Task child classes
         """
 
-    @property
+    @staticmethod
     @abstractmethod
-    def depends(self) -> List[DependencyInput]:
+    def depends() -> List[DependencyInput]:
         """ List of programs to run to generate intermediary output for this task
 
         :return: List of Task child classes

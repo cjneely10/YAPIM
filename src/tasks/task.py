@@ -31,7 +31,6 @@ class Task(BaseTask, ABC):
             self.is_skip = False
         self.is_complete = False
 
-    @property
     def task_scope(self) -> str:
         return self._task_scope
 
@@ -116,9 +115,9 @@ class Task(BaseTask, ABC):
         :return:
         """
         if self.is_skip:
-            return Result(self.record_id, self.task_name, {})
+            return Result(self.record_id, self.__name__, {})
         print("\nRunning:\n  %s" % (
-                (self.task_scope + " " if self.task_scope != ConfigManager.ROOT else "") + self.task_name
+                (self.task_scope() + " " if self.task_scope() != ConfigManager.ROOT else "") + type(self).__name__
         ))
 
         if not self.is_complete:
@@ -140,7 +139,7 @@ class Task(BaseTask, ABC):
             if (isinstance(output, Path) and not output.exists()) or \
                     (isinstance(output, str) and not os.path.exists(output)):
                 raise super().TaskCompletionError(key, output)
-        return Result(self.record_id, self.task_name, self.output)
+        return Result(self.record_id, type(self).__name__, self.output)
 
     @property
     def local(self) -> LocalMachine:
@@ -151,8 +150,8 @@ class Task(BaseTask, ABC):
         return self.local[self.results_map.config_manager.find(self.full_name, ConfigManager.PROGRAM)]
 
     def __str__(self):  # pragma: no cover
-        return f"<Task name: {self.task_name}, scope: {self.task_scope}, input_id: {self.record_id}, " \
-               f"requirements: {self.requires}, dependencies: {self.depends}>"
+        return f"<Task name: {self.__name__}, scope: {self.task_scope()}, input_id: {self.record_id}, " \
+               f"requirements: {self.requires()}, dependencies: {self.depends()}>"
 
     def __repr__(self):  # pragma: no cover
         return self.__str__()
