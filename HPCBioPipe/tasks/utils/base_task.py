@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Tuple, Union, Type
 
 from HPCBioPipe.tasks.utils.dependency_input import DependencyInput
 
@@ -31,7 +31,7 @@ class BaseTask(ABC):
         """
     @staticmethod
     @abstractmethod
-    def requires() -> List[str]:
+    def requires() -> List[Union[str, Type]]:
         """ List of tasks whose outputs are used in this task.
 
         :return: List of Task child classes

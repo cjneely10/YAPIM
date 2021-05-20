@@ -1,3 +1,4 @@
+import inspect
 from typing import List, Dict, Tuple, Type, Iterable
 
 from networkx import DiGraph, topological_sort, is_directed_acyclic_graph
@@ -78,6 +79,9 @@ class DependencyGraph:
             # Link requirements for already completed tasks in pipeline
             # Gather dependencies needed for fulfilling given requirement
             for requirement in task.requires():
+                # Can pass in requirements by string or by type
+                if inspect.isclass(requirement):
+                    requirement = requirement.__name__
                 if requirement not in self.idx.keys():
                     raise DependencyGraph.ERR
                 self.graph.add_edge(Node(DependencyGraph.ROOT, requirement), task_node)
@@ -88,6 +92,8 @@ class DependencyGraph:
 
         dependency: DependencyInput
         for dependency in task.depends():
+            if inspect.isclass(dependency.name):
+                dependency.name = dependency.name.__name__
             if dependency.name not in self.idx.keys():
                 raise DependencyGraph.ERR
             dependency_node: Node = Node(task_node.name, dependency.name)

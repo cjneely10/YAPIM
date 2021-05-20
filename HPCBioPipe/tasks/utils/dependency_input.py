@@ -2,14 +2,14 @@
 Module holds DependencyInput `struct` that is used to in TaskList.depends member
 """
 
-from typing import Dict, Optional
+from typing import Dict, Optional, Union, Type
 
 
 class DependencyInput:
     """ Class handles parsing input for dependency requirements
 
     """
-    def __init__(self, name: str,
+    def __init__(self, name: Union[str, Type],
                  collect_by: Optional[Dict[str, Dict[str, str]]] = None):
         self.name = name
         if collect_by is None:
