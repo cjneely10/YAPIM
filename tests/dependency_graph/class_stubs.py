@@ -41,7 +41,7 @@ class C(Task):
 
     @staticmethod
     def requires() -> List[str]:
-        return ["B"]
+        return [B]
 
     @staticmethod
     def depends() -> List[DependencyInput]:
@@ -77,7 +77,7 @@ class E(Task):
 
     @staticmethod
     def depends() -> List[DependencyInput]:
-        return [DependencyInput("C")]
+        return [DependencyInput(C)]
 
     def run(self):
         pass
