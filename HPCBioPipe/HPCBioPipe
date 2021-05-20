@@ -1,10 +1,90 @@
 #!/usr/bin/env python
+import os
+from importlib import import_module
+from pathlib import Path
+from inspect import isclass
+from typing import Optional, List, Type
+
 from plumbum import cli
+
+from HPCBioPipe.utils.executor import Executor
+from HPCBioPipe.utils.extension_loader import ExtensionLoader
+from HPCBioPipe.utils.input_loader import InputLoader
 
 
 class HPCBioPipeRunner(cli.Application):
+    """
+    Create and run an HPCBioPipeline
+    """
+    VERSION = "0.1.0"
+
+    loader: Optional[Type[InputLoader]]
+    config_path: Path
+    output_directory: Optional[Path] = Path(os.getcwd()).joinpath("out")
+    tasks_directory: str
+    dependencies_directories: Optional[List[str]] = None
+    display_status: bool = True
+
+    @cli.switch(["-l", "--loader"], str)
+    def set_loader_path(self, loader):
+        """Path to loader module. If not provided, will default to ExtensionLoader"""
+        if not os.path.exists(loader):
+            print("Unable to find loader module")
+            exit(1)
+        module = import_module(loader)
+        for attribute_name in dir(module):
+            attribute = getattr(module, attribute_name)
+            if isclass(attribute) and issubclass(attribute, InputLoader):
+                self.loader = attribute
+                return
+        print("Unable to import loader module")
+        exit(1)
+
+    @cli.switch(["-c", "--config"], str, mandatory=True)
+    def set_config_path(self, config):
+        """Path to configuration file"""
+        if not os.path.exists(config):
+            print("Unable to load config file")
+            exit(1)
+        self.config_path = Path(config).resolve()
+
+    @cli.switch(["-o", "--output"], str)
+    def set_output_dir(self, output):
+        """Path to output directory, default is <current-dir>/out"""
+        self.output_directory = Path(output).resolve()
+
+    @cli.switch(["-t", "--tasks"], str, mandatory=True)
+    def set_tasks_dir(self, tasks_dir):
+        """Path to directory of pipeline Task/AggregateTasks"""
+        if not os.path.exists(tasks_dir):
+            print("Unable to find tasks directory")
+            exit(1)
+        self.tasks_directory = tasks_dir
+
+    @cli.switch(["-d", "--dependencies"], str, list=True)
+    def set_dependencies_directory(self, dependencies):
+        """Path to directory of Task/AggregateTask dependencies"""
+        if not os.path.exists(dependencies):
+            print("Unable to find dependencies directory")
+        self.dependencies_directories = dependencies
+
+    @cli.switch(["-s", "--silence"])
+    def set_verbosity(self):
+        """Do not display log statements to stdout"""
+        self.display_status = False
+
     def main(self, *args):
-        pass
+        if self.loader is None:
+            self.loader = ExtensionLoader
+
+        Executor(
+            self.loader(),
+            self.config_path,
+            self.output_directory,
+            self.tasks_directory,
+            self.dependencies_directories,
+            self.display_status
+        ).run()
 
 
 if __name__ == "__main__":
