@@ -13,7 +13,7 @@ class MissingOutput(Task):
         return []
 
     def run(self):
-        pass
+        open(self.wdir.joinpath("meow.txt"), "a").close()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

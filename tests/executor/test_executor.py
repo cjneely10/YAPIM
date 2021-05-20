@@ -34,7 +34,7 @@ class TestExecutor(TestCase):
         out_dir = TestExecutor.file.joinpath("fasta-out")
         Executor(
             ExtensionLoader(  # Input loader
-                Path("/media/user/5FB965DD5569ACE6/Data/tmp").resolve(),
+                Path("../data").resolve(),
                 out_dir.joinpath("MAGs"),
             ),
             TestExecutor.file.joinpath("fasta/fasta-config.yaml"),  # Config file path
@@ -47,7 +47,7 @@ class TestExecutor(TestCase):
         out_dir = TestExecutor.file.joinpath("nested-out")
         Executor(
             ExtensionLoader(  # Input loader
-                Path("/media/user/5FB965DD5569ACE6/Data/tmp").resolve(),
+                Path("../data").resolve(),
                 out_dir.joinpath("MAGs"),
             ),
             TestExecutor.file.joinpath("nested/nested-config.yaml"),  # Config file path
