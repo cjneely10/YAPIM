@@ -105,6 +105,8 @@ class ConfigManager:
         :raises: MissingDataError
 
         """
+        if not isinstance(data_dict, dict):
+            raise MissingDataError("Dependency section is improperly configured!")
         for task_name, task_dict in data_dict.items():
             if "skip" in task_dict.keys() and task_dict["skip"] is True:
                 continue

@@ -1,0 +1,33 @@
+---  # document start
+
+###########################################
+## Pipeline input section
+INPUT:
+  base:  # List pipelines containing input data
+    root
+
+###########################################
+
+SLURM:
+  ## Set to True if using SLURM
+  USE_CLUSTER: false
+  ## Pass any flags you wish below
+  ## DO NOT PASS the following:
+  ## --nodes, --ntasks, --mem, --cpus-per-task
+  --qos: unlim
+  --job-name: EukMS
+  user-id: uid
+
+Sample:
+  workers: 10
+  threads: 1
+  memory: 40G
+  time: "4:00:00"
+  data: sample-data.list
+  dependencies:
+    Value:
+      FLAGS:
+        -x 12
+        -d e
+
+...  # document end
