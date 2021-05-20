@@ -4,9 +4,9 @@ from pathlib import Path
 from typing import List, Dict, Type, Optional
 
 from HPCBioPipe.tasks.task import Task
-from HPCBioPipe.tasks.utils.dependency_graph import Node, DependencyGraph
+from HPCBioPipe.utils.dependency_graph import Node, DependencyGraph
 from HPCBioPipe.tasks.utils.loader import get_modules
-from HPCBioPipe.tasks.utils.task_distributor import TaskDistributor
+from HPCBioPipe.utils.task_distributor import TaskDistributor
 from HPCBioPipe.utils.config_manager import ConfigManager
 from HPCBioPipe.utils.input_loader import InputLoader
 from HPCBioPipe.utils.path_manager import PathManager

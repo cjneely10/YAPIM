@@ -3,8 +3,8 @@ from pathlib import Path
 from typing import Dict
 from unittest import TestCase
 
-from HPCBioPipe.tasks.utils.executor import Executor
-from HPCBioPipe.tasks.utils.extension_loader import ExtensionLoader
+from HPCBioPipe.utils.executor import Executor
+from HPCBioPipe.utils.extension_loader import ExtensionLoader
 from HPCBioPipe.utils.input_loader import InputLoader
 
 
@@ -53,5 +53,5 @@ class TestExecutor(TestCase):
             out_dir,  # Base output dir path
             "nested/tasks",  # Relative path to pipeline directory
             ["nested/mmseqs_dependencies"],
-            # display_status_messages=False
+            display_status_messages=False
         ).run()
