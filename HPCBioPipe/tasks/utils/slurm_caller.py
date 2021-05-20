@@ -3,7 +3,6 @@ Module holds logic for running a dask distributed task within a SLURM job
 """
 
 import os
-import shutil
 from time import sleep
 from typing import List, Tuple, Union
 

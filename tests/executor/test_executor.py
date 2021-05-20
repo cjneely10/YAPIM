@@ -1,7 +1,7 @@
 import os
+import unittest
 from pathlib import Path
 from typing import Dict
-import unittest
 
 from HPCBioPipe.tasks.utils.base_task import BaseTask
 from HPCBioPipe.utils.executor import Executor

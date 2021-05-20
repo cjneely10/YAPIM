@@ -6,9 +6,9 @@ from typing import List, Type, Optional, Dict
 
 from HPCBioPipe.tasks.aggregate_task import AggregateTask
 from HPCBioPipe.tasks.task import Task, TaskSetupError
-from HPCBioPipe.utils.dependency_graph import Node
 from HPCBioPipe.tasks.utils.result import Result
 from HPCBioPipe.utils.config_manager import ConfigManager
+from HPCBioPipe.utils.dependency_graph import Node
 from HPCBioPipe.utils.path_manager import PathManager
 
 
