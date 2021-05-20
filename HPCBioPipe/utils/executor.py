@@ -37,6 +37,7 @@ class Executor:
         self.result_map: TaskDistributor = TaskDistributor(ConfigManager(config_path), input_data.load(),
                                                            self.results_base_dir, display_status_messages)
 
+    # TODO: Executor method based on either distribute by task (for servers) or by task chain (for HPCs)
     def run(self):
         for task_list in self.task_list:
             if len(task_list) == 1:

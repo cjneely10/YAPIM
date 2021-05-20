@@ -14,6 +14,7 @@ class Align(Task):
 
     def run(self):
         open(self.output["align"], "a").close()
+        print(self.added_flags)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

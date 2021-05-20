@@ -66,11 +66,10 @@ class ConfigManager:
 
         :param config_path: Path to .yaml config file
         """
-        fp = open(str(Path(config_path).resolve()), "r")
-        self.config = yaml.load(fp, Loader=yaml.FullLoader)
-        # Confirm all paths in file are valid
-        ConfigManager._validate(self.config)
-        fp.close()
+        with open(str(Path(config_path).resolve()), "r") as fp:
+            self.config = yaml.load(fp, Loader=yaml.FullLoader)
+            # Confirm all paths in file are valid
+            ConfigManager._validate(self.config)
 
     def get(self, task_data: Tuple[str, str]) -> dict:
         """ Get (scope, name) data from config file
@@ -144,12 +143,12 @@ class ConfigManager:
                     if "program" not in prog_data:
                         # pylint: disable=raise-missing-from
                         raise InvalidPathError(
-                            "Dependency %s is improperly configured in your config file!" % prog_name
+                            "Dependency %s is missing a program path in your config file!" % prog_name
                         )
-                    bool(prog_data["program"])
+                    bool(local[prog_data["program"]])
                 except CommandNotFound:
                     # pylint: disable=raise-missing-from
-                    raise MissingDataError(
+                    raise InvalidPathError(
                         "Dependency %s (provided: %s) is not present in your system's path!" % (
                             prog_name, prog_data["program"]))
 
@@ -158,10 +157,10 @@ class ConfigManager:
 
         :return: SLURM arguments parsed to input list
         """
-        return [
+        return sorted([
             (key, str(val)) for key, val in self.config["SLURM"].items()
             if key not in {"USE_CLUSTER", "--nodes", "--ntasks", "--mem", "user-id"}
-        ]
+        ], key=lambda v: v[0])
 
     def get_slurm_userid(self):
         """ Get user id from slurm section.

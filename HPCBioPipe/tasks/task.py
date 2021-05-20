@@ -60,8 +60,9 @@ class Task(BaseTask, ABC):
 
         :return: List of arguments to pass to calling program
         """
-        if ConfigManager.FLAGS in self.config.keys():
-            out = self.config[ConfigManager.FLAGS].split(" ")
+        flags = self.results_map.config_manager.find(self.full_name, ConfigManager.FLAGS)
+        if flags is not None:
+            out = flags.split(" ")
             while "" in out:
                 out.remove("")
             return out

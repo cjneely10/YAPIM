@@ -18,18 +18,19 @@ SLURM:
   --job-name: EukMS
   user-id: uid
 
-Summarize:
+Sample:
   workers: 10
   threads: 1
   memory: 40G
   time: "4:00:00"
-
-Align:
-  workers: 10
-  threads: 1
-  memory: 40G
-  time: "4:00:00"
-  FLAGS:
-    -x one
+  data: sample-data.list
+  dependencies:
+    Value:
+      data:
+        sample-data.lt
+      FLAGS:
+        -x 12
+        -d e
+      program: cat
 
 ...  # document end
