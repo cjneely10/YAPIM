@@ -17,6 +17,10 @@ class BaseTask(ABC):
         """
         return self.task_scope(), type(self).__name__
 
+    @property
+    def name(self) -> str:
+        return type(self).__name__
+
     @staticmethod
     @abstractmethod
     def task_scope() -> str:

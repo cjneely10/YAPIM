@@ -121,10 +121,10 @@ class Task(BaseTask, ABC):
         :return:
         """
         if self.is_skip:
-            return Result(self.record_id, self.__name__, {})
+            return Result(self.record_id, self.name, {})
         if self.display_messages:
             print("\nRunning:\n  %s" % (
-                    (self.task_scope() + " " if self.task_scope() != ConfigManager.ROOT else "") + type(self).__name__
+                    (self.task_scope() + " " if self.task_scope() != ConfigManager.ROOT else "") + self.name
             ))
 
         if not self.is_complete:
@@ -150,7 +150,7 @@ class Task(BaseTask, ABC):
                 if (isinstance(output, Path) and not output.exists()) or \
                         (isinstance(output, str) and not os.path.exists(output)):
                     raise super().TaskCompletionError(key, output)
-        return Result(self.record_id, type(self).__name__, self.output)
+        return Result(self.record_id, self.name, self.output)
 
     @property
     def local(self) -> LocalMachine:
