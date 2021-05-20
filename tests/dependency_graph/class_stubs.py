@@ -81,3 +81,35 @@ class E(Task):
 
     def run(self):
         pass
+
+
+class AB(Task):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    @staticmethod
+    def requires() -> List[str]:
+        return ["BA"]
+
+    @staticmethod
+    def depends() -> List[DependencyInput]:
+        return []
+
+    def run(self):
+        pass
+
+
+class BA(Task):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    @staticmethod
+    def requires() -> List[str]:
+        return ["AB"]
+
+    @staticmethod
+    def depends() -> List[DependencyInput]:
+        return []
+
+    def run(self):
+        pass

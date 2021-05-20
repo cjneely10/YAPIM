@@ -41,27 +41,15 @@ class TestDependencyGraph(unittest.TestCase):
 
     def test_unmet_expects(self):
         with self.assertRaises(DependencyGraphGenerationError):
-            self.fail()
+            DependencyGraph(*generate_dg_input([B]))
 
     def test_unmet_depends(self):
         with self.assertRaises(DependencyGraphGenerationError):
-            self.fail()
+            print(DependencyGraph(*generate_dg_input([A, B, E])).sorted_graph_identifiers)
 
     def test_cyclic(self):
         with self.assertRaises(DependencyGraphGenerationError):
-            self.fail()
-
-    def test_circular(self):
-        with self.assertRaises(DependencyGraphGenerationError):
-            self.fail()
-
-    def test_bad_requires(self):
-        with self.assertRaises(DependencyGraphGenerationError):
-            self.fail()
-
-    def test_bad_depends(self):
-        with self.assertRaises(DependencyGraphGenerationError):
-            self.fail()
+            print(DependencyGraph(*generate_dg_input([AB, BA])).sorted_graph_identifiers)
 
 
 if __name__ == '__main__':
