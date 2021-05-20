@@ -73,8 +73,10 @@ class TestExecutor(TestCase):
                 "missing_output",  # Relative path to pipeline directory
             ).run()
 
-    def test_bad_program_path_config(self):
-        self.fail()
-
-    def test_bad_program_path_from_within_class_definition(self):
-        self.fail()
+    def test_bad_program_path(self):
+        Executor(
+            TestExecutor.TestLoader(10),  # Input loader
+            TestExecutor.file.joinpath("bad_program_path/bad_program_path-config.yaml"),  # Config file path
+            TestExecutor.file.joinpath("bad_program_path-out"),  # Base output dir path
+            "bad_program_path",  # Relative path to pipeline directory
+        ).run()
