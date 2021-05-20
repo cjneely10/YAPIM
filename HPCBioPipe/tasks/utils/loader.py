@@ -2,7 +2,6 @@
 Populate dependencies for easy loading
 """
 import os
-import re
 from importlib import import_module
 from inspect import isclass
 from pkgutil import iter_modules

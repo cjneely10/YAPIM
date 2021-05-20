@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 from typing import Dict
-from unittest import TestCase
+import unittest
 
 from HPCBioPipe.tasks.utils.base_task import BaseTask
 from HPCBioPipe.utils.executor import Executor
@@ -9,7 +9,7 @@ from HPCBioPipe.utils.extension_loader import ExtensionLoader
 from HPCBioPipe.utils.input_loader import InputLoader
 
 
-class TestExecutor(TestCase):
+class TestExecutor(unittest.TestCase):
     file = Path(os.path.dirname(__file__)).resolve()
 
     class TestLoader(InputLoader):
@@ -80,3 +80,7 @@ class TestExecutor(TestCase):
             TestExecutor.file.joinpath("bad_program_path-out"),  # Base output dir path
             "bad_program_path",  # Relative path to pipeline directory
         ).run()
+
+
+if __name__ == '__main__':
+    unittest.main()

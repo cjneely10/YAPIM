@@ -1,4 +1,4 @@
-from typing import List, Dict, Tuple, Type
+from typing import List, Dict, Tuple, Type, Iterable
 
 from networkx import DiGraph, topological_sort, is_directed_acyclic_graph
 
@@ -23,10 +23,10 @@ class Node:
     def get(self) -> Tuple[str, str]:
         return self.scope, self.name
 
-    def __str__(self):
-        return f"{self.scope} {self.name}"
+    def __str__(self):  # pragma: no cover
+        return f"<Node scope: {self.scope}, name: {self.name}>"
 
-    def __repr__(self):
+    def __repr__(self):  # pragma: no cover
         return self.__str__()
 
     def __hash__(self):
@@ -71,7 +71,7 @@ class DependencyGraph:
         if not is_directed_acyclic_graph(self.graph):
             raise DependencyGraph.ERR
 
-    def _build_dependency_graph(self, tasks: List[Type[Task]]):
+    def _build_dependency_graph(self, tasks: Iterable[Type[Task]]):
         for task in tasks:
             task_node: Node = Node(DependencyGraph.ROOT, task.__name__)
             self.graph.add_edge(DependencyGraph.ROOT_NODE, task_node)
