@@ -1,9 +1,12 @@
+import os
 import unittest
+from pathlib import Path
 from typing import Type, Iterable, Dict, Tuple, Union
 
 from HPCBioPipe import AggregateTask
 from HPCBioPipe.utils.config_manager import ConfigManager
 from HPCBioPipe.utils.dependency_graph import DependencyGraph, Node, DependencyGraphGenerationError
+from HPCBioPipe.utils.task_distributor import TaskDistributor
 from tests.dependency_graph.class_stubs import *
 
 TaskType = Type[Task]
@@ -86,6 +89,9 @@ class TestDependencyGraph(unittest.TestCase):
 
     def test_bad_aggregate(self):
         class BadAggregate(AggregateTask):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+
             def aggregate(self) -> dict:
                 pass
 
@@ -95,13 +101,24 @@ class TestDependencyGraph(unittest.TestCase):
 
             @staticmethod
             def depends() -> List[DependencyInput]:
-                pass
+                return []
 
             def run(self):
                 pass
 
         with self.assertRaises(DependencyGraphGenerationError):
-            print(DependencyGraph(*generate_dg_input([BadAggregate])).sorted_graph_identifiers)
+            BadAggregate(
+                "record_id",
+                ConfigManager.ROOT,
+                TaskDistributor(
+                    ConfigManager(Path("dep-graph-config.yaml").resolve()),
+                    {},
+                    Path(os.getcwd()).resolve(),
+                    False
+                ),
+                os.getcwd(),
+                False
+            )
 
 
 if __name__ == '__main__':
