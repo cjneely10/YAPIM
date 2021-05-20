@@ -31,7 +31,7 @@ class B(Task):
     def depends() -> List[DependencyInput]:
         return []
 
-    def run(self):
+    def run(self):  # pragma: no cover
         pass
 
 
@@ -47,7 +47,7 @@ class C(Task):
     def depends() -> List[DependencyInput]:
         return []
 
-    def run(self):
+    def run(self):  # pragma: no cover
         pass
 
 
@@ -63,7 +63,7 @@ class D(Task):
     def depends() -> List[DependencyInput]:
         return []
 
-    def run(self):
+    def run(self):  # pragma: no cover
         pass
 
 
@@ -79,7 +79,7 @@ class E(Task):
     def depends() -> List[DependencyInput]:
         return [DependencyInput(C)]
 
-    def run(self):
+    def run(self):  # pragma: no cover
         pass
 
 
@@ -95,7 +95,7 @@ class AB(Task):
     def depends() -> List[DependencyInput]:
         return []
 
-    def run(self):
+    def run(self):  # pragma: no cover
         pass
 
 
@@ -111,5 +111,5 @@ class BA(Task):
     def depends() -> List[DependencyInput]:
         return []
 
-    def run(self):
+    def run(self):  # pragma: no cover
         pass

@@ -98,7 +98,7 @@ class DependencyGraph:
         if task.depends() is None:
             raise DependencyGraph.ERR
         for dependency in task.depends():
-            if not isinstance(dependency.name, (str, type)):
+            if not isinstance(dependency, DependencyInput) or not isinstance(dependency.name, (str, type)):
                 raise DependencyGraph.ERR
             if inspect.isclass(dependency.name):
                 dependency.name = dependency.name.__name__

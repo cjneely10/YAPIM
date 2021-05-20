@@ -65,7 +65,23 @@ class TestDependencyGraph(unittest.TestCase):
             def depends() -> List[DependencyInput]:
                 return []
 
-            def run(self):
+            def run(self):  # pragma: no cover
+                pass
+
+        with self.assertRaises(DependencyGraphGenerationError):
+            print(DependencyGraph(*generate_dg_input([BadSetup])).sorted_graph_identifiers)
+
+    def test_bad_requires2(self):
+        class BadSetup(Task):
+            @staticmethod
+            def requires() -> List[Union[str, Type]]:
+                return [1]
+
+            @staticmethod
+            def depends() -> List[DependencyInput]:
+                return []
+
+            def run(self):  # pragma: no cover
                 pass
 
         with self.assertRaises(DependencyGraphGenerationError):
@@ -81,7 +97,23 @@ class TestDependencyGraph(unittest.TestCase):
             def depends() -> List[DependencyInput]:
                 pass
 
-            def run(self):
+            def run(self):  # pragma: no cover
+                pass
+
+        with self.assertRaises(DependencyGraphGenerationError):
+            print(DependencyGraph(*generate_dg_input([BadSetup])).sorted_graph_identifiers)
+
+    def test_bad_depends_type2(self):
+        class BadSetup(Task):
+            @staticmethod
+            def requires() -> List[Union[str, Type]]:
+                return []
+
+            @staticmethod
+            def depends() -> List[DependencyInput]:
+                return ["str"]
+
+            def run(self):  # pragma: no cover
                 pass
 
         with self.assertRaises(DependencyGraphGenerationError):
@@ -103,7 +135,7 @@ class TestDependencyGraph(unittest.TestCase):
             def depends() -> List[DependencyInput]:
                 return []
 
-            def run(self):
+            def run(self):  # pragma: no cover
                 pass
 
         with self.assertRaises(DependencyGraphGenerationError):
