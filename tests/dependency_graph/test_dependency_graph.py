@@ -1,6 +1,7 @@
 import unittest
-from typing import Type, Iterable, Dict, Tuple
+from typing import Type, Iterable, Dict, Tuple, Union
 
+from HPCBioPipe import AggregateTask
 from HPCBioPipe.utils.config_manager import ConfigManager
 from HPCBioPipe.utils.dependency_graph import DependencyGraph, Node, DependencyGraphGenerationError
 from tests.dependency_graph.class_stubs import *
@@ -50,6 +51,57 @@ class TestDependencyGraph(unittest.TestCase):
     def test_cyclic(self):
         with self.assertRaises(DependencyGraphGenerationError):
             print(DependencyGraph(*generate_dg_input([AB, BA])).sorted_graph_identifiers)
+
+    def test_bad_requires(self):
+        class BadSetup(Task):
+            @staticmethod
+            def requires() -> List[Union[str, Type]]:
+                pass
+
+            @staticmethod
+            def depends() -> List[DependencyInput]:
+                return []
+
+            def run(self):
+                pass
+
+        with self.assertRaises(DependencyGraphGenerationError):
+            print(DependencyGraph(*generate_dg_input([BadSetup])).sorted_graph_identifiers)
+
+    def test_bad_depends_type(self):
+        class BadSetup(Task):
+            @staticmethod
+            def requires() -> List[Union[str, Type]]:
+                return []
+
+            @staticmethod
+            def depends() -> List[DependencyInput]:
+                pass
+
+            def run(self):
+                pass
+
+        with self.assertRaises(DependencyGraphGenerationError):
+            print(DependencyGraph(*generate_dg_input([BadSetup])).sorted_graph_identifiers)
+
+    def test_bad_aggregate(self):
+        class BadAggregate(AggregateTask):
+            def aggregate(self) -> dict:
+                pass
+
+            @staticmethod
+            def requires() -> List[Union[str, Type]]:
+                return []
+
+            @staticmethod
+            def depends() -> List[DependencyInput]:
+                pass
+
+            def run(self):
+                pass
+
+        with self.assertRaises(DependencyGraphGenerationError):
+            print(DependencyGraph(*generate_dg_input([BadAggregate])).sorted_graph_identifiers)
 
 
 if __name__ == '__main__':

@@ -78,7 +78,11 @@ class DependencyGraph:
             self.graph.add_edge(DependencyGraph.ROOT_NODE, task_node)
             # Link requirements for already completed tasks in pipeline
             # Gather dependencies needed for fulfilling given requirement
+            if task.requires() is None:
+                raise DependencyGraph.ERR
             for requirement in task.requires():
+                if not isinstance(requirement, (str, type)):
+                    raise DependencyGraph.ERR
                 # Can pass in requirements by string or by type
                 if inspect.isclass(requirement):
                     requirement = requirement.__name__
@@ -91,7 +95,11 @@ class DependencyGraph:
         task = self.idx[task_node.name]
 
         dependency: DependencyInput
+        if task.depends() is None:
+            raise DependencyGraph.ERR
         for dependency in task.depends():
+            if not isinstance(dependency.name, (str, type)):
+                raise DependencyGraph.ERR
             if inspect.isclass(dependency.name):
                 dependency.name = dependency.name.__name__
             if dependency.name not in self.idx.keys():
