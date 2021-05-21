@@ -36,6 +36,7 @@ class Executor:
             os.makedirs(self.results_base_dir)
         input_data_dict = input_data.load()
         config_manager = ConfigManager(config_path)
+        input_data_dict.update(self._populate_requested_existing_input(config_manager))
         self.result_map: TaskDistributor = TaskDistributor(config_manager, input_data_dict,
                                                            self.results_base_dir, display_status_messages)
 
@@ -64,16 +65,17 @@ class Executor:
             pipeline_input = input_section[requested_pipeline_id]
             if requested_pipeline_id == ConfigManager.ROOT:
                 continue
+            pkl_file = Path(os.path.dirname(self.results_base_dir))\
+                .joinpath(requested_pipeline_id).joinpath(requested_pipeline_id + ".pkl")
             if isinstance(pipeline_input, str):
-                requested_input.update(
-                    InputLoader.load_pkl_data(self.results_base_dir.joinpath(requested_pipeline_id + ".pkl"))
-                )
+                requested_input.update(InputLoader.load_pkl_data(pkl_file))
             elif isinstance(pipeline_input, dict):
-                pkl_data = InputLoader.load_pkl_data(self.results_base_dir.joinpath(requested_pipeline_id + ".pkl"))
+                pkl_data = InputLoader.load_pkl_data(pkl_file)
                 pkl_input_data = {key: {} for key in pkl_data.keys()}
                 for _from, _to in pipeline_input.items():
-                    for record_id, results_dict in pkl_data.keys():
-                        pkl_input_data[record_id][_to] = pkl_data[record_id][_from]
+                    for record_id in pkl_data.keys():
+                        if _from in pkl_data[record_id].keys():
+                            pkl_input_data[record_id][_to] = pkl_data[record_id][_from]
                 requested_input.update(pkl_input_data)
             else:
                 raise err

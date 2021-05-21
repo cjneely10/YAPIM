@@ -5,7 +5,7 @@
 INPUT:
   root: all
   first_pipeline:
-    file: input
+    result: input
 
 ###########################################
 

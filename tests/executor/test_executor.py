@@ -87,6 +87,7 @@ class TestExecutor(unittest.TestCase):
             TestExecutor.file.joinpath("existing_data/first_pipeline-config.yaml"),  # Config file path
             TestExecutor.file.joinpath("existing_data-out"),  # Base output dir path
             "existing_data/first_pipeline",  # Relative path to pipeline directory
+            ["existing_data/sample_dependencies"]
         ).run()
 
         Executor(
