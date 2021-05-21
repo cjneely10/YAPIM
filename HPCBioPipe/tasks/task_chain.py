@@ -14,7 +14,7 @@ from HPCBioPipe.utils.path_manager import PathManager
 
 
 class TaskChainDistributor(dict):
-    in_task: threading.Condition = threading.Condition()
+    awaiting_aggregate_okay: threading.Condition = threading.Condition()
     update_lock: threading.Lock = threading.RLock()
     task_count_lock: threading.Lock = threading.RLock()
     aggregate_task_in_wait: Optional[AggregateTask] = None
@@ -71,20 +71,39 @@ class TaskChainDistributor(dict):
                 self._run_task(task_id, task_ids[-1])
             self._run_task(task_ids[-1])
 
+    @staticmethod
+    def _is_aggregate(task: Type[Task]):
+        return issubclass(task, AggregateTask)
+
     def _run_task(self, task_identifier: Node, top_level_node: Optional[Node] = None):
+        if TaskChainDistributor._is_aggregate(self.task_blueprints[task_identifier.name]):
+            with TaskChainDistributor.awaiting_aggregate_okay:
+                while TaskChainDistributor.task_reference_count > 0:
+                    TaskChainDistributor.awaiting_aggregate_okay.wait()
+
         wdir = ".".join(task_identifier.get()).replace(f"{ConfigManager.ROOT}.", "")
         self.path_manager.add_dirs(self.record_id, [wdir])
-        updated_data = {}
-        if top_level_node is not None:
-            updated_data = self._update_distributed_input(self.record_id, self.task_blueprints[top_level_node.name])
-        task = self.task_blueprints[task_identifier.name](
-            self.record_id,
-            ConfigManager.ROOT,
-            TaskChainDistributor.results[self.record_id],
-            updated_data,
-            self.path_manager.get_dir(self.record_id, wdir),
-            self.display_status_messages
-        )
+        # TODO: Add waiting for threads/memory
+        if TaskChainDistributor._is_aggregate(self.task_blueprints[task_identifier.name]):
+            task = (
+                wdir,
+                task_identifier.scope,
+                TaskChainDistributor.results[self.record_id],
+                self.path_manager.get_dir(wdir),
+                self.display_status_messages
+            )
+        else:
+            updated_data = {}
+            if top_level_node is not None:
+                updated_data = self._update_distributed_input(self.record_id, self.task_blueprints[top_level_node.name])
+            task = self.task_blueprints[task_identifier.name](
+                self.record_id,
+                (ConfigManager.ROOT if top_level_node is None else top_level_node.name),
+                TaskChainDistributor.results[self.record_id],
+                updated_data,
+                self.path_manager.get_dir(self.record_id, wdir),
+                self.display_status_messages
+            )
         task.set_is_complete()
         future = TaskChainDistributor.executor.submit(task.run_task)
         self._finalize_output(future)

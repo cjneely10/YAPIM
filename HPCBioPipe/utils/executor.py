@@ -43,10 +43,7 @@ class Executor:
             print(e)
             exit(1)
         input_data_dict.update(self._populate_requested_existing_input(config_manager, set(input_data_dict.keys())))
-        self.result_map: TaskDistributor = TaskDistributor(config_manager, input_data_dict,
-                                                           self.results_base_dir, display_status_messages)
 
-    # TODO: Executor method based on either distribute by task (for servers) or by task chain (for HPCs)
     def run(self):
         for task_list in self.task_list:
             if len(task_list) == 1:
