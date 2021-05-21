@@ -13,12 +13,35 @@ from HPCBioPipe.utils.input_loader import InputLoader
 
 
 # TODO: Config file generation from pipeline
-class HPCBioPipeRunner(cli.Application):
+class HPCBioPipe(cli.Application):
     """
     Create and run an HPCBioPipeline
     """
     VERSION = "0.1.0"
 
+    def main(self, *args):
+        if args:
+            print("Unknown command {0!r}".format(args[0]))
+            exit(1)
+        if not self.nested_command:
+            self.help()
+            exit(1)
+
+
+@HPCBioPipe.subcommand("config")
+class HPCBioPipeConfigCreator(cli.Application):
+    """
+    Create configuration file for a pipeline
+    """
+    def main(self):
+        pass
+
+
+@HPCBioPipe.subcommand("run")
+class HPCBioPipeRunner(cli.Application):
+    """
+    Run a pipeline
+    """
     loader: Type[InputLoader] = ExtensionLoader
     config_path: Path
     output_directory: Optional[Path] = Path(os.getcwd()).joinpath("out")
@@ -90,4 +113,4 @@ class HPCBioPipeRunner(cli.Application):
 
 
 if __name__ == "__main__":
-    HPCBioPipeRunner.run()
+    HPCBioPipe.run()
