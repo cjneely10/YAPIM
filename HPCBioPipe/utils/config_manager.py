@@ -11,6 +11,19 @@ import yaml
 from plumbum import local, CommandNotFound
 
 
+class MissingTimingData(AttributeError):
+    """ When a config file is missing required sections
+
+    """
+
+
+class MissingProgramSection(AttributeError):
+    """ When a program is requested to be used, but section is not present in Task's
+    config file section
+
+    """
+
+
 class ImproperInputSection(ValueError):
     """ Wraps error of improperly formatted input section for deriving pipeline input
 
@@ -75,7 +88,7 @@ class ConfigManager:
         with open(str(Path(config_path).resolve()), "r") as fp:
             self.config = yaml.load(fp, Loader=yaml.FullLoader)
             # Confirm all paths in file are valid
-            ConfigManager._validate(self.config)
+            ConfigManager._validate(self.config, False)
 
     def get(self, task_data: Tuple[str, str]) -> dict:
         """ Get (scope, name) data from config file
@@ -105,7 +118,7 @@ class ConfigManager:
             return self.config[task_data[0]]
 
     @staticmethod
-    def _validate(data_dict):
+    def _validate(data_dict, is_dependency: bool):
         """ Confirm that data and dependency paths provided in file are all valid.
 
         :raises: MissingDataError
@@ -114,6 +127,12 @@ class ConfigManager:
         if not isinstance(data_dict, dict):
             raise MissingDataError("Dependency section is improperly configured!")
         for task_name, task_dict in data_dict.items():
+            if not is_dependency and task_name not in (ConfigManager.INPUT, ConfigManager.SLURM):
+                for required_arg in \
+                        (ConfigManager.TIME, ConfigManager.MEMORY, ConfigManager.THREADS, ConfigManager.WORKERS):
+                    if required_arg not in task_dict.keys():
+                        raise MissingTimingData(f"Config section for {task_name} is missing required flag "
+                                                f"{required_arg}")
             if "skip" in task_dict.keys() and task_dict["skip"] is True:
                 continue
             if "data" in task_dict.keys():
@@ -125,7 +144,7 @@ class ConfigManager:
                             task_name, _val
                         ))
             if "dependencies" in task_dict.keys():
-                ConfigManager._validate(task_dict["dependencies"])
+                ConfigManager._validate(task_dict["dependencies"], True)
                 ConfigManager._check_dependencies(task_dict)
 
     @staticmethod

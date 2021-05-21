@@ -35,7 +35,13 @@ class Executor:
         if not self.results_base_dir.exists():
             os.makedirs(self.results_base_dir)
         input_data_dict = input_data.load()
-        config_manager = ConfigManager(config_path)
+        config_manager = None
+        try:
+            config_manager = ConfigManager(config_path)
+        except BaseException as e:
+            print(e)
+            print("Exiting...")
+            exit(1)
         input_data_dict.update(self._populate_requested_existing_input(config_manager, set(input_data_dict.keys())))
         self.result_map: TaskDistributor = TaskDistributor(config_manager, input_data_dict,
                                                            self.results_base_dir, display_status_messages)

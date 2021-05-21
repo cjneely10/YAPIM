@@ -9,11 +9,11 @@ from typing import Tuple, List, Optional, Union
 from plumbum import local, colors
 from plumbum.machines import LocalMachine, LocalCommand
 
-from HPCBioPipe.tasks.utils.InputDict import InputDict
+from HPCBioPipe.tasks.utils.input_dict import InputDict
 from HPCBioPipe.tasks.utils.base_task import BaseTask
 from HPCBioPipe.tasks.utils.result import Result
 from HPCBioPipe.tasks.utils.slurm_caller import SLURMCaller
-from HPCBioPipe.utils.config_manager import ConfigManager, MissingDataError
+from HPCBioPipe.utils.config_manager import ConfigManager, MissingDataError, MissingProgramSection
 
 
 class TaskSetupError(AttributeError):
@@ -162,7 +162,10 @@ class Task(BaseTask, ABC):
 
     @property
     def program(self) -> LocalCommand:
-        return self.local[self.results_map.config_manager.find(self.full_name, ConfigManager.PROGRAM)]
+        program = self.results_map.config_manager.find(self.full_name, ConfigManager.PROGRAM)
+        if program is None:
+            raise MissingProgramSection(f"Program key not set in config section for {self.full_name}")
+        return self.local[program]
 
     def __str__(self):  # pragma: no cover
         return f"<Task name: {self.__name__}, scope: {self.task_scope()}, input_id: {self.record_id}, " \

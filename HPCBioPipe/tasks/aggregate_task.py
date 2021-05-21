@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 from HPCBioPipe.tasks.task import Task
-from HPCBioPipe.tasks.utils.InputDict import InputDict
+from HPCBioPipe.tasks.utils.input_dict import InputDict
 from HPCBioPipe.utils.dependency_graph import DependencyGraph
 
 
