@@ -1,3 +1,4 @@
+import os
 import pickle
 from abc import ABC, abstractmethod
 from pathlib import Path
@@ -22,4 +23,5 @@ class InputLoader(ABC):
         if pkl_file.exists():
             with open(pkl_file, "rb") as fp:
                 return pickle.load(fp)
-        return {}
+        pipeline_name = os.path.basename(os.path.splitext(pkl_file)[0])
+        raise FileNotFoundError(f"Unable to locate requested pkl file for {pipeline_name}")
