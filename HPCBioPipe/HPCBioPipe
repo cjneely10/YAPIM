@@ -7,12 +7,12 @@ from typing import Optional, List, Type
 
 from plumbum import cli
 
+from HPCBioPipe.utils.config_manager_generator import ConfigManagerGenerator
 from HPCBioPipe.utils.executor import Executor
 from HPCBioPipe.utils.extension_loader import ExtensionLoader
 from HPCBioPipe.utils.input_loader import InputLoader
 
 
-# TODO: Config file generation from pipeline
 class HPCBioPipe(cli.Application):
     """
     Create and run an HPCBioPipeline
@@ -28,13 +28,41 @@ class HPCBioPipe(cli.Application):
             exit(1)
 
 
+# TODO: Config file generation from pipeline
 @HPCBioPipe.subcommand("config")
 class HPCBioPipeConfigCreator(cli.Application):
     """
     Create configuration file for a pipeline
     """
+    tasks_directory: str
+    dependencies_directories: Optional[List[str]] = None
+    config_path: Path
+
+    @cli.switch(["-t", "--tasks"], str, mandatory=True)
+    def set_tasks_dir(self, tasks_dir):
+        """Path to directory of pipeline Task/AggregateTasks"""
+        if not os.path.exists(tasks_dir):
+            print("Unable to find tasks directory")
+            exit(1)
+        self.tasks_directory = tasks_dir
+
+    @cli.switch(["-d", "--dependencies"], str, list=True)
+    def set_dependencies_directory(self, dependencies):
+        """Path to directory of Task/AggregateTask dependencies"""
+        if not os.path.exists(dependencies):
+            print("Unable to find dependencies directory")
+        self.dependencies_directories = dependencies
+
+    @cli.switch(["-c", "--config"], str, mandatory=True)
+    def set_config_path(self, config):
+        """Path to configuration file"""
+        if not os.path.exists(config):
+            print("Unable to load config file")
+            exit(1)
+        self.config_path = Path(config).resolve()
+
     def main(self):
-        pass
+        ConfigManagerGenerator(self.tasks_directory, self.dependencies_directories).write(self.config_path)
 
 
 @HPCBioPipe.subcommand("run")
