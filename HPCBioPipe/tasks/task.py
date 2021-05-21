@@ -40,6 +40,9 @@ class Task(BaseTask, ABC):
     def task_scope(self) -> str:
         return self._task_scope
 
+    def task_type(self) -> str:
+        return "Task"
+
     @property
     def threads(self) -> str:
         """ Number of threads when running task (as set in config file)
@@ -150,7 +153,7 @@ class Task(BaseTask, ABC):
             if key != "final":
                 if (isinstance(output, Path) and not output.exists()) or \
                         (isinstance(output, str) and not os.path.exists(output)):
-                    raise super().TaskCompletionError(key, output)
+                    raise super().TaskCompletionError(key, Path(output))
         return Result(self.record_id, self.name, self.output)
 
     @property

@@ -4,8 +4,6 @@
 ## Pipeline input section
 INPUT:
   root: all
-  run:
-    from: to
 
 ###########################################
 

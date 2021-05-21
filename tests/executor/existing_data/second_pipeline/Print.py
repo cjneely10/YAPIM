@@ -20,5 +20,5 @@ class Print(Task):
         return []
 
     def run(self):
-        print(self.input["input"])
+        print(self.input)
         open(self.output["output"], "a").close()

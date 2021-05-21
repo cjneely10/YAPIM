@@ -1,7 +1,7 @@
 import os
 import pickle
 from pathlib import Path
-from typing import List, Dict, Type, Optional
+from typing import List, Dict, Type, Optional, Set
 
 from HPCBioPipe.tasks.task import Task
 from HPCBioPipe.tasks.utils.loader import get_modules
@@ -36,7 +36,7 @@ class Executor:
             os.makedirs(self.results_base_dir)
         input_data_dict = input_data.load()
         config_manager = ConfigManager(config_path)
-        input_data_dict.update(self._populate_requested_existing_input(config_manager))
+        input_data_dict.update(self._populate_requested_existing_input(config_manager, set(input_data_dict.keys())))
         self.result_map: TaskDistributor = TaskDistributor(config_manager, input_data_dict,
                                                            self.results_base_dir, display_status_messages)
 
@@ -54,7 +54,8 @@ class Executor:
         pickle.dump(self.result_map.output_data_to_pickle, out_ptr)
         out_ptr.close()
 
-    def _populate_requested_existing_input(self, config_manager: ConfigManager) -> Dict[str, Dict]:
+    def _populate_requested_existing_input(self, config_manager: ConfigManager, record_ids: Set[str]) \
+            -> Dict[str, Dict]:
         input_section = config_manager.config[ConfigManager.INPUT]
         err = ImproperInputSection("INPUT should consist of dictionary {pipeline_name: key-mapping} or "
                                    "{pipeline_name: all}")
@@ -71,9 +72,9 @@ class Executor:
                 requested_input.update(InputLoader.load_pkl_data(pkl_file))
             elif isinstance(pipeline_input, dict):
                 pkl_data = InputLoader.load_pkl_data(pkl_file)
-                pkl_input_data = {key: {} for key in pkl_data.keys()}
+                pkl_input_data = {key: {} for key in pkl_data.keys() if key in record_ids}
                 for _from, _to in pipeline_input.items():
-                    for record_id in pkl_data.keys():
+                    for record_id in pkl_input_data.keys():
                         if _from in pkl_data[record_id].keys():
                             pkl_input_data[record_id][_to] = pkl_data[record_id][_from]
                 requested_input.update(pkl_input_data)
