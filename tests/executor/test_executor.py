@@ -20,7 +20,6 @@ class TestExecutor(unittest.TestCase):
             return {str(i): {} for i in range(self.n)}
 
     def test_simple(self):
-
         Executor(
             TestExecutor.TestLoader(50),  # Input loader
             TestExecutor.file.joinpath("simple/sample-config.yaml"),  # Config file path
@@ -75,10 +74,26 @@ class TestExecutor(unittest.TestCase):
 
     def test_bad_program_path(self):
         Executor(
-            TestExecutor.TestLoader(10),  # Input loader
+            TestExecutor.TestLoader(1),  # Input loader
             TestExecutor.file.joinpath("bad_program_path/bad_program_path-config.yaml"),  # Config file path
             TestExecutor.file.joinpath("bad_program_path-out"),  # Base output dir path
             "bad_program_path",  # Relative path to pipeline directory
+            display_status_messages=False
+        ).run()
+
+    def test_existing_data(self):
+        Executor(
+            TestExecutor.TestLoader(1),  # Input loader
+            TestExecutor.file.joinpath("existing_data/first_pipeline-config.yaml"),  # Config file path
+            TestExecutor.file.joinpath("existing_data-out"),  # Base output dir path
+            "existing_data/first_pipeline",  # Relative path to pipeline directory
+        ).run()
+
+        Executor(
+            TestExecutor.TestLoader(1),  # Input loader
+            TestExecutor.file.joinpath("existing_data/second_pipeline-config.yaml"),  # Config file path
+            TestExecutor.file.joinpath("existing_data-out"),  # Base output dir path
+            "existing_data/second_pipeline",  # Relative path to pipeline directory
         ).run()
 
 
