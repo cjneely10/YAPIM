@@ -15,14 +15,22 @@ class AggregateTask(Task, ABC):
                  wdir: str,
                  display_messages: bool):
         super().__init__(record_id, task_scope, config_manager, input_data, {}, wdir, display_messages)
-        result = self.aggregate()
         self.input = ImmutableDict(input_data)
+        result = self.aggregate()
         if not isinstance(result, dict):
             raise DependencyGraph.ERR
         self.input = ImmutableDict(result)
 
     @abstractmethod
     def aggregate(self) -> dict:
+        """
+
+        :return:
+        :rtype:
+        """
+
+    @abstractmethod
+    def deaggregate(self) -> dict:
         """
 
         :return:

@@ -65,6 +65,7 @@ class MissingDependenciesError(ValueError):
     pass
 
 
+# TODO: Handle check threads/memory individual tasks is less than global settings
 class ConfigManager:
     """ ConfigManager handles parsing user-passed config file
 

@@ -3,7 +3,7 @@ import threading
 from concurrent.futures import ThreadPoolExecutor, Executor, Future
 from pathlib import Path
 from shutil import copy
-from typing import List, Type, Optional, Dict
+from typing import List, Type, Optional, Dict, Union
 
 from HPCBioPipe import Task, AggregateTask
 from HPCBioPipe.tasks.task import TaskSetupError
@@ -42,7 +42,7 @@ class TaskChainDistributor(dict):
         super().__init__(input_data)
         self.record_id = record_id
         self.task_identifiers: List[List[Node]] = task_identifiers
-        self.task_blueprints: Dict[str, Type[Task]] = task_blueprints
+        self.task_blueprints: Dict[str, Type[Union[Task, AggregateTask]]] = task_blueprints
         self.config_manager = config_manager
         self.path_manager = path_manager
         self.results_dir = results_base_dir
@@ -80,9 +80,10 @@ class TaskChainDistributor(dict):
                 TaskChainDistributor.task_reference_count += 1
 
         wdir = ".".join(task_identifier.get()).replace(f"{ConfigManager.ROOT}.", "")
-        if TaskChainDistributor._is_aggregate(self.task_blueprints[task_identifier.name]):
+        task_blueprint = self.task_blueprints[task_identifier.name]
+        if TaskChainDistributor._is_aggregate(task_blueprint):
             self.path_manager.add_dirs(wdir)
-            task = self.task_blueprints[task_identifier.name](
+            task = task_blueprint(
                 wdir,
                 ConfigManager.ROOT,
                 self.config_manager,
@@ -95,7 +96,7 @@ class TaskChainDistributor(dict):
             if top_level_node is not None:
                 updated_data = self._update_distributed_input(self.record_id, self.task_blueprints[top_level_node.name])
             self.path_manager.add_dirs(self.record_id, [wdir])
-            task = self.task_blueprints[task_identifier.name](
+            task = task_blueprint(
                 self.record_id,
                 (ConfigManager.ROOT if top_level_node is None else top_level_node.name),
                 self.config_manager,
@@ -117,17 +118,20 @@ class TaskChainDistributor(dict):
                 total_memory = projected_memory + TaskChainDistributor.current_gb_memory_in_use_count
                 total_threads = projected_threads + TaskChainDistributor.current_threads_in_use_count
             TaskChainDistributor.awaiting_resources.notifyAll()
-            with TaskChainDistributor.update_lock:
-                TaskChainDistributor.current_threads_in_use_count += projected_threads
-                TaskChainDistributor.current_gb_memory_in_use_count += projected_memory
-        future = TaskChainDistributor.executor.submit(task.run_task)
-        self._finalize_output(future)
         with TaskChainDistributor.update_lock:
-            TaskChainDistributor.task_reference_count -= 1
+            TaskChainDistributor.current_threads_in_use_count += projected_threads
+            TaskChainDistributor.current_gb_memory_in_use_count += projected_memory
+
+        future = TaskChainDistributor.executor.submit(task.run_task)
+        self._finalize_output(task, future)
+
+        with TaskChainDistributor.update_lock:
+            if not isinstance(task, AggregateTask):
+                TaskChainDistributor.task_reference_count -= 1
             TaskChainDistributor.current_threads_in_use_count -= projected_threads
             TaskChainDistributor.current_gb_memory_in_use_count -= projected_memory
 
-    def _finalize_output(self, future: Future):
+    def _finalize_output(self, task: Task, future: Future):
         result: Result = future.result()
         if result.record_id not in TaskChainDistributor.results.keys():
             with TaskChainDistributor.update_lock:
@@ -135,7 +139,13 @@ class TaskChainDistributor(dict):
                 TaskChainDistributor.output_data_to_pickle[result.record_id] = {}
         with TaskChainDistributor.update_lock:
             TaskChainDistributor.results[result.record_id][result.task_name] = result
-            self[result.task_name] = result
+            if isinstance(task, AggregateTask):
+                output = task.deaggregate()
+                for key, value in output.items():
+                    TaskChainDistributor.results[key][result.task_name] = value
+                self[result.task_name] = output[self.record_id]
+            else:
+                self[result.task_name] = result
         for result_key, result_data in result.items():
             if result_key == "final":
                 if not isinstance(result_data, list):
@@ -151,6 +161,7 @@ class TaskChainDistributor(dict):
                         copy(obj, _sub_out)
                     with TaskChainDistributor.update_lock:
                         TaskChainDistributor.output_data_to_pickle[result.record_id][file_str] = obj
+        print(task.name)
 
     @staticmethod
     def _update_distributed_input(record_id: str, requirement_node: Type[Task]) -> Dict:

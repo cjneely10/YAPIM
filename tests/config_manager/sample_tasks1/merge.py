@@ -6,6 +6,13 @@ from HPCBioPipe import AggregateTask, DependencyInput
 
 
 class Merge(AggregateTask):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.output = {
+            "file": self.input["file"],
+            "final": ["file"]
+        }
+
     @staticmethod
     def requires() -> List[str]:
         return ["Write"]
@@ -14,12 +21,10 @@ class Merge(AggregateTask):
     def depends() -> List[DependencyInput]:
         return []
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.output = {
-            "file": self.input["file"],
-            "final": ["file"]
-        }
+    def run(self):
+        fp = open(self.input["file"], "r")
+        print(fp.readlines())
+        fp.close()
 
     def aggregate(self) -> dict:
         file_path = os.path.join(self.wdir, "aggregate-file.txt")
@@ -30,7 +35,11 @@ class Merge(AggregateTask):
         paths_file.close()
         return {"file": Path(file_path).resolve()}
 
-    def run(self):
-        fp = open(self.input["file"], "r")
-        print(fp.readlines())
-        fp.close()
+    def deaggregate(self) -> dict:
+        fp = open(self.output["file"], "r")
+        out = {}
+        for line in fp:
+            line = line.rstrip("\r\n").split("\t")
+            out[line[0]] = line[1]
+        print(out)
+        return out

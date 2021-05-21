@@ -6,7 +6,6 @@ from typing import Type, Iterable, Dict, Tuple, Union
 from HPCBioPipe import AggregateTask
 from HPCBioPipe.utils.config_manager import ConfigManager
 from HPCBioPipe.utils.dependency_graph import DependencyGraph, Node, DependencyGraphGenerationError
-from HPCBioPipe.utils.task_distributor import TaskDistributor
 from tests.dependency_graph.class_stubs import *
 
 TaskType = Type[Task]
@@ -142,12 +141,8 @@ class TestDependencyGraph(unittest.TestCase):
             BadAggregate(
                 "record_id",
                 ConfigManager.ROOT,
-                TaskDistributor(
-                    ConfigManager(Path("dep-graph-config.yaml").resolve()),
-                    {},
-                    Path(os.getcwd()).resolve(),
-                    False
-                ),
+                ConfigManager(Path("dep-graph-config.yaml")),
+                {},
                 os.getcwd(),
                 False
             )
