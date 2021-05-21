@@ -7,6 +7,8 @@ from HPCBioPipe.utils.dependency_graph import DependencyGraph
 
 
 class AggregateTask(Task, ABC):
+    is_running = False
+
     def __init__(self,
                  record_id: str,
                  task_scope: str,
@@ -14,6 +16,7 @@ class AggregateTask(Task, ABC):
                  input_data: dict,
                  wdir: str,
                  display_messages: bool):
+        AggregateTask.is_running = True
         super().__init__(record_id, task_scope, config_manager, input_data, {}, wdir, display_messages)
         self.input = ImmutableDict(input_data)
         result = self.aggregate()

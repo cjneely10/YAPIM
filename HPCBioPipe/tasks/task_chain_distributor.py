@@ -82,15 +82,19 @@ class TaskChainDistributor(dict):
         wdir = ".".join(task_identifier.get()).replace(f"{ConfigManager.ROOT}.", "")
         task_blueprint = self.task_blueprints[task_identifier.name]
         if TaskChainDistributor._is_aggregate(task_blueprint):
-            self.path_manager.add_dirs(wdir)
-            task = task_blueprint(
-                wdir,
-                ConfigManager.ROOT,
-                self.config_manager,
-                TaskChainDistributor.results,
-                self.path_manager.get_dir(wdir),
-                self.display_status_messages
-            )
+            with TaskChainDistributor.update_lock:
+                if not task_blueprint.is_running:
+                    self.path_manager.add_dirs(wdir)
+                    task = task_blueprint(
+                        wdir,
+                        ConfigManager.ROOT,
+                        self.config_manager,
+                        TaskChainDistributor.results,
+                        self.path_manager.get_dir(wdir),
+                        self.display_status_messages
+                    )
+                else:
+                    return
         else:
             updated_data = {}
             if top_level_node is not None:
@@ -143,7 +147,8 @@ class TaskChainDistributor(dict):
                 output = task.deaggregate()
                 for key, value in output.items():
                     TaskChainDistributor.results[key][result.task_name] = value
-                self[result.task_name] = output[self.record_id]
+                with TaskChainDistributor.update_lock:
+                    type(task).is_running = False
             else:
                 self[result.task_name] = result
         for result_key, result_data in result.items():
@@ -161,7 +166,6 @@ class TaskChainDistributor(dict):
                         copy(obj, _sub_out)
                     with TaskChainDistributor.update_lock:
                         TaskChainDistributor.output_data_to_pickle[result.record_id][file_str] = obj
-        print(task.name)
 
     @staticmethod
     def _update_distributed_input(record_id: str, requirement_node: Type[Task]) -> Dict:
