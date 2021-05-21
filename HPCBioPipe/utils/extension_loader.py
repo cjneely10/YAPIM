@@ -43,7 +43,9 @@ class ExtensionLoader(InputLoader):
                     futures.append(executor.submit(self._load_file, file, ext))
             for future in as_completed(futures):
                 result = future.result()
-                out[result[0]] = result[1]
+                if result[0] not in out.keys():
+                    out[result[0]] = {}
+                out[result[0]].update(result[1])
         return out
 
     def _load_file(self, file: str, ext: str) -> Tuple[str, dict]:

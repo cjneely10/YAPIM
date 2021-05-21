@@ -43,9 +43,6 @@ class Task(BaseTask, ABC):
     def task_scope(self) -> str:
         return self._task_scope
 
-    def task_type(self) -> str:
-        return "Task"
-
     @property
     def threads(self) -> str:
         """ Number of threads when running task (as set in config file)

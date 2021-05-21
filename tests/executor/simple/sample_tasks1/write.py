@@ -23,3 +23,5 @@ class Write(Task):
         self.single(
             self.local["echo"][self.record_id] > str(self.output["result"])
         )
+        cmd = self.create_script(self.local["echo"][self.record_id], "echo.sh")
+        cmd()
