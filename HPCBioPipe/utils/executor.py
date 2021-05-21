@@ -38,9 +38,9 @@ class Executor:
         config_manager = None
         try:
             config_manager = ConfigManager(config_path)
+        # pylint: disable=broad-except
         except BaseException as e:
             print(e)
-            print("Exiting...")
             exit(1)
         input_data_dict.update(self._populate_requested_existing_input(config_manager, set(input_data_dict.keys())))
         self.result_map: TaskDistributor = TaskDistributor(config_manager, input_data_dict,
@@ -74,9 +74,7 @@ class Executor:
                 continue
             pkl_file = Path(os.path.dirname(self.results_base_dir))\
                 .joinpath(requested_pipeline_id).joinpath(requested_pipeline_id + ".pkl")
-            if isinstance(pipeline_input, str):
-                requested_input.update(InputLoader.load_pkl_data(pkl_file))
-            elif isinstance(pipeline_input, dict):
+            if isinstance(pipeline_input, dict):
                 pkl_data = InputLoader.load_pkl_data(pkl_file)
                 pkl_input_data = {key: {} for key in pkl_data.keys() if key in record_ids}
                 for _from, _to in pipeline_input.items():

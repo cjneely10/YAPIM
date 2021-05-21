@@ -59,7 +59,7 @@ SLURM:
             file_ptr.close()
 
     @staticmethod
-    def task(task_node) -> str:
+    def task(task_node: Node) -> str:
         return f'''{task_node.name}:
   workers: 1
   threads: 1

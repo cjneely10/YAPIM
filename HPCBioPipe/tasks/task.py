@@ -9,8 +9,8 @@ from typing import Tuple, List, Optional, Union
 from plumbum import local, colors
 from plumbum.machines import LocalMachine, LocalCommand
 
-from HPCBioPipe.tasks.utils.input_dict import InputDict
 from HPCBioPipe.tasks.utils.base_task import BaseTask
+from HPCBioPipe.tasks.utils.input_dict import ImmutableDict
 from HPCBioPipe.tasks.utils.result import Result
 from HPCBioPipe.tasks.utils.slurm_caller import SLURMCaller
 from HPCBioPipe.utils.config_manager import ConfigManager, MissingDataError, MissingProgramSection
@@ -28,7 +28,7 @@ class Task(BaseTask, ABC):
         self.record_id: str = record_id
         self._task_scope = task_scope
         added_data.update(result_map.get(self.record_id, {}))
-        self.input: InputDict = InputDict(added_data)
+        self.input: ImmutableDict = ImmutableDict(added_data)
         self.output = {}
         self.wdir: Path = Path(wdir).resolve()
         self.results_map = result_map
@@ -79,7 +79,7 @@ class Task(BaseTask, ABC):
         return bool(self.results_map.config_manager.config[ConfigManager.SLURM][ConfigManager.USE_CLUSTER])
 
     def _create_slurm_command(self, cmd: LocalCommand, time_override: Optional[str] = None,
-                              threads_override: str = None, memory_override: str = None) -> SLURMCaller:
+                              threads_override: str = None, memory_override: str = None) -> SLURMCaller:  # pragma: no cover
         """ Create a SLURM-managed process
 
         :param cmd: plumbum LocalCommand object to run
@@ -187,7 +187,7 @@ class Task(BaseTask, ABC):
             print(colors.warn | str(err))
 
     @staticmethod
-    def _parse_time(_time: float) -> Tuple[float, str]:
+    def _parse_time(_time: float) -> Tuple[float, str]:  # pragma: no cover
         """ Parse time to complete a task into
         day, hour, minute, or second representation based on scale
 
@@ -274,7 +274,8 @@ class Task(BaseTask, ABC):
         """
         self.parallel(cmd, time_override, threads_override="1", memory_override=memory_override)
 
-    def create_script(self, cmd: Union[str, LocalCommand, List[str]], file_name: str) -> LocalCommand:
+    def create_script(self, cmd: Union[str, LocalCommand, List[str], List[LocalCommand]], file_name: str) \
+            -> LocalCommand:
         """ Write a command to file and return its value packaged as a LocalCommand.
 
         This is highly useful when incorporating programs that only launch in the directory in which it was called

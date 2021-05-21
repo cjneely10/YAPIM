@@ -9,11 +9,11 @@ from typing import List, Tuple, Union
 from plumbum.machines.local import LocalCommand, LocalMachine
 
 
-class SlurmRunError(Exception):
+class SlurmRunError(Exception):  # pragma: no cover
     pass
 
 
-class SLURMCaller:
+class SLURMCaller:  # pragma: no cover
     """ SLURMCaller handles running a program on a SLURM cluster
 
     Overrides __str__ and __call__ method to allow script command to be displayed within config
