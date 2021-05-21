@@ -37,16 +37,19 @@ class TaskDistributor(dict):
         for record_id in self.keys():
             wdir = ".".join(task_identifier.get()).replace(f"{ConfigManager.ROOT}.", "")
             path_manager.add_dirs(record_id, [wdir])
+            if top_level_node is not None:
+                added_data = self._update_distributed_input(record_id, top_level_node)
+            else:
+                added_data = {}
             task_copy = task(
                 record_id,
                 task_identifier.scope,
                 self,
+                added_data,
                 path_manager.get_dir(record_id, wdir),
                 self.display_status_messages
             )
             task_copy.set_is_complete()
-            if top_level_node is not None:
-                self._update_distributed_input(record_id, task_copy, top_level_node)
             futures.append(executor.submit(task_copy.run_task))
 
     def _aggregate_task(self, task: Type[AggregateTask], task_identifier: Node, path_manager: PathManager,
@@ -86,11 +89,13 @@ class TaskDistributor(dict):
                         self.output_data_to_pickle[result.record_id][file_str] = obj
 
     # TODO: Remove input assignment and make readonly
-    def _update_distributed_input(self, record_id: str, task_copy: Task, requirement_node: Type[Task]):
+    def _update_distributed_input(self, record_id: str, requirement_node: Type[Task]) -> Dict:
+        amended_dict = {}
         for dependency in requirement_node.depends():
             if dependency.collect_by is not None:
                 for prior_id, prior_mapping in dependency.collect_by.items():
                     for _from, _to in prior_mapping.items():
-                        task_copy.input[_to] = self[record_id][prior_id][_from]
+                        amended_dict[_to] = self[record_id][prior_id][_from]
             else:
-                task_copy.input.update(self[record_id])
+                amended_dict.update(self[record_id])
+        return amended_dict

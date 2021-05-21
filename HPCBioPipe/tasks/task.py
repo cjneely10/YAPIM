@@ -9,6 +9,7 @@ from typing import Tuple, List, Optional, Union
 from plumbum import local, colors
 from plumbum.machines import LocalMachine, LocalCommand
 
+from HPCBioPipe.tasks.utils.InputDict import InputDict
 from HPCBioPipe.tasks.utils.base_task import BaseTask
 from HPCBioPipe.tasks.utils.result import Result
 from HPCBioPipe.tasks.utils.slurm_caller import SLURMCaller
@@ -22,10 +23,12 @@ class TaskSetupError(AttributeError):
 
 
 class Task(BaseTask, ABC):
-    def __init__(self, record_id: str, task_scope: str, result_map, wdir: str, display_messages: bool):
+    def __init__(self, record_id: str, task_scope: str, result_map,
+                 added_data: dict, wdir: str, display_messages: bool):
         self.record_id: str = record_id
         self._task_scope = task_scope
-        self.input: dict = result_map.get(self.record_id, {})
+        added_data.update(result_map.get(self.record_id, {}))
+        self.input: InputDict = InputDict(added_data)
         self.output = {}
         self.wdir: Path = Path(wdir).resolve()
         self.results_map = result_map
