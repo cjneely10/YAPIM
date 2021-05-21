@@ -1,15 +1,15 @@
 import os
 import pickle
 from pathlib import Path
-from typing import List, Dict, Type, Optional, Set
+from typing import List, Dict, Type, Optional
 
 from HPCBioPipe.tasks.task import Task
+from HPCBioPipe.tasks.task_chain_distributor import TaskChainDistributor
 from HPCBioPipe.tasks.utils.loader import get_modules
 from HPCBioPipe.utils.config_manager import ConfigManager, ImproperInputSection
 from HPCBioPipe.utils.dependency_graph import Node, DependencyGraph
 from HPCBioPipe.utils.input_loader import InputLoader
 from HPCBioPipe.utils.path_manager import PathManager
-from HPCBioPipe.utils.task_distributor import TaskDistributor
 
 
 class Executor:
@@ -34,32 +34,30 @@ class Executor:
         self.results_base_dir = base_output_dir.joinpath("results").joinpath(self.pipeline_name)
         if not self.results_base_dir.exists():
             os.makedirs(self.results_base_dir)
-        input_data_dict = input_data.load()
-        config_manager = None
+        self.input_data_dict = input_data.load()
+        self.config_manager = None
+        self.display_messages = display_status_messages
         try:
-            config_manager = ConfigManager(config_path)
+            self.config_manager = ConfigManager(config_path)
         # pylint: disable=broad-except
         except BaseException as e:
             print(e)
             exit(1)
-        input_data_dict.update(self._populate_requested_existing_input(config_manager, set(input_data_dict.keys())))
+        self.input_data_dict.update(self._populate_requested_existing_input())
 
     def run(self):
-        for task_list in self.task_list:
-            if len(task_list) == 1:
-                self.result_map.distribute(self.task_blueprints[task_list[0].name], task_list[0], self.path_manager)
-            else:
-                for task_id in task_list[:-1]:
-                    self.result_map.distribute(self.task_blueprints[task_id.name], task_id, self.path_manager,
-                                               self.task_blueprints[task_list[-1].name])
-                self.result_map.distribute(self.task_blueprints[task_list[-1].name], task_list[-1], self.path_manager)
+        task_chains = []
+        for record_id, input_data in self.input_data_dict.items():
+            task_chains.append(TaskChainDistributor(record_id, self.task_list, self.task_blueprints,
+                                                    self.config_manager, self.path_manager, input_data,
+                                                    self.results_base_dir, self.display_messages))
         out_ptr = open(self.results_base_dir.joinpath(f"{self.pipeline_name}.pkl"), "wb")
-        pickle.dump(self.result_map.output_data_to_pickle, out_ptr)
+        pickle.dump(TaskChainDistributor.output_data_to_pickle, out_ptr)
         out_ptr.close()
 
-    def _populate_requested_existing_input(self, config_manager: ConfigManager, record_ids: Set[str]) \
+    def _populate_requested_existing_input(self) \
             -> Dict[str, Dict]:
-        input_section = config_manager.config[ConfigManager.INPUT]
+        input_section = self.config_manager.config[ConfigManager.INPUT]
         err = ImproperInputSection("INPUT should consist of dictionary {pipeline_name: key-mapping} or "
                                    "{pipeline_name: all}")
         if not isinstance(input_section, dict):
@@ -73,7 +71,7 @@ class Executor:
                 .joinpath(requested_pipeline_id).joinpath(requested_pipeline_id + ".pkl")
             if isinstance(pipeline_input, dict):
                 pkl_data = InputLoader.load_pkl_data(pkl_file)
-                pkl_input_data = {key: {} for key in pkl_data.keys() if key in record_ids}
+                pkl_input_data = {key: {} for key in pkl_data.keys() if key in self.input_data_dict.keys()}
                 for _from, _to in pipeline_input.items():
                     for record_id in pkl_input_data.keys():
                         if _from in pkl_data[record_id].keys():

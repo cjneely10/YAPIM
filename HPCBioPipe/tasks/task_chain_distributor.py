@@ -1,8 +1,8 @@
 import os
 import threading
 from concurrent.futures import ThreadPoolExecutor, Executor, Future
-from shutil import copy
 from pathlib import Path
+from shutil import copy
 from typing import List, Type, Optional, Dict
 
 from HPCBioPipe import Task, AggregateTask
@@ -15,15 +15,14 @@ from HPCBioPipe.utils.path_manager import PathManager
 
 class TaskChainDistributor(dict):
     awaiting_aggregate_okay: threading.Condition = threading.Condition()
+    awaiting_resources: threading.Condition = threading.Condition()
     update_lock: threading.Lock = threading.RLock()
-    task_count_lock: threading.Lock = threading.RLock()
-    aggregate_task_in_wait: Optional[AggregateTask] = None
 
     results: dict = {}
     output_data_to_pickle: dict = {}
     task_reference_count: int = 0
     current_threads_in_use_count: int = 0
-    total_gb_memory_in_use_count: int = 0
+    current_gb_memory_in_use_count: int = 0
     executor: Executor = ThreadPoolExecutor()
 
     maximum_threads: int
@@ -41,7 +40,6 @@ class TaskChainDistributor(dict):
         if TaskChainDistributor.maximum_gb_memory is None or TaskChainDistributor.maximum_threads is None:
             raise AttributeError("Allocations for task chain not set!")
         super().__init__(input_data)
-        self.pos = -1
         self.record_id = record_id
         self.task_identifiers: List[List[Node]] = task_identifiers
         self.task_blueprints: Dict[str, Type[Task]] = task_blueprints
@@ -58,18 +56,14 @@ class TaskChainDistributor(dict):
             config_manager.config[ConfigManager.GLOBAL][ConfigManager.MAX_MEMORY]
         )
 
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        self.pos += 1
-        task_ids = self.task_identifiers[self.pos]
-        if len(task_ids) == 1:
-            self._run_task(task_ids[0])
-        else:
-            for task_id in task_ids[:-1]:
-                self._run_task(task_id, task_ids[-1])
-            self._run_task(task_ids[-1])
+    def run(self):
+        for task_ids in self.task_identifiers:
+            if len(task_ids) == 1:
+                self._run_task(task_ids[0])
+            else:
+                for task_id in task_ids[:-1]:
+                    self._run_task(task_id, task_ids[-1])
+                self._run_task(task_ids[-1])
 
     @staticmethod
     def _is_aggregate(task: Type[Task]):
@@ -80,6 +74,10 @@ class TaskChainDistributor(dict):
             with TaskChainDistributor.awaiting_aggregate_okay:
                 while TaskChainDistributor.task_reference_count > 0:
                     TaskChainDistributor.awaiting_aggregate_okay.wait()
+                TaskChainDistributor.awaiting_aggregate_okay.notifyAll()
+        else:
+            with TaskChainDistributor.update_lock:
+                TaskChainDistributor.task_reference_count += 1
 
         wdir = ".".join(task_identifier.get()).replace(f"{ConfigManager.ROOT}.", "")
         self.path_manager.add_dirs(self.record_id, [wdir])
@@ -88,7 +86,7 @@ class TaskChainDistributor(dict):
             task = (
                 wdir,
                 task_identifier.scope,
-                TaskChainDistributor.results[self.record_id],
+                self,
                 self.path_manager.get_dir(wdir),
                 self.display_status_messages
             )
@@ -99,14 +97,29 @@ class TaskChainDistributor(dict):
             task = self.task_blueprints[task_identifier.name](
                 self.record_id,
                 (ConfigManager.ROOT if top_level_node is None else top_level_node.name),
-                TaskChainDistributor.results[self.record_id],
+                self,
                 updated_data,
                 self.path_manager.get_dir(self.record_id, wdir),
                 self.display_status_messages
             )
         task.set_is_complete()
+
+        projected_memory = self.config_manager.find(task.full_name, ConfigManager.MEMORY)
+        projected_threads = self.config_manager.find(task.full_name, ConfigManager.THREADS)
+        with TaskChainDistributor.awaiting_resources:
+            total_memory = projected_memory + TaskChainDistributor.current_gb_memory_in_use_count
+            total_threads = projected_threads + TaskChainDistributor.current_threads_in_use_count
+            while total_threads > TaskChainDistributor.maximum_threads or \
+                    total_memory > TaskChainDistributor.maximum_gb_memory:
+                TaskChainDistributor.awaiting_resources.wait()
+                total_memory = projected_memory + TaskChainDistributor.current_gb_memory_in_use_count
+                total_threads = projected_threads + TaskChainDistributor.current_threads_in_use_count
+            TaskChainDistributor.awaiting_resources.notifyAll()
+
         future = TaskChainDistributor.executor.submit(task.run_task)
         self._finalize_output(future)
+        with TaskChainDistributor.update_lock:
+            TaskChainDistributor.task_reference_count -= 1
 
     def _finalize_output(self, future: Future):
         result: Result = future.result()
