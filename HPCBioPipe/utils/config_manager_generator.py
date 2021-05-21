@@ -50,7 +50,7 @@ SLURM:
                     for dependency in task_node_list[:-1]:
                         dependency_section += f"""
     {dependency.name}:
-      program: 
+      program:
 """
                     file_ptr.write(f'''{ConfigManagerGenerator.task(task_node_list[-1])}  {dependency_section}
 ''')

@@ -76,6 +76,14 @@ class TestConfigManager(unittest.TestCase):
 
     def test_file_generation(self):
         ConfigManagerGenerator("sample_tasks1", ["sample_dependencies"]).write(Path("output-config.yaml").resolve())
+        original_fp = open("original-config.yaml", "r")
+        new_fp = open("output-config.yaml", "r")
+        self.assertEqual(
+            original_fp.readlines(),
+            new_fp.readlines(),
+        )
+        original_fp.close()
+        new_fp.close()
 
 
 if __name__ == '__main__':
