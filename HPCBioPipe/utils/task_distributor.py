@@ -88,7 +88,6 @@ class TaskDistributor(dict):
                             copy(obj, _sub_out)
                         self.output_data_to_pickle[result.record_id][file_str] = obj
 
-    # TODO: Remove input assignment and make readonly
     def _update_distributed_input(self, record_id: str, requirement_node: Type[Task]) -> Dict:
         amended_dict = {}
         for dependency in requirement_node.depends():

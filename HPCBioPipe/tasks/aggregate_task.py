@@ -12,7 +12,7 @@ class AggregateTask(Task, ABC):
         result = self.aggregate()
         if not isinstance(result, dict):
             raise DependencyGraph.ERR
-        self.input = result
+        self.input = InputDict(result)
 
     @abstractmethod
     def aggregate(self) -> dict:
