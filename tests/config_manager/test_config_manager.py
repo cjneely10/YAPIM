@@ -1,6 +1,7 @@
 import unittest
 
 from HPCBioPipe.utils.config_manager import *
+from HPCBioPipe.utils.config_manager_generator import ConfigManagerGenerator
 
 
 class TestConfigManager(unittest.TestCase):
@@ -72,6 +73,9 @@ class TestConfigManager(unittest.TestCase):
             None,
             TestConfigManager.cfg.find(("Sample", "Value"), "meow")
         )
+
+    def test_file_generation(self):
+        ConfigManagerGenerator("sample_tasks1", ["sample_dependencies"]).write(Path("output-config.yaml").resolve())
 
 
 if __name__ == '__main__':

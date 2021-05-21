@@ -28,7 +28,6 @@ class HPCBioPipe(cli.Application):
             exit(1)
 
 
-# TODO: Config file generation from pipeline
 @HPCBioPipe.subcommand("config")
 class HPCBioPipeConfigCreator(cli.Application):
     """
