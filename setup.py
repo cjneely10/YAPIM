@@ -8,8 +8,8 @@ setup(
     author='Christopher Neely',
     author_email='christopher.neely1200@gmail.com',
     license='GNU GPL 3',
-    packages=['HPCBioPipe'],
-    python_requires='3.8',
+    packages=['HPCBioPipe', 'HPCBioPipe.utils', 'HPCBioPipe.tasks', 'HPCBioPipe.tasks.utils'],
+    python_requires='>=3.8',
     install_requires=[
         "bcbio-gff==0.6.6",
         "biopython==1.76",

@@ -48,9 +48,10 @@ class HPCBioPipeConfigCreator(cli.Application):
     @cli.switch(["-d", "--dependencies"], str, list=True)
     def set_dependencies_directory(self, dependencies):
         """Path to directory of Task/AggregateTask dependencies"""
-        if not os.path.exists(dependencies):
-            print("Unable to find dependencies directory")
-            exit(1)
+        for dependency in dependencies:
+            if not os.path.exists(dependency):
+                print("Unable to find dependencies directory")
+                exit(1)
         self.dependencies_directories = dependencies
 
     @cli.switch(["-c", "--config"], str, mandatory=True)

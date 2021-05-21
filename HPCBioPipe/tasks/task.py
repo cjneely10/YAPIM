@@ -23,16 +23,22 @@ class TaskSetupError(AttributeError):
 
 
 class Task(BaseTask, ABC):
-    def __init__(self, record_id: str, task_scope: str, result_map,
-                 added_data: dict, wdir: str, display_messages: bool):
+    def __init__(self,
+                 record_id: str,
+                 task_scope: str,
+                 config_manager: ConfigManager,
+                 input_data: dict,
+                 added_data: dict,
+                 wdir: str,
+                 display_messages: bool):
         self.record_id: str = record_id
         self._task_scope = task_scope
-        added_data.update(result_map.get(self.record_id, {}))
+        added_data.update(input_data)
         self.input: ImmutableDict = ImmutableDict(added_data)
         self.output = {}
         self.wdir: Path = Path(wdir).resolve()
-        self.results_map = result_map
-        is_skip = self.results_map.config_manager.find(self.full_name, ConfigManager.SKIP)
+        self.config_manager = config_manager
+        is_skip = self.config_manager.find(self.full_name, ConfigManager.SKIP)
         if is_skip is not None and str(is_skip) == "true":
             self.is_skip = True
         else:
@@ -49,11 +55,11 @@ class Task(BaseTask, ABC):
 
         :return: Str of number of tasks
         """
-        return self.results_map.config_manager.find(self.full_name, ConfigManager.THREADS)
+        return self.config_manager.find(self.full_name, ConfigManager.THREADS)
 
     @property
     def config(self) -> dict:
-        return self.results_map.get(self.full_name)
+        return self.config_manager.get(self.full_name)
 
     @property
     def added_flags(self) -> List[str]:
@@ -63,7 +69,7 @@ class Task(BaseTask, ABC):
 
         :return: List of arguments to pass to calling program
         """
-        flags = self.results_map.config_manager.find(self.full_name, ConfigManager.FLAGS)
+        flags = self.config_manager.find(self.full_name, ConfigManager.FLAGS)
         if flags is not None:
             out = flags.split(" ")
             while "" in out:
@@ -76,7 +82,7 @@ class Task(BaseTask, ABC):
         """
         Run was launched on SLURM
         """
-        return bool(self.results_map.config_manager.config[ConfigManager.SLURM][ConfigManager.USE_CLUSTER])
+        return bool(self.config_manager.config[ConfigManager.SLURM][ConfigManager.USE_CLUSTER])
 
     def _create_slurm_command(self, cmd: LocalCommand, time_override: Optional[str] = None,
                               threads_override: str = None, memory_override: str = None) -> SLURMCaller:  # pragma: no cover
@@ -91,21 +97,21 @@ class Task(BaseTask, ABC):
         :return: SLURM-wrapped command to run script via plumbum interface
         """
         # Confirm valid SLURM section
-        parent_info: dict = self.results_map.parent_info(self.full_name)
+        parent_info: dict = self.config_manager.parent_info(self.full_name)
         if ConfigManager.MEMORY not in self.config.keys() or ConfigManager.MEMORY not in parent_info.keys():
             raise MissingDataError("SLURM section not properly formatted within %s" % self.full_name)
         if ConfigManager.TIME not in self.config.keys() or ConfigManager.TIME not in parent_info.keys():
             raise MissingDataError("SLURM section not properly formatted within %s" % self.full_name)
         # Generate command to launch SLURM job
         return SLURMCaller(
-            self.results_map.get_slurm_userid(),
+            self.config_manager.get_slurm_userid(),
             str(self.wdir),
             str(self.threads) if threads_override is None else threads_override,
             cmd,
-            self.results_map.find(self.full_name, ConfigManager.MEMORY) if memory_override is None else memory_override,
-            self.results_map.find(self.full_name, ConfigManager.TIME) if time_override is None else time_override,
+            self.config_manager.find(self.full_name, ConfigManager.MEMORY) if memory_override is None else memory_override,
+            self.config_manager.find(self.full_name, ConfigManager.TIME) if time_override is None else time_override,
             self.local,
-            self.results_map.config_manager.get_slurm_flagged_arguments(),
+            self.config_manager.get_slurm_flagged_arguments(),
         )
 
     @property
@@ -162,7 +168,7 @@ class Task(BaseTask, ABC):
 
     @property
     def program(self) -> LocalCommand:
-        program = self.results_map.config_manager.find(self.full_name, ConfigManager.PROGRAM)
+        program = self.config_manager.find(self.full_name, ConfigManager.PROGRAM)
         if program is None:
             raise MissingProgramSection(f"Program key not set in config section for {self.full_name}")
         return self.local[program]

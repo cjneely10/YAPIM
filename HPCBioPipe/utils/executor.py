@@ -1,5 +1,6 @@
 import os
 import pickle
+from concurrent.futures import ThreadPoolExecutor, wait
 from pathlib import Path
 from typing import List, Dict, Type, Optional
 
@@ -35,6 +36,8 @@ class Executor:
         if not self.results_base_dir.exists():
             os.makedirs(self.results_base_dir)
         self.input_data_dict = input_data.load()
+        TaskChainDistributor.results.update(self.input_data_dict)
+        TaskChainDistributor.output_data_to_pickle.update({key: {} for key in TaskChainDistributor.results.keys()})
         self.config_manager = None
         self.display_messages = display_status_messages
         try:
@@ -44,13 +47,17 @@ class Executor:
             print(e)
             exit(1)
         self.input_data_dict.update(self._populate_requested_existing_input())
+        TaskChainDistributor.set_allocations(self.config_manager)
 
     def run(self):
-        task_chains = []
-        for record_id, input_data in self.input_data_dict.items():
-            task_chains.append(TaskChainDistributor(record_id, self.task_list, self.task_blueprints,
-                                                    self.config_manager, self.path_manager, input_data,
-                                                    self.results_base_dir, self.display_messages))
+        with ThreadPoolExecutor() as executor:
+            futures = []
+            for record_id, input_data in self.input_data_dict.items():
+                task_chain = TaskChainDistributor(record_id, self.task_list, self.task_blueprints,
+                                                  self.config_manager, self.path_manager, input_data,
+                                                  self.results_base_dir, self.display_messages)
+                futures.append(executor.submit(task_chain.run))
+            wait(futures)
         out_ptr = open(self.results_base_dir.joinpath(f"{self.pipeline_name}.pkl"), "wb")
         pickle.dump(TaskChainDistributor.output_data_to_pickle, out_ptr)
         out_ptr.close()
@@ -67,7 +74,7 @@ class Executor:
             pipeline_input = input_section[requested_pipeline_id]
             if requested_pipeline_id == ConfigManager.ROOT:
                 continue
-            pkl_file = Path(os.path.dirname(self.results_base_dir))\
+            pkl_file = Path(os.path.dirname(self.results_base_dir)) \
                 .joinpath(requested_pipeline_id).joinpath(requested_pipeline_id + ".pkl")
             if isinstance(pipeline_input, dict):
                 pkl_data = InputLoader.load_pkl_data(pkl_file)

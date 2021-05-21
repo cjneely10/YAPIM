@@ -24,6 +24,7 @@ class Merge(AggregateTask):
     def aggregate(self) -> dict:
         file_path = os.path.join(self.wdir, "aggregate-file.txt")
         paths_file = open(file_path, "w")
+        print(self.input)
         for record_id in self.input.keys():
             paths_file.write("\t".join([record_id, str(self.input[record_id]["Write"]["result"])]))
             paths_file.write("\n")

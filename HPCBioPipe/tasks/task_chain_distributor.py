@@ -51,10 +51,10 @@ class TaskChainDistributor(dict):
 
     @staticmethod
     def set_allocations(config_manager: ConfigManager):
-        TaskChainDistributor.maximum_threads = int(config_manager.config[ConfigManager.GLOBAL][ConfigManager.THREADS])
+        TaskChainDistributor.maximum_threads = int(
+            config_manager.config[ConfigManager.GLOBAL][ConfigManager.MAX_THREADS])
         TaskChainDistributor.maximum_gb_memory = int(
-            config_manager.config[ConfigManager.GLOBAL][ConfigManager.MAX_MEMORY]
-        )
+            config_manager.config[ConfigManager.GLOBAL][ConfigManager.MAX_MEMORY])
 
     def run(self):
         for task_ids in self.task_identifiers:
@@ -80,13 +80,13 @@ class TaskChainDistributor(dict):
                 TaskChainDistributor.task_reference_count += 1
 
         wdir = ".".join(task_identifier.get()).replace(f"{ConfigManager.ROOT}.", "")
-        self.path_manager.add_dirs(self.record_id, [wdir])
-        # TODO: Add waiting for threads/memory
         if TaskChainDistributor._is_aggregate(self.task_blueprints[task_identifier.name]):
-            task = (
+            self.path_manager.add_dirs(wdir)
+            task = self.task_blueprints[task_identifier.name](
                 wdir,
-                task_identifier.scope,
-                self,
+                ConfigManager.ROOT,
+                self.config_manager,
+                TaskChainDistributor.results,
                 self.path_manager.get_dir(wdir),
                 self.display_status_messages
             )
@@ -94,9 +94,11 @@ class TaskChainDistributor(dict):
             updated_data = {}
             if top_level_node is not None:
                 updated_data = self._update_distributed_input(self.record_id, self.task_blueprints[top_level_node.name])
+            self.path_manager.add_dirs(self.record_id, [wdir])
             task = self.task_blueprints[task_identifier.name](
                 self.record_id,
                 (ConfigManager.ROOT if top_level_node is None else top_level_node.name),
+                self.config_manager,
                 self,
                 updated_data,
                 self.path_manager.get_dir(self.record_id, wdir),
@@ -104,8 +106,8 @@ class TaskChainDistributor(dict):
             )
         task.set_is_complete()
 
-        projected_memory = self.config_manager.find(task.full_name, ConfigManager.MEMORY)
-        projected_threads = self.config_manager.find(task.full_name, ConfigManager.THREADS)
+        projected_memory = int(self.config_manager.find(task.full_name, ConfigManager.MEMORY))
+        projected_threads = int(self.config_manager.find(task.full_name, ConfigManager.THREADS))
         with TaskChainDistributor.awaiting_resources:
             total_memory = projected_memory + TaskChainDistributor.current_gb_memory_in_use_count
             total_threads = projected_threads + TaskChainDistributor.current_threads_in_use_count
@@ -115,11 +117,15 @@ class TaskChainDistributor(dict):
                 total_memory = projected_memory + TaskChainDistributor.current_gb_memory_in_use_count
                 total_threads = projected_threads + TaskChainDistributor.current_threads_in_use_count
             TaskChainDistributor.awaiting_resources.notifyAll()
-
+            with TaskChainDistributor.update_lock:
+                TaskChainDistributor.current_threads_in_use_count += projected_threads
+                TaskChainDistributor.current_gb_memory_in_use_count += projected_memory
         future = TaskChainDistributor.executor.submit(task.run_task)
         self._finalize_output(future)
         with TaskChainDistributor.update_lock:
             TaskChainDistributor.task_reference_count -= 1
+            TaskChainDistributor.current_threads_in_use_count += projected_threads
+            TaskChainDistributor.current_gb_memory_in_use_count += projected_memory
 
     def _finalize_output(self, future: Future):
         result: Result = future.result()
@@ -129,6 +135,7 @@ class TaskChainDistributor(dict):
                 TaskChainDistributor.output_data_to_pickle[result.record_id] = {}
         with TaskChainDistributor.update_lock:
             TaskChainDistributor.results[result.record_id][result.task_name] = result
+            self[result.task_name] = result
         for result_key, result_data in result.items():
             if result_key == "final":
                 if not isinstance(result_data, list):

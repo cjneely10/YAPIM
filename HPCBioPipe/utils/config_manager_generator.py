@@ -68,7 +68,9 @@ SLURM:
     @staticmethod
     def task(task_node: Node) -> str:
         return f'''{task_node.name}:
+  # Number of threads task will use
   threads: 1
-  memory: 8G
+  # Amount of memory task will use (in GB)
+  memory: 8
   time: "4:00:00"
 '''

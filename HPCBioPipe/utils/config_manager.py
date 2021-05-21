@@ -98,6 +98,7 @@ class ConfigManager:
             self.config = yaml.load(fp, Loader=yaml.FullLoader)
             # Confirm all paths in file are valid
             ConfigManager._validate(self.config, False)
+            ConfigManager._validate_global(self.config)
 
     def get(self, task_data: Tuple[str, str]) -> dict:
         """ Get (scope, name) data from config file
@@ -127,14 +128,7 @@ class ConfigManager:
             return self.config[task_data[0]]
 
     @staticmethod
-    def _validate(data_dict, is_dependency: bool):
-        """ Confirm that data and dependency paths provided in file are all valid.
-
-        :raises: MissingDataError
-
-        """
-        if not isinstance(data_dict, dict):
-            raise MissingDataError("Dependency section is improperly configured!")
+    def _validate_global(data_dict):
         for required_arg in (ConfigManager.GLOBAL, ConfigManager.INPUT, ConfigManager.SLURM):
             if required_arg not in data_dict.keys():
                 raise MissingRequiredHeader(f"Config section {required_arg} is missing!")
@@ -145,10 +139,20 @@ class ConfigManager:
                 int(data_dict[ConfigManager.GLOBAL][required_arg])
             except ValueError:
                 raise MissingRequiredHeader(f"Global argument {required_arg} is not an integer!")
+
+    @staticmethod
+    def _validate(data_dict, is_dependency: bool):
+        """ Confirm that data and dependency paths provided in file are all valid.
+
+        :raises: MissingDataError
+
+        """
+        if not isinstance(data_dict, dict):
+            raise MissingDataError("Dependency section is improperly configured!")
         for task_name, task_dict in data_dict.items():
-            if not is_dependency and task_name not in (ConfigManager.INPUT, ConfigManager.SLURM):
+            if not is_dependency and task_name not in (ConfigManager.INPUT, ConfigManager.SLURM, ConfigManager.GLOBAL):
                 for required_arg in \
-                        (ConfigManager.TIME, ConfigManager.MEMORY, ConfigManager.THREADS, ConfigManager.WORKERS):
+                        (ConfigManager.TIME, ConfigManager.MEMORY, ConfigManager.THREADS):
                     if required_arg not in task_dict.keys():
                         raise MissingTimingData(f"Config section for {task_name} is missing required flag "
                                                 f"{required_arg}")
@@ -177,7 +181,7 @@ class ConfigManager:
             # Provided as dict with program path and FLAGS
             if isinstance(prog_data, dict):
                 try:
-                    if "program" not in prog_data:
+                    if "program" not in prog_data or prog_data["program"] is None:
                         # pylint: disable=raise-missing-from
                         raise InvalidPathError(
                             "Dependency %s is missing a program path in your config file!" % prog_name
