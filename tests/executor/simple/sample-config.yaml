@@ -3,8 +3,9 @@
 ###########################################
 ## Pipeline input section
 INPUT:
-  base:  # List pipelines containing input data
-    root
+  root: all
+  run:
+    from: to
 
 ###########################################
 

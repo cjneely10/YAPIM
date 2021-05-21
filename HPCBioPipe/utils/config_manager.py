@@ -11,6 +11,12 @@ import yaml
 from plumbum import local, CommandNotFound
 
 
+class ImproperInputSection(ValueError):
+    """ Wraps error of improperly formatted input section for deriving pipeline input
+
+    """
+
+
 class InvalidPathError(FileExistsError):
     """ Wraps FileExistsError, raise if user provided a path that does not exist
 
