@@ -124,8 +124,8 @@ class TaskChainDistributor(dict):
         self._finalize_output(future)
         with TaskChainDistributor.update_lock:
             TaskChainDistributor.task_reference_count -= 1
-            TaskChainDistributor.current_threads_in_use_count += projected_threads
-            TaskChainDistributor.current_gb_memory_in_use_count += projected_memory
+            TaskChainDistributor.current_threads_in_use_count -= projected_threads
+            TaskChainDistributor.current_gb_memory_in_use_count -= projected_memory
 
     def _finalize_output(self, future: Future):
         result: Result = future.result()
