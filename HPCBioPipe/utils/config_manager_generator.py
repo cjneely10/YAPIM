@@ -25,6 +25,13 @@ class ConfigManagerGenerator:
 INPUT:
   root: all
 
+## Global settings
+GLOBAL:
+  # Maximum threads/cpus to use in analysis
+  MaxThreads: 10
+  # Maximum memory to use (in GB)
+  MaxMemory: 100
+
 ###########################################
 
 SLURM:
@@ -61,8 +68,7 @@ SLURM:
     @staticmethod
     def task(task_node: Node) -> str:
         return f'''{task_node.name}:
-  workers: 1
   threads: 1
-  memory: 16G
+  memory: 8G
   time: "4:00:00"
 '''

@@ -11,6 +11,12 @@ import yaml
 from plumbum import local, CommandNotFound
 
 
+class MissingRequiredHeader(AttributeError):
+    """ When a file is missing either INPUT, GLOBAL, or SLURM
+
+    """
+
+
 class MissingTimingData(AttributeError):
     """ When a config file is missing required sections
 
@@ -79,6 +85,9 @@ class ConfigManager:
     DATA = "data"
     BASE = "base"
     SKIP = "skip"
+    MAX_THREADS = "MaxThreads"
+    MAX_MEMORY = "MaxMemory"
+    GLOBAL = "GLOBAL"
 
     def __init__(self, config_path: Path):
         """ Create ConfigManager object
@@ -126,6 +135,16 @@ class ConfigManager:
         """
         if not isinstance(data_dict, dict):
             raise MissingDataError("Dependency section is improperly configured!")
+        for required_arg in (ConfigManager.GLOBAL, ConfigManager.INPUT, ConfigManager.SLURM):
+            if required_arg not in data_dict.keys():
+                raise MissingRequiredHeader(f"Config section {required_arg} is missing!")
+        for required_arg in (ConfigManager.MAX_MEMORY, ConfigManager.MAX_THREADS):
+            if required_arg not in data_dict[ConfigManager.GLOBAL]:
+                raise MissingRequiredHeader(f"Global argument {required_arg} is missing!")
+            try:
+                int(data_dict[ConfigManager.GLOBAL][required_arg])
+            except ValueError:
+                raise MissingRequiredHeader(f"Global argument {required_arg} is not an integer!")
         for task_name, task_dict in data_dict.items():
             if not is_dependency and task_name not in (ConfigManager.INPUT, ConfigManager.SLURM):
                 for required_arg in \

@@ -21,3 +21,8 @@ class AggregateTask(Task, ABC):
         :return:
         :rtype:
         """
+
+    def __eq__(self, other: "AggregateTask"):
+        if not isinstance(other, AggregateTask):
+            return False
+        return self.name == other.name
