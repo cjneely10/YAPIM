@@ -91,7 +91,8 @@ class TaskChainDistributor(dict):
             else:
                 with TaskChainDistributor.secondary_aggregate_waiting:
                     TaskChainDistributor.secondary_aggregate_waiting.wait()
-                self[task_blueprint.__name__] = TaskChainDistributor.results[task_blueprint.__name__][self.record_id]
+                self[task_blueprint.__name__] = TaskChainDistributor.results[self.record_id][task_blueprint.__name__]
+                # print(self)
                 return
         else:
             with TaskChainDistributor.update_lock:
@@ -142,6 +143,11 @@ class TaskChainDistributor(dict):
         future = TaskChainDistributor.executor.submit(task.run_task)
         possible_failure = future.exception()
         if future.exception() is not None:
+            if isinstance(task, AggregateTask):
+                with TaskChainDistributor.update_lock:
+                    type(task).is_running = False
+                with TaskChainDistributor.secondary_aggregate_waiting:
+                    TaskChainDistributor.secondary_aggregate_waiting.notifyAll()
             TaskChainDistributor._release_resources(projected_threads, projected_memory)
             raise possible_failure
         result: Result = future.result()
@@ -165,19 +171,20 @@ class TaskChainDistributor(dict):
         if result.record_id not in TaskChainDistributor.results.keys():
             TaskChainDistributor.results[result.record_id] = {}
             TaskChainDistributor.output_data_to_pickle[result.record_id] = {}
-        TaskChainDistributor.results[result.record_id][result.task_name] = result
         if isinstance(task, AggregateTask):
+            del TaskChainDistributor.results[result.record_id]
             output = task.deaggregate()
             if not isinstance(output, dict):
                 raise DependencyGraph.ERR
             for key, value in output.items():
-                TaskChainDistributor.results[result.task_name][key] = value
-                if key == self.record_id:
-                    self[result.task_name] = value
-            type(task).is_running = False
+                # print(result.task_name, key)
+                TaskChainDistributor.results[key][result.task_name] = value
+            with TaskChainDistributor.update_lock:
+                type(task).is_running = False
             with TaskChainDistributor.secondary_aggregate_waiting:
                 TaskChainDistributor.secondary_aggregate_waiting.notifyAll()
         else:
+            TaskChainDistributor.results[result.record_id][result.task_name] = result
             self[result.task_name] = result
         for result_key, result_data in result.items():
             if result_key == "final":

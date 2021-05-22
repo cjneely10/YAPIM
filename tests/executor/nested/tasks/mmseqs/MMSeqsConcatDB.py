@@ -20,6 +20,7 @@ class MMSeqsConcatDB(AggregateTask):
         return {
             key: self.output["out"]
             for key in self.input.keys()
+            if key != "dbs"
         }
 
     @staticmethod

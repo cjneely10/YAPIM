@@ -132,12 +132,12 @@ class Task(BaseTask, ABC):
         """
         if self.is_skip:
             return Result(self.record_id, self.name, {})
-        if self.display_messages:
-            print("\nRunning:\n  %s" % (
-                    (self.task_scope() + " " if self.task_scope() != ConfigManager.ROOT else "") + self.name
-            ))
 
         if not self.is_complete:
+            if self.display_messages:
+                print("\nRunning:\n  %s" % (
+                        (self.task_scope() + " " if self.task_scope() != ConfigManager.ROOT else "") + self.name
+                ))
             _str = "In progress:  {}".format(self.record_id)
             logging.info(_str)
             if self.display_messages:
@@ -146,11 +146,6 @@ class Task(BaseTask, ABC):
             self.try_run()
             end_time = time.time()
             _str = "Is complete:  {} ({:.3f}{})".format(self.record_id, *Task._parse_time(end_time - start_time))
-            logging.info(_str)
-            if self.display_messages:
-                print(colors.blue & colors.bold | _str)
-        else:
-            _str = "Is complete: {}".format(self.record_id)
             logging.info(_str)
             if self.display_messages:
                 print(colors.blue & colors.bold | _str)

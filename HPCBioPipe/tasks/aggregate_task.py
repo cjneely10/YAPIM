@@ -22,6 +22,7 @@ class AggregateTask(Task, ABC):
         result = self.aggregate()
         if not isinstance(result, dict):
             raise DependencyGraph.ERR
+        result.update(self.input)
         self.input = ImmutableDict(result)
 
     @abstractmethod
