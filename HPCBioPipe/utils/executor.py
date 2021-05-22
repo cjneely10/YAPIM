@@ -44,6 +44,7 @@ class Executor:
         except BaseException as e:
             print(e)
             exit(1)
+        TaskChainDistributor.initialize_class()
         TaskChainDistributor.set_allocations(self.config_manager)
         TaskChainDistributor.results.update(self.input_data_dict)
         TaskChainDistributor.output_data_to_pickle.update({key: {} for key in TaskChainDistributor.results.keys()})
