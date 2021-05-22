@@ -165,12 +165,18 @@ class ConfigManager:
                     if required_arg not in task_dict.keys():
                         raise MissingTimingData(f"Config section for {task_name} is missing required flag "
                                                 f"{required_arg}")
-                threads = int(task_dict[ConfigManager.THREADS])
-                if threads > max_threads:
-                    raise InvalidResourcesError(f"Max threads is set a {max_threads} but {task_name} requests {threads}")
-                memory = int(task_dict[ConfigManager.MEMORY])
-                if memory > max_memory:
-                    raise InvalidResourcesError(f"Max memory is set a {max_memory} but {task_name} requests {memory}")
+                try:
+                    threads = int(task_dict[ConfigManager.THREADS])
+                    if threads > max_threads:
+                        raise InvalidResourcesError(f"Max threads is set a {max_threads} but {task_name} requests {threads}")
+                except ValueError:
+                    raise ValueError(f"Section {task_name} threads is invalid!")
+                try:
+                    memory = int(task_dict[ConfigManager.MEMORY])
+                    if memory > max_memory:
+                        raise InvalidResourcesError(f"Max memory is set a {max_memory} but {task_name} requests {memory}")
+                except ValueError:
+                    raise ValueError(f"Section {task_name} memory is invalid!")
             if "skip" in task_dict.keys() and task_dict["skip"] is True:
                 continue
             if "data" in task_dict.keys():
