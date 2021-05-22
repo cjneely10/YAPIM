@@ -85,7 +85,8 @@ class Task(BaseTask, ABC):
         return bool(self.config_manager.config[ConfigManager.SLURM][ConfigManager.USE_CLUSTER])
 
     def _create_slurm_command(self, cmd: LocalCommand, time_override: Optional[str] = None,
-                              threads_override: str = None, memory_override: str = None) -> SLURMCaller:  # pragma: no cover
+                              threads_override: str = None,
+                              memory_override: str = None) -> SLURMCaller:  # pragma: no cover
         """ Create a SLURM-managed process
 
         :param cmd: plumbum LocalCommand object to run
@@ -108,7 +109,8 @@ class Task(BaseTask, ABC):
             str(self.wdir),
             str(self.threads) if threads_override is None else threads_override,
             cmd,
-            self.config_manager.find(self.full_name, ConfigManager.MEMORY) if memory_override is None else memory_override,
+            self.config_manager.find(self.full_name, ConfigManager.MEMORY)
+            if memory_override is None else memory_override,
             self.config_manager.find(self.full_name, ConfigManager.TIME) if time_override is None else time_override,
             self.local,
             self.config_manager.get_slurm_flagged_arguments(),

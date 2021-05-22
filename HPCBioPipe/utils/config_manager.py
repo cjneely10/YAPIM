@@ -164,6 +164,8 @@ class ConfigManager:
                     if required_arg not in task_dict.keys():
                         raise MissingTimingData(f"Config section for {task_name} is missing required flag "
                                                 f"{required_arg}")
+                    if required_arg == "0":
+                        raise InvalidResourcesError(f"Requested {required_arg} with 0 resources!")
                 try:
                     threads = int(task_dict[ConfigManager.THREADS])
                     if threads > max_threads:
