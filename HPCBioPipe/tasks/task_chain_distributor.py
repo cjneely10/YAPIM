@@ -179,10 +179,6 @@ class TaskChainDistributor(dict):
             for key, value in output.items():
                 # print(result.task_name, key)
                 TaskChainDistributor.results[key][result.task_name] = value
-            with TaskChainDistributor.update_lock:
-                type(task).is_running = False
-            with TaskChainDistributor.secondary_aggregate_waiting:
-                TaskChainDistributor.secondary_aggregate_waiting.notifyAll()
         else:
             TaskChainDistributor.results[result.record_id][result.task_name] = result
             self[result.task_name] = result
@@ -200,6 +196,11 @@ class TaskChainDistributor(dict):
                     if isinstance(obj, Path) or (isinstance(obj, str) and os.path.exists(obj)):
                         copy(obj, _sub_out)
                         TaskChainDistributor.output_data_to_pickle[result.record_id][file_str] = obj
+        if isinstance(task, AggregateTask):
+            with TaskChainDistributor.update_lock:
+                type(task).is_running = False
+            with TaskChainDistributor.secondary_aggregate_waiting:
+                TaskChainDistributor.secondary_aggregate_waiting.notifyAll()
 
     @staticmethod
     def _update_distributed_input(record_id: str, requirement_node: Type[Task]) -> Dict:
