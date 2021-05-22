@@ -51,7 +51,7 @@ class Executor:
         self.input_data_dict.update(self._populate_requested_existing_input())
 
     def run(self):
-        with ThreadPoolExecutor() as executor:
+        with ThreadPoolExecutor(len(self.input_data_dict.keys())) as executor:
             futures = []
             for record_id, input_data in self.input_data_dict.items():
                 task_chain = TaskChainDistributor(record_id, self.task_list, self.task_blueprints,

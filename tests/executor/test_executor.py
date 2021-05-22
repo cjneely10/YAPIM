@@ -21,7 +21,7 @@ class TestExecutor(unittest.TestCase):
 
     def test_simple(self):
         Executor(
-            TestExecutor.TestLoader(10),  # Input loader
+            TestExecutor.TestLoader(100),  # Input loader
             TestExecutor.file.joinpath("simple/sample-config.yaml"),  # Config file path
             TestExecutor.file.joinpath("simple-out"),  # Base output dir path
             "simple/sample_tasks1",  # Relative path to pipeline directory
