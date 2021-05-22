@@ -126,6 +126,9 @@ class TestDependencyGraph(unittest.TestCase):
             def aggregate(self) -> dict:
                 pass
 
+            def deaggregate(self) -> dict:
+                pass
+
             @staticmethod
             def requires() -> List[Union[str, Type]]:
                 return []

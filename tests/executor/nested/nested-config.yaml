@@ -5,6 +5,13 @@
 INPUT:
   root: all
 
+## Global settings
+GLOBAL:
+  # Maximum threads/cpus to use in analysis
+  MaxThreads: 10
+  # Maximum memory to use (in GB)
+  MaxMemory: 100
+
 ###########################################
 
 SLURM:
@@ -18,23 +25,20 @@ SLURM:
   user-id: uid
 
 MMSeqsConcatDB:
-  workers: 10
-  threads: 16
-  memory: 40G
+  threads: 1
+  memory: 40
   time: "4:00:00"
   program: /home/user/miniconda3/envs/EukMS_run/bin/mmseqs
   dependencies:
     MMSeqsCreateDB:
-      workers: 10
-      threads: 16
-      memory: 40G
+      threads: 1
+      memory: 40
       time: "4:00:00"
       program: /home/user/miniconda3/envs/EukMS_run/bin/mmseqs
 
 Empty:
-  workers: 10
-  threads: 16
-  memory: 40G
+  threads: 1
+  memory: 40
   time: "4:00:00"
 
 ...  # document end

@@ -5,6 +5,13 @@
 INPUT:
   root: all
 
+## Global settings
+GLOBAL:
+  # Maximum threads/cpus to use in analysis
+  MaxThreads: 10
+  # Maximum memory to use (in GB)
+  MaxMemory: 100
+
 ###########################################
 
 SLURM:
@@ -18,24 +25,21 @@ SLURM:
   user-id: uid
 
 Write:
-  workers: 20
   threads: 1
-  memory: 40G
+  memory: 40
   time: "4:00:00"
 
 Update:
-  workers: 20
   threads: 1
-  memory: 40G
+  memory: 40
   time: "4:00:00"
   dependencies:
     Sed:
       program: sed
 
 Merge:
-  workers: 20
   threads: 1
-  memory: 40G
+  memory: 40
   time: "4:00:00"
 
 ...  # document end

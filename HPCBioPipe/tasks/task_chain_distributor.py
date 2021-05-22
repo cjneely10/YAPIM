@@ -9,7 +9,7 @@ from HPCBioPipe import Task, AggregateTask
 from HPCBioPipe.tasks.task import TaskSetupError
 from HPCBioPipe.tasks.utils.result import Result
 from HPCBioPipe.utils.config_manager import ConfigManager
-from HPCBioPipe.utils.dependency_graph import Node
+from HPCBioPipe.utils.dependency_graph import Node, DependencyGraph
 from HPCBioPipe.utils.path_manager import PathManager
 
 
@@ -18,11 +18,11 @@ class TaskChainDistributor(dict):
     awaiting_resources: threading.Condition = threading.Condition()
     update_lock: threading.Lock = threading.RLock()
 
-    results: dict = {}
-    output_data_to_pickle: dict = {}
-    task_reference_count: int = 0
-    current_threads_in_use_count: int = 0
-    current_gb_memory_in_use_count: int = 0
+    results: dict
+    output_data_to_pickle: dict
+    task_reference_count: int
+    current_threads_in_use_count: int
+    current_gb_memory_in_use_count: int
     executor: Executor = ThreadPoolExecutor()
 
     maximum_threads: int
@@ -51,6 +51,11 @@ class TaskChainDistributor(dict):
 
     @staticmethod
     def set_allocations(config_manager: ConfigManager):
+        TaskChainDistributor.results = {}
+        TaskChainDistributor.output_data_to_pickle = {}
+        TaskChainDistributor.task_reference_count = 0
+        TaskChainDistributor.current_threads_in_use_count = 0
+        TaskChainDistributor.current_gb_memory_in_use_count = 0
         TaskChainDistributor.maximum_threads = int(
             config_manager.config[ConfigManager.GLOBAL][ConfigManager.MAX_THREADS])
         TaskChainDistributor.maximum_gb_memory = int(
@@ -110,7 +115,6 @@ class TaskChainDistributor(dict):
                 self.display_status_messages
             )
         task.set_is_complete()
-
         projected_memory = int(self.config_manager.find(task.full_name, ConfigManager.MEMORY))
         projected_threads = int(self.config_manager.find(task.full_name, ConfigManager.THREADS))
         with TaskChainDistributor.awaiting_resources:
@@ -121,21 +125,32 @@ class TaskChainDistributor(dict):
                 TaskChainDistributor.awaiting_resources.wait()
                 total_memory = projected_memory + TaskChainDistributor.current_gb_memory_in_use_count
                 total_threads = projected_threads + TaskChainDistributor.current_threads_in_use_count
-            TaskChainDistributor.awaiting_resources.notifyAll()
         with TaskChainDistributor.update_lock:
-            TaskChainDistributor.current_threads_in_use_count += projected_threads
-            TaskChainDistributor.current_gb_memory_in_use_count += projected_memory
+            TaskChainDistributor.current_threads_in_use_count = total_threads
+            TaskChainDistributor.current_gb_memory_in_use_count = total_memory
 
         future = TaskChainDistributor.executor.submit(task.run_task)
-        self._finalize_output(task, future)
+        try:
+            self._finalize_output(task, future)
+            TaskChainDistributor._release_resources(task, projected_threads, projected_memory)
+        except BaseException as exception:
+            TaskChainDistributor._release_resources(task, projected_threads, projected_memory)
+            raise exception
 
+    @staticmethod
+    def _release_resources(task: Union[Task, AggregateTask], projected_threads: int, projected_memory: int):
         with TaskChainDistributor.update_lock:
             if not isinstance(task, AggregateTask):
                 TaskChainDistributor.task_reference_count -= 1
             TaskChainDistributor.current_threads_in_use_count -= projected_threads
             TaskChainDistributor.current_gb_memory_in_use_count -= projected_memory
+        with TaskChainDistributor.awaiting_resources:
+            TaskChainDistributor.awaiting_resources.notifyAll()
 
     def _finalize_output(self, task: Task, future: Future):
+        possible_failure = future.exception()
+        if future.exception() is not None:
+            raise possible_failure
         result: Result = future.result()
         if result.record_id not in TaskChainDistributor.results.keys():
             with TaskChainDistributor.update_lock:
@@ -143,14 +158,16 @@ class TaskChainDistributor(dict):
                 TaskChainDistributor.output_data_to_pickle[result.record_id] = {}
         with TaskChainDistributor.update_lock:
             TaskChainDistributor.results[result.record_id][result.task_name] = result
-            if isinstance(task, AggregateTask):
-                output = task.deaggregate()
+        if isinstance(task, AggregateTask):
+            output = task.deaggregate()
+            if not isinstance(output, dict):
+                raise DependencyGraph.ERR
+            with TaskChainDistributor.update_lock:
                 for key, value in output.items():
-                    TaskChainDistributor.results[key][result.task_name] = value
-                with TaskChainDistributor.update_lock:
-                    type(task).is_running = False
-            else:
-                self[result.task_name] = result
+                    TaskChainDistributor.results[result.task_name][key] = value
+                type(task).is_running = False
+        else:
+            self[result.task_name] = result
         for result_key, result_data in result.items():
             if result_key == "final":
                 if not isinstance(result_data, list):
@@ -158,14 +175,14 @@ class TaskChainDistributor(dict):
                 _sub_out = os.path.join(self.results_dir, result.record_id)
                 if not os.path.exists(_sub_out):
                     os.makedirs(_sub_out)
-                for file_str in result_data:
-                    obj = result.get(file_str)
-                    if obj is None:
-                        raise TaskSetupError("'final' should consist of keys present in task output")
-                    if isinstance(obj, Path) or (isinstance(obj, str) and os.path.exists(obj)):
-                        copy(obj, _sub_out)
-                    with TaskChainDistributor.update_lock:
-                        TaskChainDistributor.output_data_to_pickle[result.record_id][file_str] = obj
+                with TaskChainDistributor.update_lock:
+                    for file_str in result_data:
+                        obj = result.get(file_str)
+                        if obj is None:
+                            raise TaskSetupError("'final' should consist of keys present in task output")
+                        if isinstance(obj, Path) or (isinstance(obj, str) and os.path.exists(obj)):
+                            copy(obj, _sub_out)
+                            TaskChainDistributor.output_data_to_pickle[result.record_id][file_str] = obj
 
     @staticmethod
     def _update_distributed_input(record_id: str, requirement_node: Type[Task]) -> Dict:

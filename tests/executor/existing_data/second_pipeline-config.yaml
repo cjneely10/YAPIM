@@ -7,6 +7,13 @@ INPUT:
   first_pipeline:
     result: input
 
+## Global settings
+GLOBAL:
+  # Maximum threads/cpus to use in analysis
+  MaxThreads: 10
+  # Maximum memory to use (in GB)
+  MaxMemory: 100
+
 ###########################################
 
 SLURM:
@@ -20,9 +27,8 @@ SLURM:
   user-id: uid
 
 Print:
-  workers: 20
   threads: 1
-  memory: 40G
+  memory: 40
   time: "4:00:00"
 
 ...  # document end

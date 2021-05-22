@@ -16,6 +16,12 @@ class MMSeqsConcatDB(AggregateTask):
             "dbs": [str(self.input[record_id]["MMSeqsCreateDB"]["db"]) for record_id in self.input.keys()]
         }
 
+    def deaggregate(self) -> dict:
+        return {
+            key: self.output["out"]
+            for key in self.input.keys()
+        }
+
     @staticmethod
     def requires() -> List[str]:
         return []

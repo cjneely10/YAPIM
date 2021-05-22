@@ -36,8 +36,6 @@ class Executor:
         if not self.results_base_dir.exists():
             os.makedirs(self.results_base_dir)
         self.input_data_dict = input_data.load()
-        TaskChainDistributor.results.update(self.input_data_dict)
-        TaskChainDistributor.output_data_to_pickle.update({key: {} for key in TaskChainDistributor.results.keys()})
         self.config_manager = None
         self.display_messages = display_status_messages
         try:
@@ -46,8 +44,10 @@ class Executor:
         except BaseException as e:
             print(e)
             exit(1)
-        self.input_data_dict.update(self._populate_requested_existing_input())
         TaskChainDistributor.set_allocations(self.config_manager)
+        TaskChainDistributor.results.update(self.input_data_dict)
+        TaskChainDistributor.output_data_to_pickle.update({key: {} for key in TaskChainDistributor.results.keys()})
+        self.input_data_dict.update(self._populate_requested_existing_input())
 
     def run(self):
         with ThreadPoolExecutor() as executor:
@@ -58,6 +58,9 @@ class Executor:
                                                   self.results_base_dir, self.display_messages)
                 futures.append(executor.submit(task_chain.run))
             wait(futures)
+            for future in futures:
+                if future.exception() is not None:
+                    raise future.exception()
         out_ptr = open(self.results_base_dir.joinpath(f"{self.pipeline_name}.pkl"), "wb")
         pickle.dump(TaskChainDistributor.output_data_to_pickle, out_ptr)
         out_ptr.close()

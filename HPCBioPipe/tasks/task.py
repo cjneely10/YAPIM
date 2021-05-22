@@ -174,7 +174,7 @@ class Task(BaseTask, ABC):
         return self.local[program]
 
     def __str__(self):  # pragma: no cover
-        return f"<Task name: {self.__name__}, scope: {self.task_scope()}, input_id: {self.record_id}, " \
+        return f"<Task name: {self.name}, scope: {self.task_scope()}, input_id: {self.record_id}, " \
                f"requirements: {self.requires()}, dependencies: {self.depends()}>"
 
     def __repr__(self):  # pragma: no cover
