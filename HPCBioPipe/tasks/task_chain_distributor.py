@@ -84,14 +84,15 @@ class TaskChainDistributor(dict):
         task_blueprint = self.task_blueprints[task_identifier.name]
         task = None
         if TaskChainDistributor._is_aggregate(task_blueprint):
-            with TaskChainDistributor.update_lock:
-                if not task_blueprint.is_running:
-                    self.path_manager.add_dirs(wdir)
+            if not task_blueprint.is_running:
+                self.path_manager.add_dirs(wdir)
+                with TaskChainDistributor.update_lock:
                     task_blueprint.is_running = True
-                else:
-                    print("FF")
-                    print("R", 1)
-                    return
+            else:
+                with TaskChainDistributor.secondary_aggregate_waiting:
+                    TaskChainDistributor.secondary_aggregate_waiting.wait()
+                self[task_blueprint.__name__] = TaskChainDistributor.results[task_blueprint.__name__][self.record_id]
+                return
         else:
             with TaskChainDistributor.update_lock:
                 TaskChainDistributor.task_reference_count += 1
@@ -141,24 +142,24 @@ class TaskChainDistributor(dict):
         future = TaskChainDistributor.executor.submit(task.run_task)
         possible_failure = future.exception()
         if future.exception() is not None:
-            self._release_resources(task_blueprint, projected_threads, projected_memory)
+            TaskChainDistributor._release_resources(projected_threads, projected_memory)
             raise possible_failure
         result: Result = future.result()
 
-        self._release_resources(task_blueprint, projected_threads, projected_memory)
+        TaskChainDistributor._release_resources(projected_threads, projected_memory)
         self._finalize_output(task, result)
 
-    def _release_resources(self, task: Type[Task], projected_threads: int, projected_memory: int):
+    @staticmethod
+    def _release_resources(projected_threads: int, projected_memory: int):
         with TaskChainDistributor.update_lock:
             TaskChainDistributor.task_reference_count -= 1
             TaskChainDistributor.current_threads_in_use_count -= projected_threads
             TaskChainDistributor.current_gb_memory_in_use_count -= projected_memory
         with TaskChainDistributor.awaiting_resources:
             TaskChainDistributor.awaiting_resources.notifyAll()
-        if TaskChainDistributor.task_reference_count == 0 or isinstance(task, AggregateTask):
+        if TaskChainDistributor.task_reference_count == 0:
             with TaskChainDistributor.awaiting_aggregate_okay:
                 TaskChainDistributor.awaiting_aggregate_okay.notifyAll()
-        print(self.record_id, "R", 5)
 
     def _finalize_output(self, task: Task, result: Result):
         if result.record_id not in TaskChainDistributor.results.keys():
@@ -171,7 +172,11 @@ class TaskChainDistributor(dict):
                 raise DependencyGraph.ERR
             for key, value in output.items():
                 TaskChainDistributor.results[result.task_name][key] = value
+                if key == self.record_id:
+                    self[result.task_name] = value
             type(task).is_running = False
+            with TaskChainDistributor.secondary_aggregate_waiting:
+                TaskChainDistributor.secondary_aggregate_waiting.notifyAll()
         else:
             self[result.task_name] = result
         for result_key, result_data in result.items():
