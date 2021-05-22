@@ -11,6 +11,12 @@ import yaml
 from plumbum import local, CommandNotFound
 
 
+class InvalidResourcesError(AttributeError):
+    """ When a task requests more resources than are globally available
+
+    """
+
+
 class MissingRequiredHeader(AttributeError):
     """ When a file is missing either INPUT, GLOBAL, or SLURM
 
@@ -98,8 +104,7 @@ class ConfigManager:
         with open(str(Path(config_path).resolve()), "r") as fp:
             self.config = yaml.load(fp, Loader=yaml.FullLoader)
             # Confirm all paths in file are valid
-            ConfigManager._validate(self.config, False)
-            ConfigManager._validate_global(self.config)
+            self._validate_global()
 
     def get(self, task_data: Tuple[str, str]) -> dict:
         """ Get (scope, name) data from config file
@@ -128,8 +133,8 @@ class ConfigManager:
         else:
             return self.config[task_data[0]]
 
-    @staticmethod
-    def _validate_global(data_dict):
+    def _validate_global(self):
+        data_dict = self.config
         for required_arg in (ConfigManager.GLOBAL, ConfigManager.INPUT, ConfigManager.SLURM):
             if required_arg not in data_dict.keys():
                 raise MissingRequiredHeader(f"Config section {required_arg} is missing!")
@@ -140,9 +145,12 @@ class ConfigManager:
                 int(data_dict[ConfigManager.GLOBAL][required_arg])
             except ValueError:
                 raise MissingRequiredHeader(f"Global argument {required_arg} is not an integer!")
+        max_memory = int(data_dict[ConfigManager.GLOBAL][ConfigManager.MAX_MEMORY])
+        max_threads = int(data_dict[ConfigManager.GLOBAL][ConfigManager.MAX_THREADS])
+        ConfigManager._validate(self.config, False, max_memory, max_threads)
 
     @staticmethod
-    def _validate(data_dict, is_dependency: bool):
+    def _validate(data_dict, is_dependency: bool, max_memory: int, max_threads: int):
         """ Confirm that data and dependency paths provided in file are all valid.
 
         :raises: MissingDataError
@@ -157,6 +165,12 @@ class ConfigManager:
                     if required_arg not in task_dict.keys():
                         raise MissingTimingData(f"Config section for {task_name} is missing required flag "
                                                 f"{required_arg}")
+                threads = int(task_dict[ConfigManager.THREADS])
+                if threads > max_threads:
+                    raise InvalidResourcesError(f"Max threads is set a {max_threads} but {task_name} requests {threads}")
+                memory = int(task_dict[ConfigManager.MEMORY])
+                if memory > max_memory:
+                    raise InvalidResourcesError(f"Max memory is set a {max_memory} but {task_name} requests {memory}")
             if "skip" in task_dict.keys() and task_dict["skip"] is True:
                 continue
             if "data" in task_dict.keys():
@@ -168,7 +182,7 @@ class ConfigManager:
                             task_name, _val
                         ))
             if "dependencies" in task_dict.keys():
-                ConfigManager._validate(task_dict["dependencies"], True)
+                ConfigManager._validate(task_dict["dependencies"], True, max_memory, max_threads)
                 ConfigManager._check_dependencies(task_dict)
 
     @staticmethod

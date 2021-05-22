@@ -85,6 +85,10 @@ class TestConfigManager(unittest.TestCase):
         original_fp.close()
         new_fp.close()
 
+    def test_bad_resources(self):
+        with self.assertRaises(InvalidResourcesError):
+            ConfigManager(Path("config_files/bad_resources-config.yaml"))
+
 
 if __name__ == '__main__':
     unittest.main()
