@@ -107,9 +107,10 @@ class HPCBioPipeRunner(cli.Application):
     @cli.switch(["-d", "--dependencies"], str, list=True)
     def set_dependencies_directory(self, dependencies):
         """Path to directory of Task/AggregateTask dependencies"""
-        if not os.path.exists(dependencies):
-            print("Unable to find dependencies directory")
-            exit(1)
+        for dependency in dependencies:
+            if not os.path.exists(dependency):
+                print("Unable to find dependencies directory")
+                exit(1)
         self.dependencies_directories = dependencies
 
     @cli.switch(["-s", "--silence"])
@@ -119,7 +120,7 @@ class HPCBioPipeRunner(cli.Application):
 
     def main(self, *args):
         Executor(
-            self.loader(),
+            self.loader(Path(args[0]), self.output_directory.joinpath("MAGS")),
             self.config_path,
             self.output_directory,
             self.tasks_directory,
@@ -128,16 +129,15 @@ class HPCBioPipeRunner(cli.Application):
         ).run()
 
     def _get_loader(self, loader_name: str) -> Type[InputLoader]:
-        module = import_module(
-            "{}.{}".format(
-                self.tasks_directory.replace("/", "."),
-                loader_name
-            )
-        )
+        current_dir = os.getcwd()
+        os.chdir(os.path.dirname(loader_name))
+        module = import_module(os.path.basename(os.path.splitext(loader_name)[0]))
         for attribute_name in dir(module):
             attribute = getattr(module, attribute_name)
             if isclass(attribute) and issubclass(attribute, InputLoader) and loader_name in attribute.__name__:
+                os.chdir(current_dir)
                 return attribute
+        os.chdir(current_dir)
         print("Unable to import loader module")
         exit(1)
 
