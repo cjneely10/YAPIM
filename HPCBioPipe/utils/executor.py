@@ -55,7 +55,6 @@ class Executor:
         first_item = list(self.input_data_dict.keys())[0]
         for task_batch in self.task_batch():
             workers = self._get_max_resources_in_batch(task_batch[1])
-            print(workers)
             with ThreadPoolExecutor(workers) as executor:
                 futures = []
                 if task_batch[0] == "Task":
