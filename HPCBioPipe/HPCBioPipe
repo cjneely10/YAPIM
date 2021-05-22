@@ -118,9 +118,9 @@ class HPCBioPipeRunner(cli.Application):
         """Do not display log statements to stdout"""
         self.display_status = False
 
-    def main(self, *args):
+    def main(self, input_path):
         Executor(
-            self.loader(Path(args[0]), self.output_directory.joinpath("MAGS")),
+            self.loader(input_path, self.output_directory.joinpath("input")),
             self.config_path,
             self.output_directory,
             self.tasks_directory,
