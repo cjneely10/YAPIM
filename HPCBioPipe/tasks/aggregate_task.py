@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import List
 
 from HPCBioPipe.tasks.task import Task
 from HPCBioPipe.tasks.utils.input_dict import ImmutableDict
@@ -25,6 +26,10 @@ class AggregateTask(Task, ABC):
         result.update(self.input)
         self.input = ImmutableDict(result)
 
+    @staticmethod
+    def depends() -> List:
+        return []
+
     @abstractmethod
     def aggregate(self) -> dict:
         """
@@ -40,8 +45,3 @@ class AggregateTask(Task, ABC):
         :return:
         :rtype:
         """
-
-    def __eq__(self, other: "AggregateTask"):
-        if not isinstance(other, AggregateTask):
-            return False
-        return self.name == other.name

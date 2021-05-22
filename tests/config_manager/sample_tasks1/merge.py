@@ -17,10 +17,6 @@ class Merge(AggregateTask):
     def requires() -> List[str]:
         return ["Write"]
 
-    @staticmethod
-    def depends() -> List[DependencyInput]:
-        return []
-
     def run(self):
         fp = open(self.input["file"], "r")
         print(fp.readlines())

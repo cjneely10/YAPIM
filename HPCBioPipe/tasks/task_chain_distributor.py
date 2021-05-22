@@ -83,15 +83,6 @@ class TaskChainDistributor(dict):
         task = None
         if TaskChainDistributor._is_aggregate(task_blueprint):
             self.path_manager.add_dirs(wdir)
-            # if not task_blueprint.is_running:
-            #     with TaskChainDistributor.update_lock:
-            #         task_blueprint.is_running = True
-            #     self.path_manager.add_dirs(wdir)
-            # else:
-            #     # with TaskChainDistributor.agg_is_complete:
-            #     #     TaskChainDistributor.agg_is_complete.wait()
-            #     self[task_blueprint.__name__] = TaskChainDistributor.results[self.record_id][task_blueprint.__name__]
-            #     return
         else:
             with TaskChainDistributor.update_lock:
                 TaskChainDistributor.task_reference_count += 1
@@ -110,8 +101,6 @@ class TaskChainDistributor(dict):
             )
 
         if TaskChainDistributor._is_aggregate(self.task_blueprints[task_identifier.name]):
-            # with TaskChainDistributor.agg_waiting_on_tasks_to_finish:
-            #     TaskChainDistributor.agg_waiting_on_tasks_to_finish.wait()
             task = task_blueprint(
                 wdir,
                 ConfigManager.ROOT,
@@ -140,17 +129,17 @@ class TaskChainDistributor(dict):
         future = TaskChainDistributor.executor.submit(task.run_task)
         possible_failure = future.exception()
         if future.exception() is not None:
-            TaskChainDistributor._release_resources(task_blueprint, projected_threads, projected_memory)
+            TaskChainDistributor._release_resources(projected_threads, projected_memory)
             if isinstance(task, AggregateTask):
                 TaskChainDistributor._complete_agg(task)
             raise possible_failure
         result: Result = future.result()
 
         self._finalize_output(task, result)
-        TaskChainDistributor._release_resources(task_blueprint, projected_threads, projected_memory)
+        TaskChainDistributor._release_resources(projected_threads, projected_memory)
 
     @staticmethod
-    def _release_resources(task: Type[Task], projected_threads: int, projected_memory: int):
+    def _release_resources(projected_threads: int, projected_memory: int):
         with TaskChainDistributor.update_lock:
             TaskChainDistributor.task_reference_count -= 1
             TaskChainDistributor.current_threads_in_use_count -= projected_threads

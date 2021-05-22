@@ -10,10 +10,6 @@ class Merge(AggregateTask):
     def requires() -> List[str]:
         return ["Write"]
 
-    @staticmethod
-    def depends() -> List[DependencyInput]:
-        return []
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {

@@ -133,10 +133,6 @@ class TestDependencyGraph(unittest.TestCase):
             def requires() -> List[Union[str, Type]]:
                 return []
 
-            @staticmethod
-            def depends() -> List[DependencyInput]:
-                return []
-
             def run(self):  # pragma: no cover
                 pass
 
