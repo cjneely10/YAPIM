@@ -1,6 +1,6 @@
 from typing import List
 
-from HPCBioPipe import AggregateTask, DependencyInput
+from HPCBioPipe import AggregateTask
 
 
 class MMSeqsConcatDB(AggregateTask):
