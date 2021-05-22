@@ -3,7 +3,6 @@ import threading
 from concurrent.futures import ThreadPoolExecutor, Executor
 from pathlib import Path
 from shutil import copy
-from time import sleep
 from typing import List, Type, Optional, Dict, Union
 
 from HPCBioPipe import Task, AggregateTask
@@ -15,8 +14,6 @@ from HPCBioPipe.utils.path_manager import PathManager
 
 
 class TaskChainDistributor(dict):
-    agg_waiting_on_tasks_to_finish = threading.Condition()
-    agg_is_complete = threading.Condition()
     awaiting_resources: threading.Condition = threading.Condition()
     update_lock: threading.Lock = threading.Lock()
 
@@ -27,8 +24,8 @@ class TaskChainDistributor(dict):
     current_gb_memory_in_use_count: int
     executor: Executor = ThreadPoolExecutor()
 
-    maximum_threads: int
-    maximum_gb_memory: int
+    maximum_threads: Optional[int] = None
+    maximum_gb_memory: Optional[int] = None
 
     def __init__(self,
                  record_id: str,
@@ -85,15 +82,16 @@ class TaskChainDistributor(dict):
         task_blueprint = self.task_blueprints[task_identifier.name]
         task = None
         if TaskChainDistributor._is_aggregate(task_blueprint):
-            if not task_blueprint.is_running:
-                with TaskChainDistributor.update_lock:
-                    task_blueprint.is_running = True
-                self.path_manager.add_dirs(wdir)
-            else:
-                with TaskChainDistributor.agg_is_complete:
-                    TaskChainDistributor.agg_is_complete.wait()
-                self[task_blueprint.__name__] = TaskChainDistributor.results[self.record_id][task_blueprint.__name__]
-                return
+            self.path_manager.add_dirs(wdir)
+            # if not task_blueprint.is_running:
+            #     with TaskChainDistributor.update_lock:
+            #         task_blueprint.is_running = True
+            #     self.path_manager.add_dirs(wdir)
+            # else:
+            #     # with TaskChainDistributor.agg_is_complete:
+            #     #     TaskChainDistributor.agg_is_complete.wait()
+            #     self[task_blueprint.__name__] = TaskChainDistributor.results[self.record_id][task_blueprint.__name__]
+            #     return
         else:
             with TaskChainDistributor.update_lock:
                 TaskChainDistributor.task_reference_count += 1
@@ -112,8 +110,8 @@ class TaskChainDistributor(dict):
             )
 
         if TaskChainDistributor._is_aggregate(self.task_blueprints[task_identifier.name]):
-            with TaskChainDistributor.agg_waiting_on_tasks_to_finish:
-                TaskChainDistributor.agg_waiting_on_tasks_to_finish.wait()
+            # with TaskChainDistributor.agg_waiting_on_tasks_to_finish:
+            #     TaskChainDistributor.agg_waiting_on_tasks_to_finish.wait()
             task = task_blueprint(
                 wdir,
                 ConfigManager.ROOT,
@@ -144,10 +142,7 @@ class TaskChainDistributor(dict):
         if future.exception() is not None:
             TaskChainDistributor._release_resources(task_blueprint, projected_threads, projected_memory)
             if isinstance(task, AggregateTask):
-                with TaskChainDistributor.update_lock:
-                    type(task).is_running = False
-                with TaskChainDistributor.agg_is_complete:
-                    TaskChainDistributor.agg_is_complete.notifyAll()
+                TaskChainDistributor._complete_agg(task)
             raise possible_failure
         result: Result = future.result()
 
@@ -162,9 +157,11 @@ class TaskChainDistributor(dict):
             TaskChainDistributor.current_gb_memory_in_use_count -= projected_memory
         with TaskChainDistributor.awaiting_resources:
             TaskChainDistributor.awaiting_resources.notifyAll()
-        if TaskChainDistributor.task_reference_count == 0 and not issubclass(task, AggregateTask):
-            with TaskChainDistributor.agg_waiting_on_tasks_to_finish:
-                TaskChainDistributor.agg_waiting_on_tasks_to_finish.notifyAll()
+
+    @staticmethod
+    def _complete_agg(task: AggregateTask):
+        with TaskChainDistributor.update_lock:
+            type(task).is_running = False
 
     def _finalize_output(self, task: Task, result: Result):
         with TaskChainDistributor.update_lock:
@@ -181,10 +178,7 @@ class TaskChainDistributor(dict):
                 for key, value in output.items():
                     if key in TaskChainDistributor.results.keys():
                         TaskChainDistributor.results[key][result.task_name] = value
-            with TaskChainDistributor.update_lock:
-                type(task).is_running = False
-            with TaskChainDistributor.agg_is_complete:
-                TaskChainDistributor.agg_is_complete.notifyAll()
+            TaskChainDistributor._complete_agg(task)
         else:
             with TaskChainDistributor.update_lock:
                 TaskChainDistributor.results[result.record_id][result.task_name] = result

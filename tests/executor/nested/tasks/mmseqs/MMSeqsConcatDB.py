@@ -25,11 +25,11 @@ class MMSeqsConcatDB(AggregateTask):
 
     @staticmethod
     def requires() -> List[str]:
-        return []
+        return ["MMSeqsCreateDB"]
 
     @staticmethod
     def depends() -> List[DependencyInput]:
-        return [DependencyInput("MMSeqsCreateDB")]
+        return []
 
     def run(self):
         self.single(

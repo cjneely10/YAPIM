@@ -24,17 +24,17 @@ SLURM:
   --job-name: EukMS
   user-id: uid
 
+MMSeqsCreateDB:
+  threads: 1
+  memory: 40
+  time: "4:00:00"
+  program: /home/user/miniconda3/envs/EukMS_run/bin/mmseqs
+
 MMSeqsConcatDB:
   threads: 1
   memory: 40
   time: "4:00:00"
   program: /home/user/miniconda3/envs/EukMS_run/bin/mmseqs
-  dependencies:
-    MMSeqsCreateDB:
-      threads: 1
-      memory: 40
-      time: "4:00:00"
-      program: /home/user/miniconda3/envs/EukMS_run/bin/mmseqs
 
 Empty:
   threads: 1

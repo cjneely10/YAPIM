@@ -4,6 +4,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import List, Dict, Type, Optional
 
+from HPCBioPipe import AggregateTask
 from HPCBioPipe.tasks.task import Task
 from HPCBioPipe.tasks.task_chain_distributor import TaskChainDistributor
 from HPCBioPipe.tasks.utils.loader import get_modules
@@ -52,21 +53,44 @@ class Executor:
 
     def run(self):
         with ThreadPoolExecutor() as executor:
-            futures = []
-            for record_id, input_data in self.input_data_dict.items():
-                task_chain = TaskChainDistributor(record_id, self.task_list, self.task_blueprints,
-                                                  self.config_manager, self.path_manager, input_data,
-                                                  self.results_base_dir, self.display_messages)
-                futures.append(executor.submit(task_chain.run))
-            for future in as_completed(futures):
-                if future.exception() is not None:
-                    raise future.exception()
+            first_item = list(self.input_data_dict.keys())[0]
+            for task_batch in self.task_batch():
+                # print(task_batch)
+                futures = []
+                if task_batch[0] == "Task":
+                    for record_id, input_data in self.input_data_dict.items():
+                        task_chain = TaskChainDistributor(record_id, task_batch[1], self.task_blueprints,
+                                                          self.config_manager, self.path_manager, input_data,
+                                                          self.results_base_dir, self.display_messages)
+                        futures.append(executor.submit(task_chain.run))
+                else:
+                    task_chain = TaskChainDistributor(first_item, task_batch[1], self.task_blueprints,
+                                                      self.config_manager, self.path_manager, input_data,
+                                                      self.results_base_dir, self.display_messages)
+                    futures.append(executor.submit(task_chain.run))
+                for future in as_completed(futures):
+                    if future.exception() is not None:
+                        raise future.exception()
         out_ptr = open(self.results_base_dir.joinpath(f"{self.pipeline_name}.pkl"), "wb")
         pickle.dump(TaskChainDistributor.output_data_to_pickle, out_ptr)
         out_ptr.close()
 
-    def _populate_requested_existing_input(self) \
-            -> Dict[str, Dict]:
+    def task_batch(self):
+        agg_positions = []
+        task: Node
+        for i, task_list in enumerate(self.task_list):
+            for task in task_list:
+                if issubclass(self.task_blueprints[task.name], AggregateTask):
+                    agg_positions.append(i)
+                    break
+        start = 0
+        for pos in agg_positions:
+            yield "Task", self.task_list[start: pos]
+            yield "Agg", [self.task_list[pos]]
+            start = pos + 1
+        yield "Task", self.task_list[start:]
+
+    def _populate_requested_existing_input(self) -> Dict[str, Dict]:
         input_section = self.config_manager.config[ConfigManager.INPUT]
         err = ImproperInputSection("INPUT should consist of dictionary {pipeline_name: key-mapping} or "
                                    "{pipeline_name: all}")
