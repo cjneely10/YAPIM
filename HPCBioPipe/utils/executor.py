@@ -54,10 +54,9 @@ class Executor:
     def run(self):
         first_item = list(self.input_data_dict.keys())[0]
         for task_batch in self.task_batch():
-            workers = self._get_max_threads_in_batch(task_batch[1])
+            workers = self._get_max_resources_in_batch(task_batch[1])
             print(workers)
             with ThreadPoolExecutor(workers) as executor:
-                # print(task_batch)
                 futures = []
                 if task_batch[0] == "Task":
                     for record_id, input_data in self.input_data_dict.items():
@@ -92,12 +91,18 @@ class Executor:
             start = pos + 1
         yield "Task", self.task_list[start:]
 
-    def _get_max_threads_in_batch(self, task_batch: List[List[Node]]) -> int:
+    def _get_max_resources_in_batch(self, task_batch: List[List[Node]]) -> int:
         min_threads: int = 64
+        min_memory: int = 5000
         for task_list in task_batch:
             for task in task_list:
                 min_threads = min(min_threads, self.config_manager.find(task.get(), ConfigManager.THREADS))
-        return self.config_manager.config[ConfigManager.GLOBAL][ConfigManager.MAX_THREADS] // min_threads
+                min_memory = min(min_memory, self.config_manager.find(task.get(), ConfigManager.MEMORY))
+        min_threads = self.config_manager.config[ConfigManager.GLOBAL][ConfigManager.MAX_THREADS] // min_threads or 1
+        min_memory = self.config_manager.config[ConfigManager.GLOBAL][ConfigManager.MAX_MEMORY] // min_memory or 1
+        if min_memory < min_threads:
+            return min_memory
+        return min_threads
 
     def _populate_requested_existing_input(self) -> Dict[str, Dict]:
         input_section = self.config_manager.config[ConfigManager.INPUT]
