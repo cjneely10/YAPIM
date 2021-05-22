@@ -16,7 +16,7 @@ from HPCBioPipe.utils.path_manager import PathManager
 class TaskChainDistributor(dict):
     awaiting_aggregate_okay: threading.Condition = threading.Condition()
     awaiting_resources: threading.Condition = threading.Condition()
-    update_lock: threading.Lock = threading.RLock()
+    update_lock: threading.Lock = threading.Lock()
 
     results: dict
     output_data_to_pickle: dict
@@ -66,6 +66,7 @@ class TaskChainDistributor(dict):
 
     def run(self):
         for task_ids in self.task_identifiers:
+            print(task_ids)
             if len(task_ids) == 1:
                 self._run_task(task_ids[0])
             else:
@@ -83,13 +84,22 @@ class TaskChainDistributor(dict):
         task_blueprint = self.task_blueprints[task_identifier.name]
         task = None
         if TaskChainDistributor._is_aggregate(task_blueprint):
+            print("A", 1)
             with TaskChainDistributor.update_lock:
                 if not task_blueprint.is_running:
+                    print("F")
                     self.path_manager.add_dirs(wdir)
                     task_blueprint.is_running = True
                 else:
+                    print("FF")
+                    print("R", 1)
                     return
+            print("R", 1)
         else:
+            print(self.record_id, "A", 2)
+            with TaskChainDistributor.update_lock:
+                TaskChainDistributor.task_reference_count += 1
+            print(self.record_id, "R", 2)
             updated_data = {}
             if top_level_node is not None:
                 updated_data = self._update_distributed_input(self.record_id, self.task_blueprints[top_level_node.name])
@@ -104,74 +114,79 @@ class TaskChainDistributor(dict):
                 self.display_status_messages
             )
 
-        with TaskChainDistributor.update_lock:
-            TaskChainDistributor.task_reference_count += 1
-
         if TaskChainDistributor._is_aggregate(self.task_blueprints[task_identifier.name]):
+            print("ref", TaskChainDistributor.task_reference_count)
+            print("A", "A")
             with TaskChainDistributor.awaiting_aggregate_okay:
-                while TaskChainDistributor.task_reference_count != 1:
+                while TaskChainDistributor.task_reference_count != 0:
+                    print("Waiting")
                     TaskChainDistributor.awaiting_aggregate_okay.wait()
-                task = task_blueprint(
-                    wdir,
-                    ConfigManager.ROOT,
-                    self.config_manager,
-                    TaskChainDistributor.results,
-                    self.path_manager.get_dir(wdir),
-                    self.display_status_messages
-                )
+                print("Finished waiting")
+            print("R", "A")
+            task = task_blueprint(
+                wdir,
+                ConfigManager.ROOT,
+                self.config_manager,
+                TaskChainDistributor.results,
+                self.path_manager.get_dir(wdir),
+                self.display_status_messages
+            )
 
         task.set_is_complete()
 
         projected_memory = int(self.config_manager.find(task.full_name, ConfigManager.MEMORY))
         projected_threads = int(self.config_manager.find(task.full_name, ConfigManager.THREADS))
-        print(TaskChainDistributor.task_reference_count)
         total_memory = projected_memory + TaskChainDistributor.current_gb_memory_in_use_count
         total_threads = projected_threads + TaskChainDistributor.current_threads_in_use_count
+        print(self.record_id, "A", 3)
         with TaskChainDistributor.awaiting_resources:
             while total_threads > TaskChainDistributor.maximum_threads or \
                     total_memory > TaskChainDistributor.maximum_gb_memory:
                 TaskChainDistributor.awaiting_resources.wait()
                 total_memory = projected_memory + TaskChainDistributor.current_gb_memory_in_use_count
                 total_threads = projected_threads + TaskChainDistributor.current_threads_in_use_count
+        print(self.record_id, "R", 3)
+        print(self.record_id, "A", 4)
         with TaskChainDistributor.update_lock:
             TaskChainDistributor.current_threads_in_use_count = total_threads
             TaskChainDistributor.current_gb_memory_in_use_count = total_memory
+        print(self.record_id, "R", 4)
 
         future = TaskChainDistributor.executor.submit(task.run_task)
-        try:
-            self._finalize_output(task, future)
-            TaskChainDistributor._release_resources(projected_threads, projected_memory)
-        except BaseException as exception:
-            TaskChainDistributor._release_resources(projected_threads, projected_memory)
-            raise exception
+        possible_failure = future.exception()
+        if future.exception() is not None:
+            self._release_resources(task, projected_threads, projected_memory)
+            raise possible_failure
+        result: Result = future.result()
 
-    @staticmethod
-    def _release_resources(projected_threads: int, projected_memory: int):
+        self._release_resources(task, projected_threads, projected_memory)
+        self._finalize_output(task, result)
+
+    def _release_resources(self, task: Task, projected_threads: int, projected_memory: int):
+        print(self.record_id, "A", 5)
         with TaskChainDistributor.update_lock:
             TaskChainDistributor.task_reference_count -= 1
             TaskChainDistributor.current_threads_in_use_count -= projected_threads
             TaskChainDistributor.current_gb_memory_in_use_count -= projected_memory
         with TaskChainDistributor.awaiting_resources:
             TaskChainDistributor.awaiting_resources.notifyAll()
+        if TaskChainDistributor.task_reference_count == 0 or isinstance(task, AggregateTask):
+            with TaskChainDistributor.awaiting_aggregate_okay:
+                TaskChainDistributor.awaiting_aggregate_okay.notifyAll()
+        print(self.record_id, "R", 5)
 
-    def _finalize_output(self, task: Task, future: Future):
-        possible_failure = future.exception()
-        if future.exception() is not None:
-            raise possible_failure
-        result: Result = future.result()
-        with TaskChainDistributor.update_lock:
-            if result.record_id not in TaskChainDistributor.results.keys():
-                TaskChainDistributor.results[result.record_id] = {}
-                TaskChainDistributor.output_data_to_pickle[result.record_id] = {}
-            TaskChainDistributor.results[result.record_id][result.task_name] = result
+    def _finalize_output(self, task: Task, result: Result):
+        if result.record_id not in TaskChainDistributor.results.keys():
+            TaskChainDistributor.results[result.record_id] = {}
+            TaskChainDistributor.output_data_to_pickle[result.record_id] = {}
+        TaskChainDistributor.results[result.record_id][result.task_name] = result
         if isinstance(task, AggregateTask):
             output = task.deaggregate()
             if not isinstance(output, dict):
                 raise DependencyGraph.ERR
-            with TaskChainDistributor.update_lock:
-                for key, value in output.items():
-                    TaskChainDistributor.results[result.task_name][key] = value
-                type(task).is_running = False
+            for key, value in output.items():
+                TaskChainDistributor.results[result.task_name][key] = value
+            type(task).is_running = False
         else:
             self[result.task_name] = result
         for result_key, result_data in result.items():
@@ -187,8 +202,7 @@ class TaskChainDistributor(dict):
                         raise TaskSetupError("'final' should consist of keys present in task output")
                     if isinstance(obj, Path) or (isinstance(obj, str) and os.path.exists(obj)):
                         copy(obj, _sub_out)
-                        with TaskChainDistributor.update_lock:
-                            TaskChainDistributor.output_data_to_pickle[result.record_id][file_str] = obj
+                        TaskChainDistributor.output_data_to_pickle[result.record_id][file_str] = obj
 
     @staticmethod
     def _update_distributed_input(record_id: str, requirement_node: Type[Task]) -> Dict:

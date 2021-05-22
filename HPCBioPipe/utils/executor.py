@@ -1,6 +1,6 @@
 import os
 import pickle
-from concurrent.futures import ThreadPoolExecutor, wait
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import List, Dict, Type, Optional
 
@@ -58,8 +58,7 @@ class Executor:
                                                   self.config_manager, self.path_manager, input_data,
                                                   self.results_base_dir, self.display_messages)
                 futures.append(executor.submit(task_chain.run))
-            wait(futures)
-            for future in futures:
+            for future in as_completed(futures):
                 if future.exception() is not None:
                     raise future.exception()
         out_ptr = open(self.results_base_dir.joinpath(f"{self.pipeline_name}.pkl"), "wb")
