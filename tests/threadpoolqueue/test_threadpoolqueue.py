@@ -9,15 +9,16 @@ class TestThreadPoolQueue(unittest.TestCase):
     def test_something(self):
         def run(n):
             print(n)
+            sleep(0.4)
             print(n)
 
-        q = ThreadPoolQueue(3)
-        threading.Thread(target=q.start, daemon=True).start()
+        q = ThreadPoolQueue(2)
         q.submit(run, 1)
         q.submit(run, 2)
         q.submit(run, 3)
         q.submit(run, 4)
         q.submit(run, 5)
+        q.start()
         q.join()
 
 
