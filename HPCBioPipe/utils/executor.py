@@ -91,8 +91,8 @@ class Executor:
         yield "Task", self.task_list[start:]
 
     def _get_max_resources_in_batch(self, task_batch: List[List[Node]]) -> int:
-        min_threads: int = 64
-        min_memory: int = 5000
+        min_threads: int = 500
+        min_memory: int = 50000
         for task_list in task_batch:
             for task in task_list:
                 min_threads = min(min_threads, self.config_manager.find(task.get(), ConfigManager.THREADS))
@@ -100,8 +100,12 @@ class Executor:
         min_threads = self.config_manager.config[ConfigManager.GLOBAL][ConfigManager.MAX_THREADS] // min_threads or 1
         min_memory = self.config_manager.config[ConfigManager.GLOBAL][ConfigManager.MAX_MEMORY] // min_memory or 1
         if min_memory < min_threads:
-            return min_memory
-        return min_threads
+            resources = min_memory
+        else:
+            resources = min_threads
+        if resources > 64:
+            return 64
+        return resources
 
     def _populate_requested_existing_input(self) -> Dict[str, Dict]:
         input_section = self.config_manager.config[ConfigManager.INPUT]
