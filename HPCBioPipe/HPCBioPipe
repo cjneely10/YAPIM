@@ -80,7 +80,7 @@ class HPCBioPipeRunner(cli.Application):
 
     @cli.switch(["-l", "--loader"], str)
     def set_loader(self, loader_name):
-        """Use InputLoader present in task directory with provided name"""
+        """Path to custom loader class extending InputLoader"""
         self.loader = self._get_loader(loader_name)
 
     @cli.switch(["-c", "--config"], str, mandatory=True)
@@ -118,15 +118,25 @@ class HPCBioPipeRunner(cli.Application):
         """Do not display log statements to stdout"""
         self.display_status = False
 
-    def main(self, input_path):
-        Executor(
-            self.loader(input_path, self.output_directory.joinpath("input")),
-            self.config_path,
-            self.output_directory,
-            self.tasks_directory,
-            self.dependencies_directories,
-            self.display_status
-        ).run()
+    def main(self, input_path=None, *args):
+        if self.loader.__name__ == ExtensionLoader.__name__:
+            Executor(
+                self.loader(input_path, self.output_directory.joinpath("input")),
+                self.config_path,
+                self.output_directory,
+                self.tasks_directory,
+                self.dependencies_directories,
+                self.display_status
+            ).run()
+        else:
+            Executor(
+                self.loader(),
+                self.config_path,
+                self.output_directory,
+                self.tasks_directory,
+                self.dependencies_directories,
+                self.display_status
+            ).run()
 
     def _get_loader(self, loader_name: str) -> Type[InputLoader]:
         current_dir = os.getcwd()
