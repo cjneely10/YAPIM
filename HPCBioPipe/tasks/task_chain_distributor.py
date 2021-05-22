@@ -3,6 +3,7 @@ import threading
 from concurrent.futures import ThreadPoolExecutor, Executor
 from pathlib import Path
 from shutil import copy
+from time import sleep
 from typing import List, Type, Optional, Dict, Union
 
 from HPCBioPipe import Task, AggregateTask
@@ -112,8 +113,7 @@ class TaskChainDistributor(dict):
 
         if TaskChainDistributor._is_aggregate(self.task_blueprints[task_identifier.name]):
             with TaskChainDistributor.agg_waiting_on_tasks_to_finish:
-                while TaskChainDistributor.task_reference_count != 0:
-                    TaskChainDistributor.agg_waiting_on_tasks_to_finish.wait()
+                TaskChainDistributor.agg_waiting_on_tasks_to_finish.wait()
             task = task_blueprint(
                 wdir,
                 ConfigManager.ROOT,

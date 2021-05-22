@@ -16,4 +16,4 @@ class UnMerge(Task):
         return []
 
     def run(self):
-        print(self.input)
+        pass
