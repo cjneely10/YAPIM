@@ -99,7 +99,6 @@ class Executor:
                 min_threads = min(min_threads, self.config_manager.find(task.get(), ConfigManager.THREADS))
         return self.config_manager.config[ConfigManager.GLOBAL][ConfigManager.MAX_THREADS] // min_threads
 
-
     def _populate_requested_existing_input(self) -> Dict[str, Dict]:
         input_section = self.config_manager.config[ConfigManager.INPUT]
         err = ImproperInputSection("INPUT should consist of dictionary {pipeline_name: key-mapping} or "
