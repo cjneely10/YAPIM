@@ -58,6 +58,8 @@ class Executor:
             workers = self._get_max_resources_in_batch(task_batch[1])
             with ThreadPoolExecutor(workers) as executor:
                 futures = []
+                if len(task_batch[1]) == 0:
+                    continue
                 if task_batch[0] == "Task":
                     for record_id, input_data in TaskChainDistributor.results.items():
                         task_chain = TaskChainDistributor(record_id, task_batch[1], self.task_blueprints,
