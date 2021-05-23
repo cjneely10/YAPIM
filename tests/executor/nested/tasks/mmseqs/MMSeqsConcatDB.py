@@ -1,6 +1,6 @@
 from typing import List
 
-from HPCBioPipe import AggregateTask
+from yapm import AggregateTask
 
 
 class MMSeqsConcatDB(AggregateTask):

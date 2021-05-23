@@ -3,9 +3,9 @@ from typing import List, Dict, Tuple, Type, Iterable
 
 from networkx import DiGraph, topological_sort, is_directed_acyclic_graph
 
-from HPCBioPipe.tasks.task import Task
-from HPCBioPipe.tasks.utils.dependency_input import DependencyInput
-from HPCBioPipe.utils.config_manager import ConfigManager
+from yapm.tasks.task import Task
+from yapm.tasks.utils.dependency_input import DependencyInput
+from yapm.utils.config_manager import ConfigManager
 
 
 class DependencyGraphGenerationError(BaseException):

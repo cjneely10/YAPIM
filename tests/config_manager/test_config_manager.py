@@ -1,7 +1,7 @@
 import unittest
 
-from HPCBioPipe.utils.config_manager import *
-from HPCBioPipe.utils.config_manager_generator import ConfigManagerGenerator
+from yapm.utils.config_manager import *
+from yapm.utils.config_manager_generator import ConfigManagerGenerator
 
 
 class TestConfigManager(unittest.TestCase):

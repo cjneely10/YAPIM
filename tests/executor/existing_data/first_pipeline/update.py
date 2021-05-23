@@ -1,6 +1,6 @@
 from typing import List
 
-from HPCBioPipe import Task, DependencyInput
+from yapm import Task, DependencyInput
 
 
 class Update(Task):

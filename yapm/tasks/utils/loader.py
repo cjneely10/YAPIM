@@ -4,7 +4,7 @@ Populate dependencies for easy loading
 import pkgutil
 from inspect import isclass
 
-from HPCBioPipe.tasks.task import Task
+from yapm.tasks.task import Task
 
 
 def get_modules(package_dir: str) -> dict:

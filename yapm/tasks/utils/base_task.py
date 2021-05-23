@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import List, Tuple, Union, Type
 
-from HPCBioPipe.tasks.utils.dependency_input import DependencyInput
+from yapm.tasks.utils.dependency_input import DependencyInput
 
 
 class BaseTask(ABC):

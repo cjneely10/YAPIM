@@ -4,14 +4,14 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import List, Dict, Type, Optional
 
-from HPCBioPipe import AggregateTask
-from HPCBioPipe.tasks.task import Task
-from HPCBioPipe.tasks.task_chain_distributor import TaskChainDistributor
-from HPCBioPipe.tasks.utils.loader import get_modules
-from HPCBioPipe.utils.config_manager import ConfigManager, ImproperInputSection
-from HPCBioPipe.utils.dependency_graph import Node, DependencyGraph
-from HPCBioPipe.utils.input_loader import InputLoader
-from HPCBioPipe.utils.path_manager import PathManager
+from yapm import AggregateTask
+from yapm.tasks.task import Task
+from yapm.tasks.task_chain_distributor import TaskChainDistributor
+from yapm.tasks.utils.loader import get_modules
+from yapm.utils.config_manager import ConfigManager, ImproperInputSection
+from yapm.utils.dependency_graph import Node, DependencyGraph
+from yapm.utils.input_loader import InputLoader
+from yapm.utils.path_manager import PathManager
 
 
 class Executor:

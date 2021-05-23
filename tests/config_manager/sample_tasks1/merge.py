@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from typing import List
 
-from HPCBioPipe import AggregateTask
+from yapm import AggregateTask
 
 
 class Merge(AggregateTask):

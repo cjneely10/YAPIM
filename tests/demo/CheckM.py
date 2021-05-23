@@ -1,7 +1,7 @@
 import os
 from typing import List, Union, Type
 
-from HPCBioPipe import AggregateTask
+from yapm import AggregateTask
 
 
 class CheckM(AggregateTask):
@@ -18,8 +18,9 @@ class CheckM(AggregateTask):
                 "lineage_wf",
                 "-t", self.threads,
                 "-x", ".fna",
+                (*self.added_flags),
                 self.input["input"],
-                str(self.wdir)
+                str(self.wdir),
             ]
         )
 

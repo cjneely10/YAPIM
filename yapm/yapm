@@ -7,16 +7,16 @@ from typing import Optional, List, Type
 
 from plumbum import cli
 
-from HPCBioPipe.utils.config_manager import ConfigManager
-from HPCBioPipe.utils.config_manager_generator import ConfigManagerGenerator
-from HPCBioPipe.utils.executor import Executor
-from HPCBioPipe.utils.extension_loader import ExtensionLoader
-from HPCBioPipe.utils.input_loader import InputLoader
+from yapm.utils.config_manager import ConfigManager
+from yapm.utils.config_manager_generator import ConfigManagerGenerator
+from yapm.utils.executor import Executor
+from yapm.utils.extension_loader import ExtensionLoader
+from yapm.utils.input_loader import InputLoader
 
 
-class HPCBioPipe(cli.Application):
+class YAPM(cli.Application):
     """
-    Create and run an HPCBioPipeline
+    Create and run Yet Another Pipeline (Manager)
     """
     VERSION = "0.1.0"
 
@@ -29,8 +29,8 @@ class HPCBioPipe(cli.Application):
             exit(1)
 
 
-@HPCBioPipe.subcommand("config")
-class HPCBioPipeConfigCreator(cli.Application):
+@YAPM.subcommand("config")
+class YAPMConfigCreator(cli.Application):
     """
     Create configuration file for a pipeline
     """
@@ -78,8 +78,8 @@ def _get_loader(loader_name: str) -> Type[InputLoader]:
     exit(1)
 
 
-@HPCBioPipe.subcommand("run")
-class HPCBioPipeRunner(cli.Application):
+@YAPM.subcommand("run")
+class YAPMRunner(cli.Application):
     """
     Run a pipeline
     """
@@ -167,4 +167,4 @@ class HPCBioPipeRunner(cli.Application):
 
 
 if __name__ == "__main__":
-    HPCBioPipe.run()
+    YAPM.run()

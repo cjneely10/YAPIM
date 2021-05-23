@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
 from typing import List
 
-from HPCBioPipe.tasks.task import Task
-from HPCBioPipe.tasks.utils.input_dict import ImmutableDict
-from HPCBioPipe.utils.config_manager import ConfigManager
-from HPCBioPipe.utils.dependency_graph import DependencyGraph
+from yapm.tasks.task import Task
+from yapm.tasks.utils.input_dict import ImmutableDict
+from yapm.utils.config_manager import ConfigManager
+from yapm.utils.dependency_graph import DependencyGraph
 
 
 class AggregateTask(Task, ABC):

@@ -9,11 +9,11 @@ from typing import Tuple, List, Optional, Union
 from plumbum import local, colors
 from plumbum.machines import LocalMachine, LocalCommand
 
-from HPCBioPipe.tasks.utils.base_task import BaseTask
-from HPCBioPipe.tasks.utils.input_dict import ImmutableDict
-from HPCBioPipe.tasks.utils.result import Result
-from HPCBioPipe.tasks.utils.slurm_caller import SLURMCaller
-from HPCBioPipe.utils.config_manager import ConfigManager, MissingDataError, MissingProgramSection
+from yapm.tasks.utils.base_task import BaseTask
+from yapm.tasks.utils.input_dict import ImmutableDict
+from yapm.tasks.utils.result import Result
+from yapm.tasks.utils.slurm_caller import SLURMCaller
+from yapm.utils.config_manager import ConfigManager, MissingDataError, MissingProgramSection
 
 
 class TaskSetupError(AttributeError):
@@ -137,7 +137,7 @@ class Task(BaseTask, ABC):
 
         if not self.is_complete:
             if self.display_messages:
-                print(colors.green | "\nRunning:\n  %s" % (
+                print(colors.green & colors.bold | "\nRunning:\n  %s" % (
                         (self.task_scope() + " " if self.task_scope() != ConfigManager.ROOT else "") + self.name
                 ))
             _str = "In progress:  {}".format(self.record_id)

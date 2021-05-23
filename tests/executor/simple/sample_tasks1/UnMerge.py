@@ -1,6 +1,6 @@
 from typing import List, Union, Type
 
-from HPCBioPipe import Task, DependencyInput
+from yapm import Task, DependencyInput
 
 
 class UnMerge(Task):

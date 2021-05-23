@@ -3,9 +3,9 @@ import unittest
 from pathlib import Path
 from typing import Type, Iterable, Dict, Tuple, Union
 
-from HPCBioPipe import AggregateTask
-from HPCBioPipe.utils.config_manager import ConfigManager
-from HPCBioPipe.utils.dependency_graph import DependencyGraph, Node, DependencyGraphGenerationError
+from yapm import AggregateTask
+from yapm.utils.config_manager import ConfigManager
+from yapm.utils.dependency_graph import DependencyGraph, Node, DependencyGraphGenerationError
 from tests.dependency_graph.class_stubs import *
 
 TaskType = Type[Task]

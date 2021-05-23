@@ -1,9 +1,9 @@
 from pathlib import Path
 from typing import Type, Dict, List, Optional
 
-from HPCBioPipe import Task
-from HPCBioPipe.tasks.utils.loader import get_modules
-from HPCBioPipe.utils.dependency_graph import DependencyGraph, Node
+from yapm import Task
+from yapm.tasks.utils.loader import get_modules
+from yapm.utils.dependency_graph import DependencyGraph, Node
 
 
 class ConfigManagerGenerator:

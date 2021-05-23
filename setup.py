@@ -1,14 +1,14 @@
 from setuptools import setup
 
 setup(
-    name='HPCBioPipe',
+    name='yapm',
     version='0.1.0',
     description='Pipeline generation tool',
     url='',
     author='Christopher Neely',
     author_email='christopher.neely1200@gmail.com',
     license='GNU GPL 3',
-    packages=['HPCBioPipe', 'HPCBioPipe.utils', 'HPCBioPipe.tasks', 'HPCBioPipe.tasks.utils'],
+    packages=['yapm', 'yapm.utils', 'yapm.tasks', 'yapm.tasks.utils'],
     python_requires='>=3.8',
     install_requires=[
         "bcbio-gff==0.6.6",
@@ -22,6 +22,6 @@ setup(
         "pytest-cov==2.10.1"
     ],
     scripts=[
-        "HPCBioPipe/HPCBioPipe",
+        "yapm/yapm",
     ]
 )

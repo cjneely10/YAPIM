@@ -5,12 +5,12 @@ from pathlib import Path
 from shutil import copy
 from typing import List, Type, Optional, Dict, Union
 
-from HPCBioPipe import Task, AggregateTask
-from HPCBioPipe.tasks.task import TaskSetupError
-from HPCBioPipe.tasks.utils.result import Result
-from HPCBioPipe.utils.config_manager import ConfigManager
-from HPCBioPipe.utils.dependency_graph import Node, DependencyGraph
-from HPCBioPipe.utils.path_manager import PathManager
+from yapm import Task, AggregateTask
+from yapm.tasks.task import TaskSetupError
+from yapm.tasks.utils.result import Result
+from yapm.utils.config_manager import ConfigManager
+from yapm.utils.dependency_graph import Node, DependencyGraph
+from yapm.utils.path_manager import PathManager
 
 
 class TaskChainDistributor(dict):
