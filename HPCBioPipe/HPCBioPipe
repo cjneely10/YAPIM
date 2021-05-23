@@ -58,9 +58,6 @@ class HPCBioPipeConfigCreator(cli.Application):
     @cli.switch(["-c", "--config"], str, mandatory=True)
     def set_config_path(self, config):
         """Path to configuration file"""
-        if not os.path.exists(config):
-            print("Unable to load config file")
-            exit(1)
         self.config_path = Path(config).resolve()
 
     def main(self):
