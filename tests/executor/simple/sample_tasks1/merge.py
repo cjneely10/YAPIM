@@ -34,7 +34,9 @@ class Merge(AggregateTask):
     def deaggregate(self) -> dict:
         fp = open(self.output["file"], "r")
         out = {}
-        for line in fp:
+        for i, line in enumerate(fp):
+            if i % 2 == 0:
+                continue
             line = line.rstrip("\r\n").split("\t")
             out[line[0]] = line[1]
         fp.close()

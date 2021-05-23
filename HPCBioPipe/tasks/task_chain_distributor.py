@@ -158,15 +158,20 @@ class TaskChainDistributor(dict):
                 TaskChainDistributor.results[result.record_id] = {}
                 TaskChainDistributor.output_data_to_pickle[result.record_id] = {}
         if isinstance(task, AggregateTask):
-            with TaskChainDistributor.update_lock:
-                del TaskChainDistributor.results[result.record_id]
             output = task.deaggregate()
             if not isinstance(output, dict):
                 raise DependencyGraph.ERR
             with TaskChainDistributor.update_lock:
+                keys = set(output.keys())
                 for key, value in output.items():
                     if key in TaskChainDistributor.results.keys():
                         TaskChainDistributor.results[key][result.task_name] = value
+                to_remove = []
+                for key in TaskChainDistributor.results.keys():
+                    if key not in keys:
+                        to_remove.append(key)
+                for key in to_remove:
+                    del TaskChainDistributor.results[key]
             TaskChainDistributor._complete_agg(task)
         else:
             with TaskChainDistributor.update_lock:

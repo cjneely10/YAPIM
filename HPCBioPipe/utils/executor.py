@@ -52,18 +52,18 @@ class Executor:
         self.input_data_dict.update(self._populate_requested_existing_input())
 
     def run(self):
-        first_item = list(self.input_data_dict.keys())[0]
         for task_batch in self.task_batch():
             workers = self._get_max_resources_in_batch(task_batch[1])
             with ThreadPoolExecutor(workers) as executor:
                 futures = []
                 if task_batch[0] == "Task":
-                    for record_id, input_data in self.input_data_dict.items():
+                    for record_id, input_data in TaskChainDistributor.results.items():
                         task_chain = TaskChainDistributor(record_id, task_batch[1], self.task_blueprints,
                                                           self.config_manager, self.path_manager, input_data,
                                                           self.results_base_dir, self.display_messages)
                         futures.append(executor.submit(task_chain.run))
                 else:
+                    first_item = list(TaskChainDistributor.results.keys())[0]
                     task_chain = TaskChainDistributor(first_item, task_batch[1], self.task_blueprints,
                                                       self.config_manager, self.path_manager, input_data,
                                                       self.results_base_dir, self.display_messages)

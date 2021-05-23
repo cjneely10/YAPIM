@@ -16,4 +16,4 @@ class UnMerge(Task):
         return []
 
     def run(self):
-        pass
+        print(self.record_id)
