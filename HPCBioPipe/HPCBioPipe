@@ -7,6 +7,7 @@ from typing import Optional, List, Type
 
 from plumbum import cli
 
+from HPCBioPipe.utils.config_manager import ConfigManager
 from HPCBioPipe.utils.config_manager_generator import ConfigManagerGenerator
 from HPCBioPipe.utils.executor import Executor
 from HPCBioPipe.utils.extension_loader import ExtensionLoader
@@ -135,7 +136,7 @@ class HPCBioPipeRunner(cli.Application):
     def main(self, *args):
         if self.loader.__name__ == ExtensionLoader.__name__:
             Executor(
-                self.loader(args[0], self.output_directory.joinpath("input")),
+                self.loader(args[0], self.output_directory.joinpath(ConfigManager.STORAGE_DIR)),
                 self.config_path,
                 self.output_directory,
                 self.tasks_directory,
