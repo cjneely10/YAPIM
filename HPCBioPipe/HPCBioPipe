@@ -41,7 +41,7 @@ class HPCBioPipeConfigCreator(cli.Application):
     @cli.switch(["-t", "--tasks"], str, mandatory=True)
     def set_tasks_dir(self, tasks_dir):
         """Path to directory of pipeline Task/AggregateTasks"""
-        if not os.path.exists(tasks_dir):
+        if not os.path.exists(tasks_dir) or not os.path.isdir(tasks_dir):
             print("Unable to find tasks directory")
             exit(1)
         self.tasks_directory = tasks_dir
@@ -50,7 +50,7 @@ class HPCBioPipeConfigCreator(cli.Application):
     def set_dependencies_directory(self, dependencies):
         """Path to directory of Task/AggregateTask dependencies"""
         for dependency in dependencies:
-            if not os.path.exists(dependency):
+            if not os.path.exists(dependency) or not os.path.isdir(dependency):
                 print("Unable to find dependencies directory")
                 exit(1)
         self.dependencies_directories = dependencies
@@ -83,6 +83,7 @@ class HPCBioPipeRunner(cli.Application):
     """
     Run a pipeline
     """
+    input_directory: Optional[Path] = None
     loader: Type[InputLoader] = ExtensionLoader
     config_path: Path
     output_directory: Optional[Path] = Path(os.getcwd()).joinpath("out")
@@ -93,12 +94,23 @@ class HPCBioPipeRunner(cli.Application):
     @cli.switch(["-l", "--loader"], str)
     def set_loader(self, loader_name):
         """Path to custom loader class extending InputLoader"""
+        if not os.path.exists(loader_name) or not os.path.isfile(loader_name):
+            print("Unable to find loader")
+            exit(1)
         self.loader = _get_loader(loader_name)
+
+    @cli.switch(["-i", "--input"], str)
+    def set_input(self, input_directory):
+        """Path to input directory"""
+        if not os.path.exists(input_directory) or not os.path.isdir(input_directory):
+            print("Unable to locate input directory")
+            exit(1)
+        self.input_directory = input_directory
 
     @cli.switch(["-c", "--config"], str, mandatory=True)
     def set_config_path(self, config):
         """Path to configuration file"""
-        if not os.path.exists(config):
+        if not os.path.exists(config) or not os.path.isfile(config):
             print("Unable to load config file")
             exit(1)
         self.config_path = Path(config).resolve()
@@ -111,7 +123,7 @@ class HPCBioPipeRunner(cli.Application):
     @cli.switch(["-t", "--tasks"], str, mandatory=True)
     def set_tasks_dir(self, tasks_dir):
         """Path to directory of pipeline Task/AggregateTasks"""
-        if not os.path.exists(tasks_dir):
+        if not os.path.exists(tasks_dir) or not os.path.isdir(tasks_dir):
             print("Unable to find tasks directory")
             exit(1)
         self.tasks_directory = tasks_dir
@@ -120,7 +132,7 @@ class HPCBioPipeRunner(cli.Application):
     def set_dependencies_directory(self, dependencies):
         """Path to directory of Task/AggregateTask dependencies"""
         for dependency in dependencies:
-            if not os.path.exists(dependency):
+            if not os.path.exists(dependency) or not os.path.isdir(dependency):
                 print("Unable to find dependencies directory")
                 exit(1)
         self.dependencies_directories = dependencies
@@ -132,8 +144,11 @@ class HPCBioPipeRunner(cli.Application):
 
     def main(self, *args):
         if self.loader.__name__ == ExtensionLoader.__name__:
+            if self.input_directory is None:
+                print("Must set input directory for default ExtensionLoader")
+                exit(1)
             Executor(
-                self.loader(args[0], self.output_directory.joinpath(ConfigManager.STORAGE_DIR)),
+                self.loader(self.input_directory, self.output_directory.joinpath(ConfigManager.STORAGE_DIR)),
                 self.config_path,
                 self.output_directory,
                 self.tasks_directory,

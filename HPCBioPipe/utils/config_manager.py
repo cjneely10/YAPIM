@@ -94,6 +94,7 @@ class ConfigManager:
     MAX_THREADS = "MaxThreads"
     MAX_MEMORY = "MaxMemory"
     GLOBAL = "GLOBAL"
+    STORAGE_DIR = "input"
 
     def __init__(self, config_path: Path):
         """ Create ConfigManager object

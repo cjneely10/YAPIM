@@ -9,7 +9,8 @@ class Prodigal(Task):
         self.output = {
             "prot": self.wdir.joinpath(self.record_id + ".faa"),
             "cds": self.wdir.joinpath(self.record_id + ".cds.fna"),
-            "gff": self.wdir.joinpath(self.record_id + ".gff")
+            "gff": self.wdir.joinpath(self.record_id + ".gff"),
+            "final": ["prot", "cds", "gff"]
         }
 
     @staticmethod
