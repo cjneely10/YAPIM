@@ -49,7 +49,9 @@ class Executor:
         TaskChainDistributor.set_allocations(self.config_manager)
         TaskChainDistributor.results.update(self.input_data_dict)
         TaskChainDistributor.output_data_to_pickle.update({key: {} for key in TaskChainDistributor.results.keys()})
-        self.input_data_dict.update(self._populate_requested_existing_input())
+        existing_data = self._populate_requested_existing_input()
+        self.input_data_dict.update(existing_data)
+        TaskChainDistributor.results.update(existing_data)
 
     def run(self):
         for task_batch in self.task_batch():
