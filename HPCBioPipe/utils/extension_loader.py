@@ -35,6 +35,7 @@ class ExtensionLoader(InputLoader):
 
     def load(self) -> Dict[str, Dict]:
         out = {}
+        print("Populating input...")
         with ThreadPoolExecutor() as executor:
             futures = []
             for file in os.listdir(self.directory):
@@ -46,6 +47,7 @@ class ExtensionLoader(InputLoader):
                 if result[0] not in out.keys():
                     out[result[0]] = {}
                 out[result[0]].update(result[1])
+        print("Done")
         return out
 
     def _load_file(self, file: str, ext: str) -> Tuple[str, dict]:
