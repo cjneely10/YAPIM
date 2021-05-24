@@ -36,7 +36,7 @@ pipeline_file = ".pipeline.pkl"
 @YAPM.subcommand("config")
 class YAPMConfigCreator(cli.Application):
     """
-    Create configuration file and calling script for a pipeline
+    Create configuration file and pipeline path data
     """
     tasks_directory: Path
     loader: Type[InputLoader] = ExtensionLoader
