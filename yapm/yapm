@@ -152,8 +152,8 @@ class YAPMRunner(cli.Application):
 
     def main(self, *args):
         pipeline_data: dict
-        with open(self.pipeline_pkl_path, "rb") as pipeline_file:
-            pipeline_data = pickle.load(pipeline_file)
+        with open(self.pipeline_pkl_path, "rb") as provided_pipeline_file:
+            pipeline_data = pickle.load(provided_pipeline_file)
         if pipeline_data["loader"].__name__ == ExtensionLoader.__name__:
             if self.input_directory is None:
                 print("Must set input directory for default ExtensionLoader")
