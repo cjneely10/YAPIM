@@ -30,7 +30,7 @@ class YAPM(cli.Application):
             exit(1)
 
 
-pipeline_file = "pipeline.pkl"
+pipeline_file = ".pipeline.pkl"
 
 
 @YAPM.subcommand("config")
@@ -86,8 +86,8 @@ class YAPMConfigCreator(cli.Application):
             "dependencies": self.dependencies_directories
         }
         out_file = self.tasks_directory.joinpath(pipeline_file)
-        with open(out_file, "wb") as json_file:
-            if out_file.exists() and input("Overwrite existing pipeline file? [Y/n]: ").upper() == "Y":
+        if not out_file.exists() or input("Overwrite existing pipeline file? [Y/n]: ").upper() == "Y":
+            with open(out_file, "wb") as json_file:
                 pickle.dump(pipeline_data, json_file)
 
 
