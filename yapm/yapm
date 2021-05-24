@@ -30,6 +30,9 @@ class YAPM(cli.Application):
             exit(1)
 
 
+pipeline_file = "pipeline.pkl"
+
+
 @YAPM.subcommand("config")
 class YAPMConfigCreator(cli.Application):
     """
@@ -40,7 +43,6 @@ class YAPMConfigCreator(cli.Application):
     dependencies_directories: Optional[List[Path]] = None
     config_path: Path
     overwrite: bool
-    pipeline_file = "pipeline.pkl"
 
     @cli.switch(["-l", "--loader"], str)
     def set_loader(self, loader_name):
@@ -78,15 +80,15 @@ class YAPMConfigCreator(cli.Application):
     def main(self):
         if self.overwrite is True:
             ConfigManagerGenerator(self.tasks_directory, self.dependencies_directories).write(self.config_path)
-        pipeline_file = {
+        pipeline_data = {
             "loader": self.loader,
             "tasks": self.tasks_directory,
             "dependencies": self.dependencies_directories
         }
-        out_file = self.tasks_directory.joinpath(self.pipeline_file)
+        out_file = self.tasks_directory.joinpath(pipeline_file)
         with open(out_file, "wb") as json_file:
             if out_file.exists() and input("Overwrite existing pipeline file? [Y/n]: ").upper() == "Y":
-                pickle.dump(pipeline_file, json_file)
+                pickle.dump(pipeline_data, json_file)
 
 
 def _get_loader(loader_name: str) -> Type[InputLoader]:
@@ -132,11 +134,11 @@ class YAPMRunner(cli.Application):
 
     @cli.switch(["-p", "--pipeline"], str, mandatory=True)
     def set_pipeline_path(self, pipeline):
-        """Path to pipeline .pkl file"""
-        if not os.path.exists(pipeline) or not os.path.isfile(pipeline):
+        """Path to directory containing pipeline.pkl file"""
+        self.pipeline_pkl_path = Path(pipeline).resolve().joinpath(pipeline_file)
+        if not self.pipeline_pkl_path.exists():
             print("Unable to find pipeline .pkl file")
             exit(1)
-        self.pipeline_pkl_path = Path(pipeline).resolve()
 
     @cli.switch(["-o", "--output"], str)
     def set_output_dir(self, output):
