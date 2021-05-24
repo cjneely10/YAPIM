@@ -30,7 +30,6 @@ class YAPM(cli.Application):
             exit(1)
 
 
-# TODO: Create script for simplified running
 @YAPM.subcommand("config")
 class YAPMConfigCreator(cli.Application):
     """
