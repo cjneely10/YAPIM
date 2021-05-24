@@ -8,7 +8,6 @@ from typing import List, Union
 
 from plumbum.machines.local import LocalCommand, local
 
-from yapm import Task
 from yapm.utils.config_manager import ConfigManager
 
 
@@ -30,7 +29,7 @@ class SLURMCaller:  # pragma: no cover
     def __init__(self,
                  cmd: Union[LocalCommand, List[LocalCommand]],
                  config_manager: ConfigManager,
-                 task: Task,
+                 task,
                  ):
         """ Generate SLURMCaller object using user metadata gathered from SLURM config section and
         the task's own metadata
