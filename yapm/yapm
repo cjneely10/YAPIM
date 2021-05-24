@@ -110,7 +110,8 @@ def _validate_pipeline_pkl(pipeline_path: Path) -> dict:
     with open(pipeline_path, "rb") as provided_pipeline_file:
         pipeline_data = pickle.load(provided_pipeline_file)
     for key in ("tasks", "dependencies"):
-        if key not in pipeline_data.keys() or (isinstance(pipeline_data[key], Path) and not pipeline_data[key].exists()):
+        if key not in pipeline_data.keys() or \
+                (isinstance(pipeline_data[key], Path) and not pipeline_data[key].exists()):
             print(f"Unable to load {key} {pipeline_data[key]}")
             print(f"Re-run yaml config to update pipeline")
             exit(1)
