@@ -7,9 +7,9 @@ class Prodigal(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {
-            "prot": self.wdir.joinpath(self.record_id + ".faa"),
-            "cds": self.wdir.joinpath(self.record_id + ".cds.fna"),
-            "gff": self.wdir.joinpath(self.record_id + ".gff"),
+            "prot": self.wdir.joinpath(f"{self.record_id}.faa"),
+            "cds": self.wdir.joinpath(f"{self.record_id}.cds.fna"),
+            "gff": self.wdir.joinpath(f"{self.record_id}.gff"),
             "final": ["prot", "cds", "gff"]
         }
 
