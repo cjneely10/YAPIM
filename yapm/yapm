@@ -157,7 +157,9 @@ class YAPMRunner(cli.Application):
                 print("Must set input directory for default ExtensionLoader")
                 exit(1)
             Executor(
-                pipeline_data["loader"](self.input_directory, self.output_directory.joinpath(ConfigManager.STORAGE_DIR)),
+                pipeline_data["loader"](
+                    self.input_directory, self.output_directory.joinpath(ConfigManager.STORAGE_DIR)
+                ),
                 self.config_path,
                 self.output_directory,
                 pipeline_data["tasks"],
