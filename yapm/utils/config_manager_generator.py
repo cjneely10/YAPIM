@@ -7,7 +7,7 @@ from yapm.utils.dependency_graph import DependencyGraph, Node
 
 
 class ConfigManagerGenerator:
-    def __init__(self, pipeline_module_path: str, dependencies_directories: Optional[List[str]]):
+    def __init__(self, pipeline_module_path: Path, dependencies_directories: Optional[List[Path]]):
         self.task_blueprints: Dict[str, Type[Task]] = get_modules(pipeline_module_path)
         pipeline_tasks = list(self.task_blueprints.values())
         if dependencies_directories is not None:

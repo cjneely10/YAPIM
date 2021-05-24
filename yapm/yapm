@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os
+import pickle
 from importlib import import_module
 from inspect import isclass
 from pathlib import Path
@@ -29,14 +30,26 @@ class YAPM(cli.Application):
             exit(1)
 
 
+# TODO: Create script for simplified running
 @YAPM.subcommand("config")
 class YAPMConfigCreator(cli.Application):
     """
-    Create configuration file for a pipeline
+    Create configuration file and calling script for a pipeline
     """
-    tasks_directory: str
-    dependencies_directories: Optional[List[str]] = None
+    tasks_directory: Path
+    loader: Type[InputLoader] = ExtensionLoader
+    dependencies_directories: Optional[List[Path]] = None
     config_path: Path
+    overwrite: bool
+    pipeline_file = "pipeline.pkl"
+
+    @cli.switch(["-l", "--loader"], str)
+    def set_loader(self, loader_name):
+        """Path to custom loader class extending InputLoader"""
+        if not os.path.exists(loader_name) or not os.path.isfile(loader_name):
+            print("Unable to find loader")
+            exit(1)
+        self.loader = _get_loader(loader_name)
 
     @cli.switch(["-t", "--tasks"], str, mandatory=True)
     def set_tasks_dir(self, tasks_dir):
@@ -44,24 +57,37 @@ class YAPMConfigCreator(cli.Application):
         if not os.path.exists(tasks_dir) or not os.path.isdir(tasks_dir):
             print("Unable to find tasks directory")
             exit(1)
-        self.tasks_directory = tasks_dir
+        self.tasks_directory = Path(tasks_dir).resolve()
 
     @cli.switch(["-d", "--dependencies"], str, list=True)
     def set_dependencies_directory(self, dependencies):
         """Path to directory of Task/AggregateTask dependencies"""
-        for dependency in dependencies:
-            if not os.path.exists(dependency) or not os.path.isdir(dependency):
+        for i in range(len(dependencies)):
+            if not os.path.exists(dependencies[i]) or not os.path.isdir(dependencies[i]):
                 print("Unable to find dependencies directory")
                 exit(1)
+            dependencies[i] = Path(dependencies[i]).resolve()
         self.dependencies_directories = dependencies
 
     @cli.switch(["-c", "--config"], str, mandatory=True)
     def set_config_path(self, config):
         """Path to configuration file"""
         self.config_path = Path(config).resolve()
+        if self.config_path.exists():
+            self.overwrite = input("Overwrite existing configuration file? [Y/n]: ").upper() == "Y"
 
     def main(self):
-        ConfigManagerGenerator(self.tasks_directory, self.dependencies_directories).write(self.config_path)
+        if self.overwrite is True:
+            ConfigManagerGenerator(self.tasks_directory, self.dependencies_directories).write(self.config_path)
+        pipeline_file = {
+            "loader": self.loader,
+            "tasks": self.tasks_directory,
+            "dependencies": self.dependencies_directories
+        }
+        out_file = self.tasks_directory.joinpath(self.pipeline_file)
+        with open(out_file, "wb") as json_file:
+            if out_file.exists() and input("Overwrite existing pipeline file? [Y/n]: ").upper() == "Y":
+                pickle.dump(pipeline_file, json_file)
 
 
 def _get_loader(loader_name: str) -> Type[InputLoader]:
@@ -84,20 +110,10 @@ class YAPMRunner(cli.Application):
     Run a pipeline
     """
     input_directory: Optional[Path] = None
-    loader: Type[InputLoader] = ExtensionLoader
     config_path: Path
     output_directory: Optional[Path] = Path(os.getcwd()).joinpath("out")
-    tasks_directory: str
-    dependencies_directories: Optional[List[str]] = None
+    pipeline_pkl_path: Path
     display_status: bool = True
-
-    @cli.switch(["-l", "--loader"], str)
-    def set_loader(self, loader_name):
-        """Path to custom loader class extending InputLoader"""
-        if not os.path.exists(loader_name) or not os.path.isfile(loader_name):
-            print("Unable to find loader")
-            exit(1)
-        self.loader = _get_loader(loader_name)
 
     @cli.switch(["-i", "--input"], str)
     def set_input(self, input_directory):
@@ -115,27 +131,18 @@ class YAPMRunner(cli.Application):
             exit(1)
         self.config_path = Path(config).resolve()
 
+    @cli.switch(["-p", "--pipeline"], str, mandatory=True)
+    def set_pipeline_path(self, pipeline):
+        """Path to pipeline .pkl file"""
+        if not os.path.exists(pipeline) or not os.path.isfile(pipeline):
+            print("Unable to find pipeline .pkl file")
+            exit(1)
+        self.pipeline_pkl_path = Path(pipeline).resolve()
+
     @cli.switch(["-o", "--output"], str)
     def set_output_dir(self, output):
         """Path to output directory, default is <current-dir>/out"""
         self.output_directory = Path(output).resolve()
-
-    @cli.switch(["-t", "--tasks"], str, mandatory=True)
-    def set_tasks_dir(self, tasks_dir):
-        """Path to directory of pipeline Task/AggregateTasks"""
-        if not os.path.exists(tasks_dir) or not os.path.isdir(tasks_dir):
-            print("Unable to find tasks directory")
-            exit(1)
-        self.tasks_directory = tasks_dir
-
-    @cli.switch(["-d", "--dependencies"], str, list=True)
-    def set_dependencies_directory(self, dependencies):
-        """Path to directory of Task/AggregateTask dependencies"""
-        for dependency in dependencies:
-            if not os.path.exists(dependency) or not os.path.isdir(dependency):
-                print("Unable to find dependencies directory")
-                exit(1)
-        self.dependencies_directories = dependencies
 
     @cli.switch(["-s", "--silence"])
     def set_verbosity(self):
@@ -143,25 +150,28 @@ class YAPMRunner(cli.Application):
         self.display_status = False
 
     def main(self, *args):
-        if self.loader.__name__ == ExtensionLoader.__name__:
+        pipeline_data: dict
+        with open(self.pipeline_pkl_path, "rb") as pipeline_file:
+            pipeline_data = pickle.load(pipeline_file)
+        if pipeline_data["loader"].__name__ == ExtensionLoader.__name__:
             if self.input_directory is None:
                 print("Must set input directory for default ExtensionLoader")
                 exit(1)
             Executor(
-                self.loader(self.input_directory, self.output_directory.joinpath(ConfigManager.STORAGE_DIR)),
+                pipeline_data["loader"](self.input_directory, self.output_directory.joinpath(ConfigManager.STORAGE_DIR)),
                 self.config_path,
                 self.output_directory,
-                self.tasks_directory,
-                self.dependencies_directories,
+                pipeline_data["tasks"],
+                pipeline_data["dependencies"],
                 self.display_status
             ).run()
         else:
             Executor(
-                self.loader(*args),
+                pipeline_data["loader"](*args),
                 self.config_path,
                 self.output_directory,
-                self.tasks_directory,
-                self.dependencies_directories,
+                pipeline_data["tasks"],
+                pipeline_data["dependencies"],
                 self.display_status
             ).run()
 

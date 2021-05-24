@@ -3,13 +3,14 @@ Populate dependencies for easy loading
 """
 import pkgutil
 from inspect import isclass
+from pathlib import Path
 
 from yapm.tasks.task import Task
 
 
-def get_modules(package_dir: str) -> dict:
+def get_modules(package_dir: Path) -> dict:
     out = {}
-    for loader, module_name, is_pkg in pkgutil.walk_packages([package_dir]):
+    for loader, module_name, is_pkg in pkgutil.walk_packages([str(package_dir)]):
         module = loader.find_module(module_name).load_module(module_name)
         for attribute_name in dir(module):
             attribute = getattr(module, attribute_name)
