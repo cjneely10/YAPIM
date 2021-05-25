@@ -33,14 +33,14 @@ class TypeChecker:
             for attr in dir(cls):
                 _attr = getattr(cls, attr)
                 if isinstance(_attr, TypeChecker.function_type):
-                    setattr(cls, attr, TypeChecker.check_method(cls, getattr(cls, attr)))
+                    setattr(cls, attr, TypeChecker.check_method(getattr(cls, attr)))
             return cls
 
         return decorate()
 
     # Default cache size
     @staticmethod
-    def check_method(cls: Type, func: Callable):
+    def check_method(func: Callable):
         """ Check if types of args/kwargs passed to function/method are valid for provided type signatures
 
         :param func: Called function/method
@@ -77,7 +77,7 @@ class TypeChecker:
             # Confirm output is valid
             if "return" in specified_types.keys():
                 TypeChecker._validate_type(specified_types["return"], output,
-                                            TypeChecker.RETURN_ERR_STR % str(type(output)))
+                                           TypeChecker.RETURN_ERR_STR % str(type(output)))
             # Add successful call to cache
             TypeChecker._cache.add(cache_add_id)
             return output
