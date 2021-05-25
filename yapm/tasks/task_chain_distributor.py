@@ -1,6 +1,5 @@
 import os
 import threading
-from concurrent.futures import ThreadPoolExecutor, Executor
 from pathlib import Path
 from shutil import copy
 from typing import List, Type, Optional, Dict, Union
@@ -22,7 +21,6 @@ class TaskChainDistributor(dict):
     task_reference_count: int
     current_threads_in_use_count: int
     current_gb_memory_in_use_count: int
-    executor: Executor = ThreadPoolExecutor()
 
     maximum_threads: Optional[int] = None
     maximum_gb_memory: Optional[int] = None
