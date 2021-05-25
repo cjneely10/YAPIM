@@ -42,7 +42,7 @@ class YAPMConfigCreator(cli.Application):
     loader: Type[InputLoader] = ExtensionLoader
     dependencies_directories: Optional[List[Path]] = None
     config_path: Path
-    overwrite: bool
+    overwrite: bool = True
 
     @cli.switch(["-l", "--loader"], str)
     def set_loader(self, loader_name):
