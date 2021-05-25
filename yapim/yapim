@@ -34,7 +34,7 @@ pipeline_file = ".pipeline.pkl"
 
 
 @YAPIM.subcommand("config")
-class YAPMConfigCreator(cli.Application):
+class YAPIMConfigCreator(cli.Application):
     """
     Create configuration file and pipeline path data
     """
@@ -122,7 +122,7 @@ def _validate_pipeline_pkl(pipeline_path: Path) -> dict:
 
 
 @YAPIM.subcommand("run")
-class YAPMRunner(cli.Application):
+class YAPIMRunner(cli.Application):
     """
     Run a pipeline
     """
