@@ -17,7 +17,7 @@ from yapim.utils.input_loader import InputLoader
 
 class YAPM(cli.Application):
     """
-    Create and run Yet Another Pipeline (Manager)
+    Create and run Yet Another PIpeline (Manager)
     """
     VERSION = "0.1.0"
 
