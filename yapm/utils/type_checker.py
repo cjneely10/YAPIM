@@ -10,8 +10,6 @@ class TypeChecker:
     """
         Class TypeChecker has simple decorator method to check if function has been called with specified parameters
         and to handle type checking if not yet called.
-
-        If TYPECHECKER=off is set as an environment variable, then no runtime checking will be handled.
         """
     function_type = type(lambda: None)
     # Default error strings
