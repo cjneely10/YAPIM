@@ -1,5 +1,5 @@
 .idea
 tests/out
 tests/*/out
-tests/*/*out
+tests/*/*/out
 __pycache__
