@@ -10,7 +10,7 @@ from plumbum import local, colors
 from plumbum.machines import LocalMachine, LocalCommand
 
 from yapim.tasks.utils.base_task import BaseTask
-from yapim.tasks.utils.input_dict import ImmutableDict
+from yapim.tasks.utils.input_dict import InputDict
 from yapim.tasks.utils.result import Result
 from yapim.tasks.utils.slurm_caller import SLURMCaller
 from yapim.utils.config_manager import ConfigManager, MissingDataError, MissingProgramSection
@@ -34,7 +34,7 @@ class Task(BaseTask, ABC):
         self.record_id: str = record_id
         self._task_scope = task_scope
         added_data.update(input_data)
-        self.input: ImmutableDict = ImmutableDict(added_data)
+        self.input: InputDict = InputDict(added_data)
         self.output = {}
         self.wdir: Path = Path(wdir).resolve()
         self.config_manager = config_manager

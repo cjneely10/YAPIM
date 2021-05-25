@@ -1,4 +1,4 @@
-class ImmutableDict(dict):
+class InputDict(dict):
     def __init__(self, input_data: dict):
         super().__init__(input_data)
 
