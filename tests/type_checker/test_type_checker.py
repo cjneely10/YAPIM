@@ -18,7 +18,7 @@ class TestTypeChecker(TestCase):
     def test_simple_class(self):
         @TypeChecker()
         class Simple:
-            def returns_int(_self) -> int:
+            def returns_int(self) -> int:
                 return 1.0
 
             def proper_method(self, value: float) -> float:
