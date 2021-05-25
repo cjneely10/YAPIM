@@ -8,7 +8,7 @@ from typing import List, Union
 
 from plumbum.machines.local import LocalCommand, local
 
-from yapm.utils.config_manager import ConfigManager
+from yapim.utils.config_manager import ConfigManager
 
 
 class SlurmRunError(Exception):  # pragma: no cover

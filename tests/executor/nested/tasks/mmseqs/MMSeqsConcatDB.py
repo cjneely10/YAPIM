@@ -1,6 +1,6 @@
 from typing import List
 
-from yapm import AggregateTask
+from yapim import AggregateTask
 
 
 class MMSeqsConcatDB(AggregateTask):

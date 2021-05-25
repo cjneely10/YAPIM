@@ -1,14 +1,14 @@
 from setuptools import setup
 
 setup(
-    name='yapm',
+    name='yapim',
     version='0.1.0',
     description='Pipeline generation tool',
     url='',
     author='Christopher Neely',
     author_email='christopher.neely1200@gmail.com',
     license='GNU GPL 3',
-    packages=['yapm', 'yapm.utils', 'yapm.tasks', 'yapm.tasks.utils'],
+    packages=['yapim', 'yapim.utils', 'yapim.tasks', 'yapim.tasks.utils'],
     python_requires='>=3.8',
     install_requires=[
         "bcbio-gff==0.6.6",
@@ -22,6 +22,6 @@ setup(
         "pytest-cov==2.10.1"
     ],
     scripts=[
-        "yapm/yapm",
+        "yapim/yapim",
     ]
 )

@@ -9,11 +9,11 @@ from typing import Tuple, List, Union
 from plumbum import local, colors
 from plumbum.machines import LocalMachine, LocalCommand
 
-from yapm.tasks.utils.base_task import BaseTask
-from yapm.tasks.utils.input_dict import ImmutableDict
-from yapm.tasks.utils.result import Result
-from yapm.tasks.utils.slurm_caller import SLURMCaller
-from yapm.utils.config_manager import ConfigManager, MissingDataError, MissingProgramSection
+from yapim.tasks.utils.base_task import BaseTask
+from yapim.tasks.utils.input_dict import ImmutableDict
+from yapim.tasks.utils.result import Result
+from yapim.tasks.utils.slurm_caller import SLURMCaller
+from yapim.utils.config_manager import ConfigManager, MissingDataError, MissingProgramSection
 
 
 class TaskSetupError(AttributeError):

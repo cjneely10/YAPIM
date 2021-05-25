@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
 from typing import List
 
-from yapm.tasks.task import Task
-from yapm.tasks.utils.input_dict import ImmutableDict
-from yapm.utils.config_manager import ConfigManager
-from yapm.utils.dependency_graph import DependencyGraph
+from yapim.tasks.task import Task
+from yapim.tasks.utils.input_dict import ImmutableDict
+from yapim.utils.config_manager import ConfigManager
+from yapim.utils.dependency_graph import DependencyGraph
 
 
 class AggregateTask(Task, ABC):

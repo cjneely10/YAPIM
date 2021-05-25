@@ -5,7 +5,7 @@ import pkgutil
 from inspect import isclass, isabstract
 from pathlib import Path
 
-from yapm.tasks.task import Task
+from yapim.tasks.task import Task
 
 
 def get_modules(package_dir: Path) -> dict:

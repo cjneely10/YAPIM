@@ -3,10 +3,10 @@ import unittest
 from pathlib import Path
 from typing import Dict
 
-from yapm.tasks.utils.base_task import BaseTask
-from yapm.utils.executor import Executor
-from yapm.utils.extension_loader import ExtensionLoader
-from yapm.utils.input_loader import InputLoader
+from yapim.tasks.utils.base_task import BaseTask
+from yapim.utils.executor import Executor
+from yapim.utils.extension_loader import ExtensionLoader
+from yapim.utils.input_loader import InputLoader
 
 
 class TestExecutor(unittest.TestCase):

@@ -3,9 +3,9 @@ from typing import List, Dict, Tuple, Type, Iterable
 
 from networkx import DiGraph, topological_sort, is_directed_acyclic_graph
 
-from yapm.tasks.task import Task
-from yapm.tasks.utils.dependency_input import DependencyInput
-from yapm.utils.config_manager import ConfigManager
+from yapim.tasks.task import Task
+from yapim.tasks.utils.dependency_input import DependencyInput
+from yapim.utils.config_manager import ConfigManager
 
 
 class DependencyGraphGenerationError(BaseException):

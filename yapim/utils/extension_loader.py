@@ -5,7 +5,7 @@ from typing import Dict, Tuple, Optional, Callable
 
 from Bio import SeqIO
 
-from yapm.utils.input_loader import InputLoader
+from yapim.utils.input_loader import InputLoader
 
 
 class ExtensionLoader(InputLoader):

@@ -1,6 +1,6 @@
 from typing import List
 
-from yapm import Task, DependencyInput
+from yapim import Task, DependencyInput
 
 
 class Sed(Task):

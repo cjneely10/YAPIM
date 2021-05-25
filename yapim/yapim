@@ -8,11 +8,11 @@ from typing import Optional, List, Type
 
 from plumbum import cli
 
-from yapm.utils.config_manager import ConfigManager
-from yapm.utils.config_manager_generator import ConfigManagerGenerator
-from yapm.utils.executor import Executor
-from yapm.utils.extension_loader import ExtensionLoader
-from yapm.utils.input_loader import InputLoader
+from yapim.utils.config_manager import ConfigManager
+from yapim.utils.config_manager_generator import ConfigManagerGenerator
+from yapim.utils.executor import Executor
+from yapim.utils.extension_loader import ExtensionLoader
+from yapim.utils.input_loader import InputLoader
 
 
 class YAPM(cli.Application):

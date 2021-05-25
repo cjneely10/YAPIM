@@ -3,7 +3,7 @@ from typing import List
 
 from Bio import SeqIO
 
-from yapm import Task, DependencyInput
+from yapim import Task, DependencyInput
 
 
 class Summarize(Task):

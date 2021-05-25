@@ -4,14 +4,14 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import List, Dict, Type, Optional
 
-from yapm import AggregateTask
-from yapm.tasks.task import Task
-from yapm.tasks.task_chain_distributor import TaskChainDistributor
-from yapm.tasks.utils.loader import get_modules
-from yapm.utils.config_manager import ConfigManager, ImproperInputSection
-from yapm.utils.dependency_graph import Node, DependencyGraph
-from yapm.utils.input_loader import InputLoader
-from yapm.utils.path_manager import PathManager
+from yapim import AggregateTask
+from yapim.tasks.task import Task
+from yapim.tasks.task_chain_distributor import TaskChainDistributor
+from yapim.tasks.utils.loader import get_modules
+from yapim.utils.config_manager import ConfigManager, ImproperInputSection
+from yapim.utils.dependency_graph import Node, DependencyGraph
+from yapim.utils.input_loader import InputLoader
+from yapim.utils.path_manager import PathManager
 
 
 class Executor:

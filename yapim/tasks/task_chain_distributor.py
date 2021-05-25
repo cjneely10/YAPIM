@@ -4,12 +4,12 @@ from pathlib import Path
 from shutil import copy
 from typing import List, Type, Optional, Dict, Union
 
-from yapm import Task, AggregateTask
-from yapm.tasks.task import TaskSetupError
-from yapm.tasks.utils.result import Result
-from yapm.utils.config_manager import ConfigManager
-from yapm.utils.dependency_graph import Node, DependencyGraph
-from yapm.utils.path_manager import PathManager
+from yapim import Task, AggregateTask
+from yapim.tasks.task import TaskSetupError
+from yapim.tasks.utils.result import Result
+from yapim.utils.config_manager import ConfigManager
+from yapim.utils.dependency_graph import Node, DependencyGraph
+from yapim.utils.path_manager import PathManager
 
 
 class TaskChainDistributor(dict):

@@ -1,9 +1,9 @@
 from pathlib import Path
 from typing import Type, Dict, List, Optional
 
-from yapm import Task
-from yapm.tasks.utils.loader import get_modules
-from yapm.utils.dependency_graph import DependencyGraph, Node
+from yapim import Task
+from yapim.tasks.utils.loader import get_modules
+from yapim.utils.dependency_graph import DependencyGraph, Node
 
 
 class ConfigManagerGenerator:

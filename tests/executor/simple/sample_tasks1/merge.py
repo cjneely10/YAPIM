@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from typing import List
 
-from yapm import AggregateTask
+from yapim import AggregateTask
 
 
 class Merge(AggregateTask):

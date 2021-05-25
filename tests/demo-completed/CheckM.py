@@ -1,7 +1,7 @@
 import os
 from typing import List, Union, Type
 
-from yapm import AggregateTask
+from yapim import AggregateTask
 
 
 class CheckM(AggregateTask):

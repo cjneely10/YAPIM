@@ -1,4 +1,4 @@
-name: yapm
+name: yapim
 channels:
   - bioconda
   - conda-forge
