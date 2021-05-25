@@ -19,16 +19,20 @@ class BaseTask(ABC):
 
     @property
     def name(self) -> str:
+        """
+        Get name of class
+        """
         return type(self).__name__
 
     @staticmethod
     @abstractmethod
     def task_scope() -> str:
-        """
+        """ Task level - either ROOT or the name of a pipeline Task/AggregateTask
 
         :return:
         :rtype:
         """
+
     @staticmethod
     @abstractmethod
     def requires() -> List[Union[str, Type]]:
@@ -47,7 +51,6 @@ class BaseTask(ABC):
 
     @abstractmethod
     def run(self):
-        """ Implementation of method to run to complete a given task
-
-        :return:
+        """
+        Implementation of method to run to complete a given task
         """
