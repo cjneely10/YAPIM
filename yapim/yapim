@@ -15,7 +15,7 @@ from yapim.utils.extension_loader import ExtensionLoader
 from yapim.utils.input_loader import InputLoader
 
 
-class YAPM(cli.Application):
+class YAPIM(cli.Application):
     """
     Create and run Yet Another PIpeline (Manager)
     """
@@ -33,7 +33,7 @@ class YAPM(cli.Application):
 pipeline_file = ".pipeline.pkl"
 
 
-@YAPM.subcommand("config")
+@YAPIM.subcommand("config")
 class YAPMConfigCreator(cli.Application):
     """
     Create configuration file and pipeline path data
@@ -121,7 +121,7 @@ def _validate_pipeline_pkl(pipeline_path: Path) -> dict:
     return pipeline_data
 
 
-@YAPM.subcommand("run")
+@YAPIM.subcommand("run")
 class YAPMRunner(cli.Application):
     """
     Run a pipeline
@@ -194,4 +194,4 @@ class YAPMRunner(cli.Application):
 
 
 if __name__ == "__main__":
-    YAPM.run()
+    YAPIM.run()
