@@ -19,15 +19,15 @@ class Executor:
                  input_data: InputLoader,
                  config_path: Path,
                  base_output_dir: Path,
-                 pipeline_steps_directory: str,
-                 dependencies_directories: Optional[List[str]] = None,
+                 pipeline_steps_directory: Path,
+                 dependencies_directories: Optional[List[Path]] = None,
                  display_status_messages: bool = True
                  ):
-        self.task_blueprints: Dict[str, Type[Task]] = get_modules(pipeline_steps_directory)
+        self.task_blueprints: Dict[str, Type[Task]] = get_modules(Path(pipeline_steps_directory))
         pipeline_tasks = list(self.task_blueprints.values())
         if dependencies_directories is not None:
             for directory in dependencies_directories:
-                self.task_blueprints.update(get_modules(directory))
+                self.task_blueprints.update(get_modules(Path(directory)))
         self.task_list: List[List[Node]] = DependencyGraph(pipeline_tasks, self.task_blueprints) \
             .sorted_graph_identifiers
 
