@@ -33,7 +33,7 @@ class TestTypeChecker(TestCase):
         class Outer:
             @TypeChecker()
             class Inner:
-                def returns_int(_self) -> int:
+                def returns_int(self) -> int:
                     return 1.0
 
         with self.assertRaises(TypeError):
@@ -41,12 +41,12 @@ class TestTypeChecker(TestCase):
 
     def test_child(self):
         class Parent:
-            def returns_int(_self) -> int:
+            def returns_int(self) -> int:
                 return 1
 
         @TypeChecker()
         class Child(Parent):
-            def returns_int(_self) -> int:
+            def returns_int(self) -> int:
                 return 1.0
 
         with self.assertRaises(TypeError):
