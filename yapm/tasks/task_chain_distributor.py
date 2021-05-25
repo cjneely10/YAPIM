@@ -77,12 +77,18 @@ class TaskChainDistributor(dict):
         return issubclass(task, AggregateTask)
 
     def _run_task(self, task_identifier: Node, top_level_node: Optional[Node] = None):
-
         wdir = ".".join(task_identifier.get()).replace(f"{ConfigManager.ROOT}.", "")
         task_blueprint = self.task_blueprints[task_identifier.name]
-        task = None
         if TaskChainDistributor._is_aggregate(task_blueprint):
             self.path_manager.add_dirs(wdir)
+            task = task_blueprint(
+                wdir,
+                ConfigManager.ROOT,
+                self.config_manager,
+                TaskChainDistributor.results,
+                self.path_manager.get_dir(wdir),
+                self.display_status_messages
+            )
         else:
             with TaskChainDistributor.update_lock:
                 TaskChainDistributor.task_reference_count += 1
@@ -99,44 +105,30 @@ class TaskChainDistributor(dict):
                 self.path_manager.get_dir(self.record_id, wdir),
                 self.display_status_messages
             )
-
-        if TaskChainDistributor._is_aggregate(self.task_blueprints[task_identifier.name]):
-            task = task_blueprint(
-                wdir,
-                ConfigManager.ROOT,
-                self.config_manager,
-                TaskChainDistributor.results,
-                self.path_manager.get_dir(wdir),
-                self.display_status_messages
-            )
-
         task.set_is_complete()
 
         projected_memory = int(self.config_manager.find(task.full_name, ConfigManager.MEMORY))
         projected_threads = int(self.config_manager.find(task.full_name, ConfigManager.THREADS))
-        total_memory = projected_memory + TaskChainDistributor.current_gb_memory_in_use_count
-        total_threads = projected_threads + TaskChainDistributor.current_threads_in_use_count
+        with TaskChainDistributor.update_lock:
+            total_memory = projected_memory + TaskChainDistributor.current_gb_memory_in_use_count
+            total_threads = projected_threads + TaskChainDistributor.current_threads_in_use_count
         with TaskChainDistributor.awaiting_resources:
             while total_threads > TaskChainDistributor.maximum_threads or \
                     total_memory > TaskChainDistributor.maximum_gb_memory:
                 TaskChainDistributor.awaiting_resources.wait()
-                total_memory = projected_memory + TaskChainDistributor.current_gb_memory_in_use_count
-                total_threads = projected_threads + TaskChainDistributor.current_threads_in_use_count
+                with TaskChainDistributor.update_lock:
+                    total_memory = projected_memory + TaskChainDistributor.current_gb_memory_in_use_count
+                    total_threads = projected_threads + TaskChainDistributor.current_threads_in_use_count
         with TaskChainDistributor.update_lock:
             TaskChainDistributor.current_threads_in_use_count = total_threads
             TaskChainDistributor.current_gb_memory_in_use_count = total_memory
 
-        future = TaskChainDistributor.executor.submit(task.run_task)
-        possible_failure = future.exception()
-        if future.exception() is not None:
+        try:
+            self._finalize_output(task, task.run_task())
             TaskChainDistributor._release_resources(projected_threads, projected_memory)
-            if isinstance(task, AggregateTask):
-                TaskChainDistributor._complete_agg(task)
-            raise possible_failure
-        result: Result = future.result()
-
-        self._finalize_output(task, result)
-        TaskChainDistributor._release_resources(projected_threads, projected_memory)
+        except BaseException as err:
+            TaskChainDistributor._release_resources(projected_threads, projected_memory)
+            raise err
 
     @staticmethod
     def _release_resources(projected_threads: int, projected_memory: int):
@@ -146,11 +138,6 @@ class TaskChainDistributor(dict):
             TaskChainDistributor.current_gb_memory_in_use_count -= projected_memory
         with TaskChainDistributor.awaiting_resources:
             TaskChainDistributor.awaiting_resources.notifyAll()
-
-    @staticmethod
-    def _complete_agg(task: AggregateTask):
-        with TaskChainDistributor.update_lock:
-            type(task).is_running = False
 
     def _finalize_output(self, task: Task, result: Result):
         with TaskChainDistributor.update_lock:
@@ -172,7 +159,6 @@ class TaskChainDistributor(dict):
                         to_remove.append(key)
                 for key in to_remove:
                     del TaskChainDistributor.results[key]
-            TaskChainDistributor._complete_agg(task)
         else:
             with TaskChainDistributor.update_lock:
                 TaskChainDistributor.results[result.record_id][result.task_name] = result
