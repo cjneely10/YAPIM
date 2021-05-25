@@ -18,7 +18,6 @@ class TaskChainDistributor(dict):
 
     results: dict
     output_data_to_pickle: dict
-    task_reference_count: int
     current_threads_in_use_count: int
     current_gb_memory_in_use_count: int
 
@@ -50,7 +49,6 @@ class TaskChainDistributor(dict):
     def initialize_class():
         TaskChainDistributor.results = {}
         TaskChainDistributor.output_data_to_pickle = {}
-        TaskChainDistributor.task_reference_count = 0
         TaskChainDistributor.current_threads_in_use_count = 0
         TaskChainDistributor.current_gb_memory_in_use_count = 0
 
@@ -81,15 +79,13 @@ class TaskChainDistributor(dict):
             self.path_manager.add_dirs(wdir)
             task = task_blueprint(
                 wdir,
-                ConfigManager.ROOT,
+                task_identifier.scope,
                 self.config_manager,
                 TaskChainDistributor.results,
                 self.path_manager.get_dir(wdir),
                 self.display_status_messages
             )
         else:
-            with TaskChainDistributor.update_lock:
-                TaskChainDistributor.task_reference_count += 1
             updated_data = {}
             if top_level_node is not None:
                 updated_data = self._update_distributed_input(self.record_id, self.task_blueprints[top_level_node.name])
@@ -131,7 +127,6 @@ class TaskChainDistributor(dict):
     @staticmethod
     def _release_resources(projected_threads: int, projected_memory: int):
         with TaskChainDistributor.update_lock:
-            TaskChainDistributor.task_reference_count -= 1
             TaskChainDistributor.current_threads_in_use_count -= projected_threads
             TaskChainDistributor.current_gb_memory_in_use_count -= projected_memory
         with TaskChainDistributor.awaiting_resources:
