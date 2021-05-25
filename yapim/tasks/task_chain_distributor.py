@@ -152,6 +152,7 @@ class TaskChainDistributor(dict):
                         to_remove.append(key)
                 for key in to_remove:
                     del TaskChainDistributor.results[key]
+                TaskChainDistributor.results[result.task_name] = result
         else:
             with TaskChainDistributor.update_lock:
                 TaskChainDistributor.results[result.record_id][result.task_name] = result

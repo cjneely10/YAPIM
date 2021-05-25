@@ -97,6 +97,15 @@ class TestExecutor(unittest.TestCase):
             "existing_data/second_pipeline",  # Relative path to pipeline directory
         ).run()
 
+    def test_aggregate_dependencies(self):
+        Executor(
+            TestExecutor.TestLoader(1),  # Input loader
+            TestExecutor.file.joinpath("aggregate_dependency/aggregate-config.yaml"),  # Config file path
+            TestExecutor.file.joinpath("aggregate_dependency-out"),  # Base output dir path
+            "aggregate_dependency/tasks",  # Relative path to pipeline directory
+            ["aggregate_dependency/dependencies"]
+        ).run()
+
 
 if __name__ == '__main__':
     unittest.main()

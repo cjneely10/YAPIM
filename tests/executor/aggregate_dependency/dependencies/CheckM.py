@@ -12,28 +12,16 @@ class CheckM(AggregateTask):
         }
 
     def run(self):
-        self.parallel(
-            self.program[
-                "lineage_wf",
-                "-t", self.threads,
-                "-x", ".fna",
-                (*self.added_flags),
-                self.input["input"],
-                str(self.wdir),
-            ]
-        )
+        open(self.output["CheckMResult"], "a").close()
 
     def aggregate(self) -> dict:
-        key = list(self.input.keys())[0]
         return {
-            "input": os.path.dirname(self.input[key]["fasta"])
+            record_id: {"CheckM": {}}
+            for record_id in self.input.keys()
         }
 
     def deaggregate(self) -> dict:
-        return {
-            record_id: {}
-            for record_id in self.input.keys()
-        }
+        return {"CheckM": {}}
 
     @staticmethod
     def requires() -> List[Union[str, Type]]:
