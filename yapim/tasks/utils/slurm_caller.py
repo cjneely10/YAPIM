@@ -4,7 +4,7 @@ Module holds logic for running a dask distributed task within a SLURM job
 
 import os
 from time import sleep
-from typing import List, Union
+from typing import List, Union, Optional
 
 from plumbum.machines.local import LocalCommand, local
 
@@ -30,6 +30,7 @@ class SLURMCaller:  # pragma: no cover
                  cmd: Union[LocalCommand, List[LocalCommand]],
                  config_manager: ConfigManager,
                  task,
+                 time_override: Optional[str] = None
                  ):
         """ Generate SLURMCaller object using user metadata gathered from SLURM config section and
         the task's own metadata
@@ -42,6 +43,7 @@ class SLURMCaller:  # pragma: no cover
         self.memory = self.config_manager.find(task.full_name, ConfigManager.MEMORY)
         self.time = self.config_manager.find(task.full_name, ConfigManager.TIME)
         self.added_flags = self.config_manager.get_slurm_flagged_arguments()
+        self.time_override = time_override
 
         # Generated job id
         self.job_id: str = SLURMCaller.FAILED_ID
@@ -116,7 +118,8 @@ class SLURMCaller:  # pragma: no cover
         file_ptr.write(SLURMCaller._create_header_line("--tasks", "1"))
         file_ptr.write(SLURMCaller._create_header_line("--cpus-per-task", self.threads))
         file_ptr.write(SLURMCaller._create_header_line("--mem", self.memory))
-        file_ptr.write(SLURMCaller._create_header_line("--time", self.time))
+        file_ptr.write(SLURMCaller._create_header_line("--time",
+                                                       self.time if self.time_override is None else self.time_override))
         # Write additional header lines passed in by user
         for added_arg in self.added_flags:
             file_ptr.write(SLURMCaller._create_header_line(*added_arg))
