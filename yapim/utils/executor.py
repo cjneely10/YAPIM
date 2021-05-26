@@ -1,8 +1,12 @@
+import logging
 import os
 import pickle
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import List, Dict, Type, Optional, Union
+
+from art import tprint
+from plumbum import colors
 
 from yapim import AggregateTask
 from yapim.tasks.task import Task
@@ -36,6 +40,8 @@ class Executor:
         self.results_base_dir = base_output_dir.joinpath("results").joinpath(self.pipeline_name)
         if not self.results_base_dir.exists():
             os.makedirs(self.results_base_dir)
+        print(colors.yellow & colors.bold | "Gathering files...")
+        print(colors.yellow & colors.bold | "------------------")
         self.input_data_dict = input_data.load()
         self.config_manager = None
         self.display_messages = display_status_messages
@@ -52,8 +58,20 @@ class Executor:
         existing_data = self._populate_requested_existing_input()
         self.input_data_dict.update(existing_data)
         TaskChainDistributor.results.update(existing_data)
+        self.begin_logging(base_output_dir)
+
+    def begin_logging(self, base_output_dir: Path):
+        log_file = os.path.join(base_output_dir, "%s-eukmetasanity.log" % self.pipeline_name)
+        logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO, filename=log_file, filemode='a')
+        for _line in ("*" * 80, "",
+                      "Primary log statements are redirected to %s" % log_file,
+                      "Task-level log statements are redirected to subdirectory log files", "",
+                      "*" * 80, "",
+                      "Displaying step summaries here:\n"):
+            print(colors.yellow & colors.bold | _line)
 
     def run(self):
+        tprint(self.pipeline_name, font="smslant")
         for task_batch in self.task_batch():
             workers = self._get_max_resources_in_batch(task_batch[1])
             with ThreadPoolExecutor(workers) as executor:
@@ -79,6 +97,7 @@ class Executor:
         out_ptr = open(self.results_base_dir.joinpath(f"{self.pipeline_name}.pkl"), "wb")
         pickle.dump(TaskChainDistributor.output_data_to_pickle, out_ptr)
         out_ptr.close()
+        print(colors.yellow & colors.bold | "\n%s complete!\n" % self.pipeline_name)
 
     def task_batch(self):
         agg_positions = []
