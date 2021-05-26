@@ -9,9 +9,10 @@ class Taxonomy(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {
-            "taxonomy": Taxonomy.get_taxonomy(str(self.input["mmseqs.taxonomy"]["tax-report"]),
+            "taxonomy": Taxonomy.get_taxonomy(str(self.input["MMSeqsTaxonomy"]["tax-report"]),
                                               float(self.config["cutoff"])),
-            "final": ["mmseqs.taxonomy.tax-report", "taxonomy"]
+            "tax-report": self.input["MMSeqsTaxonomy"]["tax-report"],
+            "final": ["tax-report", "taxonomy"]
         }
 
     @staticmethod
@@ -55,7 +56,7 @@ class Taxonomy(Task):
     @staticmethod
     def depends() -> List[DependencyInput]:
         return [
-            DependencyInput("MMSeqsTaxonomy", {"Evidence": {"fasta": "prot"}})
+            DependencyInput("MMSeqsTaxonomy", {"root": {"fasta": "prot"}})
         ]
 
     def run(self):

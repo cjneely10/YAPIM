@@ -5,7 +5,7 @@ from shutil import copy
 from typing import List, Type, Optional, Dict, Union
 
 from yapim import Task, AggregateTask
-from yapim.tasks.task import TaskSetupError
+from yapim.tasks.task import TaskSetupError, TaskExecutionError
 from yapim.tasks.utils.task_result import TaskResult
 from yapim.utils.config_manager import ConfigManager
 from yapim.utils.dependency_graph import Node, DependencyGraph
@@ -88,7 +88,11 @@ class TaskChainDistributor(dict):
         else:
             updated_data = {}
             if top_level_node is not None:
-                updated_data = self._update_distributed_input(self.record_id, self.task_blueprints[top_level_node.name])
+                try:
+                    updated_data = self._update_distributed_input(self.record_id,
+                                                                  self.task_blueprints[top_level_node.name])
+                except KeyError as e:
+                    raise TaskExecutionError(f"Unable to load dependency data {e} for {task_identifier.get()}")
             self.path_manager.add_dirs(self.record_id, [wdir])
             task = task_blueprint(
                 self.record_id,
@@ -184,8 +188,12 @@ class TaskChainDistributor(dict):
         for dependency in requirement_node.depends():
             if dependency.collect_by is not None:
                 for prior_id, prior_mapping in dependency.collect_by.items():
-                    for _from, _to in prior_mapping.items():
-                        amended_dict[_to] = TaskChainDistributor.results[record_id][prior_id][_from]
+                    if prior_id.lower() != ConfigManager.ROOT.lower():
+                        for _from, _to in prior_mapping.items():
+                            amended_dict[_to] = TaskChainDistributor.results[record_id][prior_id][_from]
+                    else:
+                        for _from, _to in prior_mapping.items():
+                            amended_dict[_to] = TaskChainDistributor.results[record_id][_from]
             else:
                 amended_dict.update(TaskChainDistributor.results[record_id])
         return amended_dict
