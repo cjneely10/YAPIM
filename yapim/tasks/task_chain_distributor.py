@@ -31,7 +31,7 @@ class TaskChainDistributor(dict):
                  config_manager: ConfigManager,
                  path_manager: PathManager,
                  input_data: Dict,
-                 results_base_dir: Path,
+                 results_base_dir: Union[Path, str],
                  display_status_messages: bool):
         if TaskChainDistributor.maximum_gb_memory is None or TaskChainDistributor.maximum_threads is None:
             raise AttributeError("Allocations for task chain not set!")
@@ -169,9 +169,14 @@ class TaskChainDistributor(dict):
                     if obj is None:
                         raise TaskSetupError("'final' should consist of keys present in task output")
                     if isinstance(obj, Path) or (isinstance(obj, str) and os.path.exists(obj)):
-                        copy(obj, _sub_out)
+                        _path = os.path.splitext(os.path.basename(obj))
+                        _out = os.path.join(
+                            _sub_out,
+                            _path[0] + "." + result.task_name + _path[1]
+                        )
+                        copy(obj, _out)
                         with TaskChainDistributor.update_lock:
-                            TaskChainDistributor.output_data_to_pickle[result.record_id][file_str] = obj
+                            TaskChainDistributor.output_data_to_pickle[result.record_id][file_str] = _out
 
     @staticmethod
     def _update_distributed_input(record_id: str, requirement_node: Type[Task]) -> Dict:

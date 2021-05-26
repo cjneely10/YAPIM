@@ -2,7 +2,7 @@ import os
 import pickle
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import List, Dict, Type, Optional
+from typing import List, Dict, Type, Optional, Union
 
 from yapim import AggregateTask
 from yapim.tasks.task import Task
@@ -17,10 +17,10 @@ from yapim.utils.path_manager import PathManager
 class Executor:
     def __init__(self,
                  input_data: InputLoader,
-                 config_path: Path,
-                 base_output_dir: Path,
-                 pipeline_steps_directory: Path,
-                 dependencies_directories: Optional[List[Path]] = None,
+                 config_path: Union[Path, str],
+                 base_output_dir: Union[Path, str],
+                 pipeline_steps_directory: Union[Path, str],
+                 dependencies_directories: Optional[List[Union[Path, str]]] = None,
                  display_status_messages: bool = True
                  ):
         self.task_blueprints: Dict[str, Type[Task]] = get_modules(Path(pipeline_steps_directory))

@@ -24,8 +24,8 @@ class TestExecutor(unittest.TestCase):
             TestExecutor.TestLoader(10),  # Input loader
             TestExecutor.file.joinpath("simple/sample-config.yaml"),  # Config file path
             TestExecutor.file.joinpath("simple-out"),  # Base output dir path
-            "simple/sample_tasks1",  # Relative path to pipeline directory
-            ["simple/sample_dependencies"],  # List of relative paths to dependency directories,
+            Path("simple/sample_tasks1"),  # Relative path to pipeline directory
+            [Path("simple/sample_dependencies")],  # List of relative paths to dependency directories,
             display_status_messages=False  # Silence status messages
         ).run()
 
@@ -38,7 +38,7 @@ class TestExecutor(unittest.TestCase):
             ),
             TestExecutor.file.joinpath("fasta/fasta-config.yaml"),  # Config file path
             out_dir,  # Base output dir path
-            "fasta/tasks",  # Relative path to pipeline directory
+            Path("fasta/tasks"),  # Relative path to pipeline directory
             display_status_messages=False
         ).run()
 
@@ -51,8 +51,8 @@ class TestExecutor(unittest.TestCase):
             ),
             TestExecutor.file.joinpath("nested/nested-config.yaml"),  # Config file path
             out_dir,  # Base output dir path
-            "nested/tasks",  # Relative path to pipeline directory
-            ["nested/mmseqs_dependencies"],
+            Path("nested/tasks"),  # Relative path to pipeline directory
+            [Path("nested/mmseqs_dependencies")],
         ).run()
 
     def test_no_output_defined(self):
