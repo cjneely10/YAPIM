@@ -8,7 +8,7 @@ class Repeats(Task):
         super().__init__(*args, **kwargs)
         self.output = {
             "mask-fna": self.input["RMaskRMOut"]["mask-fna"],
-            "rmtbl": self.input["RMaskRMOut"]["rmtbl"],
+            "rmtbl": self.input["RMaskProcessRepeats"]["rmtbl"],
             "mask-gff3": self.input["RMaskRMOut"]["mask-gff3"],
             "final": ["rmtbl", "mask-fna", "mask-gff3"]
         }
