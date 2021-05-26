@@ -3,6 +3,8 @@ import unittest
 from pathlib import Path
 from typing import Dict
 
+from plumbum import CommandNotFound
+
 from yapim.tasks.utils.base_task import BaseTask
 from yapim.utils.executor import Executor
 from yapim.utils.extension_loader import ExtensionLoader
@@ -73,13 +75,14 @@ class TestExecutor(unittest.TestCase):
             ).run()
 
     def test_bad_program_path(self):
-        Executor(
-            TestExecutor.TestLoader(1),  # Input loader
-            TestExecutor.file.joinpath("bad_program_path/bad_program_path-config.yaml"),  # Config file path
-            TestExecutor.file.joinpath("bad_program_path-out"),  # Base output dir path
-            "bad_program_path",  # Relative path to pipeline directory
-            display_status_messages=False
-        ).run()
+        with self.assertRaises(CommandNotFound):
+            Executor(
+                TestExecutor.TestLoader(1),  # Input loader
+                TestExecutor.file.joinpath("bad_program_path/bad_program_path-config.yaml"),  # Config file path
+                TestExecutor.file.joinpath("bad_program_path-out"),  # Base output dir path
+                "bad_program_path",  # Relative path to pipeline directory
+                display_status_messages=False
+            ).run()
 
     def test_existing_data(self):
         Executor(

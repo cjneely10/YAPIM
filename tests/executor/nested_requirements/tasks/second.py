@@ -1,6 +1,6 @@
 from typing import List, Union, Type
 
-from yapim import Task, DependencyInput
+from yapim import Task, DependencyInput, touch, prefix
 
 
 class Second(Task):
@@ -15,9 +15,10 @@ class Second(Task):
         return ["First"]
 
     def run(self):
+        touch(str(self.output["result"]))
         fp = open(self.output["result"], "w")
         fp.write(str(self.input["First"]["result"]) + "\n")
-        fp.write(str(self.input["First"]["second-result"]))
+        fp.write(str(self.input["First"]["second-result"]) + " " + prefix(str(self.wdir)))
         fp.close()
 
     @staticmethod
