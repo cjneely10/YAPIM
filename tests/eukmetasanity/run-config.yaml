@@ -8,7 +8,7 @@ INPUT:
 ## Global settings
 GLOBAL:
   # Maximum threads/cpus to use in analysis
-  MaxThreads: 10
+  MaxThreads: 20
   # Maximum memory to use (in GB)
   MaxMemory: 100
 
@@ -34,13 +34,13 @@ Evidence:
     MetaEuk:
       program: metaeuk
       data:
-        /path/to/data/odb-mmetsp_db
+        /media/user/2TB/Data/EukMetaSanity/data/odb-mmetsp_db
       # Pass any flags to metaeuk required
       FLAGS:
         --min-length 30
         --metaeuk-eval 0.0001
         --split-memory-limit 75G
-        -s 7
+        -s 5
         --cov-mode 0
         -c 0.3
         -e 100
@@ -60,15 +60,15 @@ Taxonomy:
     MMSeqsTaxonomy:
       program: mmseqs
       data:
-        /path/to/data/odb-mmetsp_db
-        # Pass any flags to mmseqs required
-        FLAGS:
-          --remove-tmp-files
-          -s 6.5
-          --min-seq-id 0.40
-          -c 0.3
-          --cov-mode 0
-          --split-memory-limit 75G
+        /media/user/2TB/Data/EukMetaSanity/data/odb-mmetsp_db
+      # Pass any flags to mmseqs required
+      FLAGS:
+        --remove-tmp-files
+        -s 6.5
+        --min-seq-id 0.40
+        -c 0.3
+        --cov-mode 0
+        --split-memory-limit 75G
 
 Repeats:
   # Number of threads task will use
@@ -112,7 +112,7 @@ AbinitioGeneMark:
       program: mmseqs
       level: order
       data:
-        /path/to/data/odb-mmetsp_db
+        /media/user/2TB/Data/EukMetaSanity/data/odb-mmetsp_db
 
     GeneMarkProtHint:
       program: prothint.py
@@ -144,7 +144,7 @@ AbinitioAugustus:
     MMSeqsSearch:
       memory: 20
       data:
-        /path/to/data/odb-mmetsp_db
+        /media/user/2TB/Data/EukMetaSanity/data/odb-mmetsp_db
       program: mmseqs
       subname: linsearch  # Can use `search` if linear index is not present for database
       FLAGS:
@@ -156,7 +156,7 @@ AbinitioAugustus:
 
     MMSeqsConvertAlis:
       data:
-        /path/to/data/odb-mmetsp_db
+        /media/user/2TB/Data/EukMetaSanity/data/odb-mmetsp_db
       program: mmseqs
       FLAGS:
         --format-output query,target,pident,taxid,taxname,taxlineage
