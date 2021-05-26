@@ -79,7 +79,7 @@ class DependencyGraph:
             # Link requirements for already completed tasks in pipeline
             # Gather dependencies needed for fulfilling given requirement
             if task.requires() is None:
-                raise DependencyGraph.ERR
+                return
             for requirement in task.requires():
                 if not isinstance(requirement, (str, type)):
                     raise DependencyGraph.ERR
@@ -96,7 +96,7 @@ class DependencyGraph:
 
         dependency: DependencyInput
         if task.depends() is None:
-            raise DependencyGraph.ERR
+            return
         for dependency in task.depends():
             if not isinstance(dependency, DependencyInput) or not isinstance(dependency.name, (str, type)):
                 raise DependencyGraph.ERR
