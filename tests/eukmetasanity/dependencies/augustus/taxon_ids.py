@@ -73,7 +73,7 @@ fly
 arabidopsis
 brugia
 aedes
-tribolium
+tribolium2012
 schistosoma
 tetrahymena
 galdieria
