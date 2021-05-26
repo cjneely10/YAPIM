@@ -6,7 +6,7 @@ from typing import List, Type, Optional, Dict, Union
 
 from yapim import Task, AggregateTask
 from yapim.tasks.task import TaskSetupError
-from yapim.tasks.utils.result import Result
+from yapim.tasks.utils.task_result import TaskResult
 from yapim.utils.config_manager import ConfigManager
 from yapim.utils.dependency_graph import Node, DependencyGraph
 from yapim.utils.path_manager import PathManager
@@ -132,7 +132,7 @@ class TaskChainDistributor(dict):
         with TaskChainDistributor.awaiting_resources:
             TaskChainDistributor.awaiting_resources.notifyAll()
 
-    def _finalize_output(self, task: Task, result: Result):
+    def _finalize_output(self, task: Task, result: TaskResult):
         with TaskChainDistributor.update_lock:
             if result.record_id not in TaskChainDistributor.results.keys():
                 TaskChainDistributor.results[result.record_id] = {}

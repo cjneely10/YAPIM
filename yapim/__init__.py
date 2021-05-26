@@ -5,3 +5,4 @@ from yapim.utils.executor import Executor
 from yapim.utils.extension_loader import ExtensionLoader
 from yapim.utils.input_loader import InputLoader
 from yapim.utils.helpers import touch, prefix
+from yapim.tasks.utils.result import Result

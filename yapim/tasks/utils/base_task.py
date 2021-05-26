@@ -7,8 +7,8 @@ from yapim.tasks.utils.dependency_input import DependencyInput
 
 class BaseTask(ABC):
     class TaskCompletionError(Exception):
-        def __init__(self, task_name: str, file: Path):
-            super().__init__(f"Task {task_name} output file missing {file}")
+        def __init__(self, task_name: str, attr_name: str, file: Path):
+            super().__init__(f"Task <{task_name}> output id <{attr_name}> is missing its file <{file}>")
 
     @property
     def full_name(self) -> Tuple[str, str]:

@@ -11,7 +11,7 @@ from plumbum.machines import LocalMachine, LocalCommand
 
 from yapim.tasks.utils.base_task import BaseTask
 from yapim.tasks.utils.input_dict import InputDict
-from yapim.tasks.utils.result import Result
+from yapim.tasks.utils.task_result import TaskResult
 from yapim.tasks.utils.slurm_caller import SLURMCaller
 from yapim.utils.config_manager import ConfigManager, MissingDataError, MissingProgramSection
 
@@ -19,6 +19,13 @@ from yapim.utils.config_manager import ConfigManager, MissingDataError, MissingP
 class TaskSetupError(AttributeError):
     """
     Wrap AttributeError around improperly-formatted Task fields
+    """
+
+
+class TaskExecutionError(RuntimeError):
+    """
+    Wrapper for error within running a task associated with an error in config lookup or other utility- or setup-
+    related issues
     """
 
 
@@ -38,7 +45,10 @@ class Task(BaseTask, ABC):
         self.output = {}
         self.wdir: Path = Path(wdir).resolve()
         self.config_manager = config_manager
-        is_skip = self.config_manager.find(self.full_name, ConfigManager.SKIP)
+        try:
+            is_skip = self.config_manager.find(self.full_name, ConfigManager.SKIP)
+        except BaseException:
+            raise TaskExecutionError(f"Error completing {self.name}")
         if is_skip is not None and str(is_skip) == "true":
             self.is_skip = True
         else:
@@ -109,7 +119,7 @@ class Task(BaseTask, ABC):
         """
         return self.config[ConfigManager.DATA].split(" ")
 
-    def run_task(self) -> Result:
+    def run_task(self) -> TaskResult:
         """ Type of run. For Task objects, this simply calls run(). For other tasks, there
         may be more processing required prior to returning the result.
 
@@ -118,7 +128,7 @@ class Task(BaseTask, ABC):
         :return:
         """
         if self.is_skip:
-            return Result(self.record_id, self.name, {})
+            return TaskResult(self.record_id, self.name, {})
 
         if not self.is_complete:
             if self.display_messages:
@@ -141,8 +151,8 @@ class Task(BaseTask, ABC):
             if key != "final":
                 if (isinstance(output, Path) and not output.exists()) or \
                         (isinstance(output, str) and not os.path.exists(output)):
-                    raise super().TaskCompletionError(key, Path(output))
-        return Result(self.record_id, self.name, self.output)
+                    raise super().TaskCompletionError(self.name, key, Path(output))
+        return TaskResult(self.record_id, self.name, self.output)
 
     @property
     def local(self) -> LocalMachine:
@@ -173,6 +183,7 @@ class Task(BaseTask, ABC):
                 w_out.write(str(err) + "\n")
                 w_out.write(traceback.format_exc() + "\n")
             print(colors.warn | str(err))
+            raise err
 
     @staticmethod
     def _parse_time(_time: float) -> Tuple[float, str]:  # pragma: no cover
