@@ -13,11 +13,13 @@ class MMSeqsTaxonomy(Task):
 
     @staticmethod
     def requires() -> List[Union[str, Type]]:
-        pass
+        return []
 
     @staticmethod
     def depends() -> List[DependencyInput]:
-        pass
+        return [
+            DependencyInput("MMSeqsCreateDB")
+        ]
 
     def run(self):
         """

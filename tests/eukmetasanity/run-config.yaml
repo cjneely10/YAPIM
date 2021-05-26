@@ -26,51 +26,73 @@ SLURM:
 
 Evidence:
   # Number of threads task will use
-  threads: 1
+  threads: 16
   # Amount of memory task will use (in GB)
-  memory: 8
+  memory: 90
   time: "4:00:00"
   dependencies:
     MetaEuk:
-      program:
+      program: metaeuk
 
 Taxonomy:
   # Number of threads task will use
-  threads: 1
+  threads: 16
   # Amount of memory task will use (in GB)
-  memory: 8
+  memory: 90
   time: "4:00:00"
+  cutoff: 8.0  # Minimum % of mapped reads to tax level
   dependencies:
+    MMSeqsCreateDB:
+      program: mmseqs
+
     MMSeqsTaxonomy:
-      program:
+      program: mmseqs
+      data:
+        /path/to/data/odb-mmetsp_db
+        # Pass any flags to mmseqs required
+        FLAGS:
+          --remove-tmp-files
+          -s 6.5
+          --min-seq-id 0.40
+          -c 0.3
+          --cov-mode 0
+          --split-memory-limit 16G
 
 Repeats:
   # Number of threads task will use
-  threads: 1
+  threads: 16
   # Amount of memory task will use (in GB)
-  memory: 8
+  memory: 16
   time: "4:00:00"
   dependencies:
     RModBuildDatabase:
-      program:
+      program: BuildDatabase
 
     RModRepeatModeler:
-      program:
+      program: RepeatModeler
+      skip: false
 
     RMaskRepeatMasker:
-      program:
+      program: RepeatMasker
+      level: family
+      data:
+        "" # Comma-separated list of repeat models to incorporate
+      FLAGS:
+        -nolow
 
     RMaskProcessRepeats:
-      program:
+      program: ProcessRepeats
+      FLAGS:
+        -nolow
 
     RMaskRMOut:
-      program:
+      program: rmOutToGFF3.pl
 
 AbinitioGeneMark:
   # Number of threads task will use
-  threads: 1
+  threads: 16
   # Amount of memory task will use (in GB)
-  memory: 8
+  memory: 16
   time: "4:00:00"
   dependencies:
     MMSeqsFilterTaxSeqDB:
