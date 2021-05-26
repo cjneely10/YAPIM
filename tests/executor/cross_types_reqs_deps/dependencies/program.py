@@ -29,6 +29,6 @@ class Program(AggregateTask):
 
     def run(self):
         fp = open(str(self.output["result_file"]), "a")
-        fp.write(str(self.input))
+        fp.write(str(self.input["data"]))
         fp.write("\n")
         fp.close()
