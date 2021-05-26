@@ -15,7 +15,6 @@ class ConfigManagerGenerator:
                 self.task_blueprints.update(get_modules(directory))
         self.task_list: List[List[Node]] = DependencyGraph(pipeline_tasks, self.task_blueprints) \
             .sorted_graph_identifiers
-        print(self.task_list)
 
     def write(self, config_file_path: Path):
         with open(config_file_path, "w") as file_ptr:

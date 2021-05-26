@@ -24,12 +24,25 @@ SLURM:
   --job-name: EukMS
   user-id: uid
 
+Evidence:
+  # Number of threads task will use
+  threads: 1
+  # Amount of memory task will use (in GB)
+  memory: 8
+  time: "4:00:00"
+  dependencies:
+    MetaEuk:
+      program:
+
 Taxonomy:
   # Number of threads task will use
   threads: 1
   # Amount of memory task will use (in GB)
   memory: 8
   time: "4:00:00"
+  dependencies:
+    MMSeqsTaxonomy:
+      program:
 
 Repeats:
   # Number of threads task will use
@@ -53,6 +66,22 @@ Repeats:
     RMaskRMOut:
       program:
 
+AbinitioGeneMark:
+  # Number of threads task will use
+  threads: 1
+  # Amount of memory task will use (in GB)
+  memory: 8
+  time: "4:00:00"
+  dependencies:
+    MMSeqsFilterTaxSeqDB:
+      program:
+
+    GeneMarkProtHint:
+      program:
+
+    GeneMarkPETAP:
+      program:
+
 AbinitioAugustus:
   # Number of threads task will use
   threads: 1
@@ -70,32 +99,6 @@ AbinitioAugustus:
       program:
 
     Augustus:
-      program:
-
-Evidence:
-  # Number of threads task will use
-  threads: 1
-  # Amount of memory task will use (in GB)
-  memory: 8
-  time: "4:00:00"
-  dependencies:
-    MetaEuk:
-      program:
-
-AbinitioGeneMark:
-  # Number of threads task will use
-  threads: 1
-  # Amount of memory task will use (in GB)
-  memory: 8
-  time: "4:00:00"
-  dependencies:
-    MMSeqsFilterTaxSeqDB:
-      program:
-
-    GeneMarkProtHint:
-      program:
-
-    GeneMarkPETAP:
       program:
 
 Merge:

@@ -50,11 +50,13 @@ class Taxonomy(Task):
 
     @staticmethod
     def requires() -> List[Union[str, Type]]:
-        pass
+        return ["Evidence"]
 
     @staticmethod
     def depends() -> List[DependencyInput]:
-        pass
+        return [
+            DependencyInput("MMSeqsTaxonomy", {"Evidence": {"fasta": "prot"}})
+        ]
 
     def run(self):
         """
