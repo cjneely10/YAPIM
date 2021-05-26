@@ -149,6 +149,7 @@ AbinitioAugustus:
 
     MMSeqsSearch:
       memory: 20
+      threads: 10
       data:
         /media/user/2TB/Data/EukMetaSanity/data/odb-mmetsp_db
       program: mmseqs

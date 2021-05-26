@@ -10,7 +10,7 @@ class MMSeqsConvertAlis(Task):
         self.output = {
             "results_files": [
                 os.path.join(self.wdir, prefix(database) + "_" + prefix(data) + ".m8")
-                for data, database in zip(self.data, self.input["mmseqs.search"]["dbs"])]
+                for data, database in zip(self.data, self.input["MMSeqsSearch"]["dbs"])]
         }
 
     @staticmethod

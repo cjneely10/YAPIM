@@ -27,7 +27,7 @@ class Merge(Task):
         if os.path.exists(str(self.input["AbinitioGeneMark"]["ab-gff3"])):
             self.single(
                 self.local["gffread"][
-                    "-g", self.input["root"]["fasta"],
+                    "-g", self.input["fasta"],
                     str(self.input["AbinitioGeneMark"]["ab-gff3"]),
                     "-y", self.output["prot-genemark"]
                 ]
@@ -35,7 +35,7 @@ class Merge(Task):
         if os.path.exists(str(self.input["AbinitioAugustus"]["ab-gff3"])):
             self.single(
                 self.local["gffread"][
-                    "-g", self.input["root"]["fasta"],
+                    "-g", self.input["fasta"],
                     str(self.input["AbinitioAugustus"]["ab-gff3"]),
                     "-y", self.output["prot-augustus"]
                 ]

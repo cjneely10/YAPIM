@@ -30,12 +30,12 @@ class Augustus(Task):
         """
         Run augustus
         """
-        if self.parse_search_output(str(self.input["mmseqs.convertalis"]["results_files"][0])) == "":
+        if self.parse_search_output(str(self.input["MMSeqsConvertAlis"]["results_files"][0])) == "":
             touch(str(self.output["ab-gff3"]))
             return
         # Initial training based on best species from taxonomy search
         out_gff = self._augustus(
-            self.parse_search_output(str(self.input["mmseqs.convertalis"]["results_files"][0])), 1,
+            self.parse_search_output(str(self.input["MMSeqsConvertAlis"]["results_files"][0])), 1,
             str(self.input["fasta"])
         )
         if len(open(out_gff, "r").readlines()) < 200 or int(self.config["rounds"]) == 0:
