@@ -13,7 +13,7 @@ class Augustus(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {
-
+            "ab-gff3": self.wdir.joinpath(self.record_id + ".gff3")
         }
 
     @staticmethod
