@@ -3,29 +3,26 @@ from typing import List, Union, Type
 from yapim import AggregateTask, DependencyInput
 
 
-class CheckM(AggregateTask):
+class AggregateProgram(AggregateTask):
     @staticmethod
     def depends() -> List[DependencyInput]:
-        return []
+        pass
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {
-            "CheckMResult": self.wdir.joinpath("checkm.log"),
-        }
 
-    def run(self):
-        open(self.output["CheckMResult"], "a").close()
+        }
 
     def aggregate(self) -> dict:
-        return {
-            record_id: {"CheckM": {}}
-            for record_id in self.input.keys()
-        }
+        return self.input
 
     def deaggregate(self) -> dict:
-        return {"CheckM": {}}
+        return self.input
 
     @staticmethod
     def requires() -> List[Union[str, Type]]:
-        return []
+        pass
+
+    def run(self):
+        pass

@@ -6,6 +6,7 @@ from typing import Dict
 from plumbum import CommandNotFound
 
 from yapim.tasks.utils.base_task import BaseTask
+from yapim.utils.dependency_graph import DependencyGraphGenerationError
 from yapim.utils.executor import Executor
 from yapim.utils.extension_loader import ExtensionLoader
 from yapim.utils.input_loader import InputLoader
@@ -117,6 +118,16 @@ class TestExecutor(unittest.TestCase):
             "nested_requirements/tasks",
             ["nested_requirements/dependencies"]
         ).run()
+
+    def test_bad_mixing(self):
+        with self.assertRaises(DependencyGraphGenerationError):
+            Executor(
+                TestExecutor.TestLoader(10),
+                TestExecutor.file.joinpath("bad_mixing/bad_mixing-config.yaml"),
+                TestExecutor.file.joinpath("bad_mixing-out"),
+                "bad_mixing/tasks",
+                ["bad_mixing/dependencies"]
+            ).run()
 
 
 if __name__ == '__main__':

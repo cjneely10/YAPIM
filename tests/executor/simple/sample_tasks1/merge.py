@@ -2,10 +2,14 @@ import os
 from pathlib import Path
 from typing import List
 
-from yapim import AggregateTask
+from yapim import AggregateTask, DependencyInput
 
 
 class Merge(AggregateTask):
+    @staticmethod
+    def depends() -> List[DependencyInput]:
+        return []
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {

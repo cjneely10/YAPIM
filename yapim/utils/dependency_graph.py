@@ -4,6 +4,7 @@ from typing import List, Dict, Tuple, Type, Iterable
 import networkx as nx
 from networkx import DiGraph, topological_sort, is_directed_acyclic_graph
 
+from yapim import AggregateTask
 from yapim.tasks.task import Task
 from yapim.tasks.utils.dependency_input import DependencyInput
 from yapim.utils.config_manager import ConfigManager
@@ -115,6 +116,15 @@ class DependencyGraph:
             if dependency.name not in self.idx.keys():
                 print(f"Unable to locate {dependency.name}")
                 raise DependencyGraph.ERR
+            scope_type = self.idx[dependency.name]
+            if issubclass(scope_type, AggregateTask):
+                if not issubclass(task, AggregateTask):
+                    print(f"Task <{task.__name__}> is of type AggregateTask and can only use AggregateTask dependencies")
+                    raise DependencyGraph.ERR
+            else:
+                if issubclass(task, AggregateTask):
+                    print(f"Task <{task.__name__}> is of type Task and cannot use AggregateTask dependencies")
+                    raise DependencyGraph.ERR
             dependency_node: Node = Node(scope, dependency.name)
             graph.add_edge(task_node, dependency_node)
             self._add_dependencies(dependency_node, scope, graph)

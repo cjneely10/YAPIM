@@ -86,34 +86,6 @@ class TestDependencyGraph(unittest.TestCase):
         with self.assertRaises(DependencyGraphGenerationError):
             print(DependencyGraph(*generate_dg_input([BadSetup])).sorted_graph_identifiers)
 
-    def test_bad_aggregate(self):
-        class BadAggregate(AggregateTask):
-            def __init__(self, *args, **kwargs):
-                super().__init__(*args, **kwargs)
-
-            def aggregate(self) -> dict:
-                pass
-
-            def deaggregate(self) -> dict:
-                pass
-
-            @staticmethod
-            def requires() -> List[Union[str, Type]]:
-                return []
-
-            def run(self):  # pragma: no cover
-                pass
-
-        with self.assertRaises(DependencyGraphGenerationError):
-            BadAggregate(
-                "record_id",
-                ConfigManager.ROOT,
-                ConfigManager(Path("dep-graph-config.yaml")),
-                {},
-                os.getcwd(),
-                False
-            )
-
 
 if __name__ == '__main__':
     unittest.main()
