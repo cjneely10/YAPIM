@@ -13,7 +13,7 @@ class AbinitioGeneMark(Task):
 
     @staticmethod
     def requires() -> List[Union[str, Type]]:
-        return ["Taxonomy", "Repeats", "Evidence"]
+        return ["Repeats"]
 
     @staticmethod
     def depends() -> List[DependencyInput]:

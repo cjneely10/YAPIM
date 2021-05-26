@@ -106,6 +106,15 @@ class TestExecutor(unittest.TestCase):
             ["aggregate_dependency/dependencies"]
         ).run()
 
+    def test_nested_requirements(self):
+        Executor(
+            TestExecutor.TestLoader(10),
+            TestExecutor.file.joinpath("nested_requirements/nested_requirements-config.yaml"),
+            TestExecutor.file.joinpath("nested_requirements-out"),
+            "nested_requirements/tasks",
+            ["nested_requirements/dependencies"]
+        ).run()
+
 
 if __name__ == '__main__':
     unittest.main()
