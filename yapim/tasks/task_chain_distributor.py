@@ -8,7 +8,7 @@ from yapim import Task, AggregateTask
 from yapim.tasks.task import TaskSetupError, TaskExecutionError
 from yapim.tasks.utils.task_result import TaskResult
 from yapim.utils.config_manager import ConfigManager
-from yapim.utils.dependency_graph import Node, DependencyGraph
+from yapim.utils.dependency_graph import Node
 from yapim.utils.path_manager import PathManager
 
 
@@ -144,7 +144,7 @@ class TaskChainDistributor(dict):
         if isinstance(task, AggregateTask):
             output = task.deaggregate()
             if not isinstance(output, dict):
-                raise DependencyGraph.ERR
+                output = task.output
             with TaskChainDistributor.update_lock:
                 keys = set(output.keys())
                 for key, value in output.items():

@@ -133,7 +133,8 @@ class Task(BaseTask, ABC):
         if not self.is_complete:
             if self.display_messages:
                 print(colors.green & colors.bold | "\nRunning:\n  %s" % (
-                        (self.task_scope() + " " if self.task_scope() != ConfigManager.ROOT else "") + self.name
+                        (self.task_scope() + " " if self.task_scope() != ConfigManager.ROOT else "")
+                        + (self.name if self.task_scope() == ConfigManager.ROOT else f"(using {self.name})")
                 ))
             _str = "In progress:  {}".format(self.record_id)
             logging.info(_str)
