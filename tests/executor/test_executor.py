@@ -129,6 +129,15 @@ class TestExecutor(unittest.TestCase):
                 ["bad_mixing/dependencies"]
             ).run()
 
+    def test_cross_types_reqs_deps(self):
+        Executor(
+            TestExecutor.TestLoader(10),
+            TestExecutor.file.joinpath("cross_types_reqs_deps/cross_types_reqs_deps.yaml"),
+            TestExecutor.file.joinpath("cross_types_reqs_deps-out"),
+            "cross_types_reqs_deps/tasks",
+            ["cross_types_reqs_deps/dependencies"]
+        ).run()
+
 
 if __name__ == '__main__':
     unittest.main()

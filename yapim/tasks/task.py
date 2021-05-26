@@ -4,7 +4,7 @@ import time
 import traceback
 from abc import ABC
 from pathlib import Path
-from typing import Tuple, List, Union, Optional
+from typing import Tuple, List, Union, Optional, Hashable
 
 from plumbum import local, colors
 from plumbum.machines import LocalMachine, LocalCommand
@@ -31,7 +31,7 @@ class TaskExecutionError(RuntimeError):
 
 class Task(BaseTask, ABC):
     def __init__(self,
-                 record_id: str,
+                 record_id: Union[str, Hashable],
                  task_scope: str,
                  config_manager: ConfigManager,
                  input_data: dict,

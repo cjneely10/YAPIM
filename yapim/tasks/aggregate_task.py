@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import List, KeysView, ValuesView, ItemsView
 
 from yapim.tasks.task import Task
 from yapim.tasks.utils.input_dict import InputDict
@@ -22,6 +23,15 @@ class AggregateTask(Task, ABC):
         if isinstance(result, dict):
             result.update(self.input)
             self.input = InputDict(result)
+
+    def input_ids(self) -> KeysView:
+        return self.input.keys()
+
+    def input_values(self) -> ValuesView:
+        return self.input.values()
+
+    def input_items(self) -> ItemsView:
+        return self.input.items()
 
     @abstractmethod
     def aggregate(self) -> dict:

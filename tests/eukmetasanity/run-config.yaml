@@ -56,6 +56,7 @@ Taxonomy:
   dependencies:
     MMSeqsCreateDB:
       program: mmseqs
+      threads: 1
 
     MMSeqsTaxonomy:
       program: mmseqs
@@ -78,6 +79,7 @@ Repeats:
   time: "24:00:00"
   dependencies:
     RModBuildDatabase:
+      threads: 1
       program: BuildDatabase
 
     RModRepeatModeler:
@@ -93,11 +95,13 @@ Repeats:
         -nolow
 
     RMaskProcessRepeats:
+      threads: 1
       program: ProcessRepeats
       FLAGS:
         -nolow
 
     RMaskRMOut:
+      threads: 1
       program: rmOutToGFF3.pl
 
 AbinitioGeneMark:
@@ -109,6 +113,7 @@ AbinitioGeneMark:
   skip: false
   dependencies:
     MMSeqsFilterTaxSeqDB:
+      threads: 1
       program: mmseqs
       level: order
       data:
@@ -140,6 +145,7 @@ AbinitioAugustus:
   dependencies:
     MMSeqsCreateDB:
       program: mmseqs
+      threads: 1
 
     MMSeqsSearch:
       memory: 20
@@ -162,9 +168,10 @@ AbinitioAugustus:
         --format-output query,target,pident,taxid,taxname,taxlineage
 
     Augustus:
+      threads: 1
       program: augustus
       cutoff: 25.0
-      rounds: 3
+      rounds: 1
 
 Merge:
   # Number of threads task will use
