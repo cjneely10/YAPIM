@@ -62,8 +62,8 @@ class GeneMarkPETAP(Task):
                 (*ev_vals),
                 "--cores", self.threads, (*self.added_flags),
                 ("--fungus"
-                 if self.input["taxonomy"]["taxonomy"].kingdom is not None and
-                    self.input["taxonomy"]["taxonomy"].kingdom.value.lower() == "fungi" else "")
+                 if self.input["Taxonomy"]["taxonomy"].kingdom is not None and
+                    self.input["Taxonomy"]["taxonomy"].kingdom.value.lower() == "fungi" else "")
             ],
             script_name
         )

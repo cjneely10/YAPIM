@@ -34,9 +34,9 @@ class GMAP(Task):
         # Get transcripts
         for transcript, sam_file in zip(self.get_transcripts(), self.output["sams"]):
             # Generate genome index
-            genome_idx = self.input["gmap.build"]["db"]
-            _genome_dir = os.path.dirname(str(self.input["gmap.build"]["db"]))
-            _genome_basename = os.path.basename(str(self.input["gmap.build"]["db"]))
+            genome_idx = self.input["GMAPBuild"]["db"]
+            _genome_dir = os.path.dirname(str(self.input["GMAPBuild"]["db"]))
+            _genome_basename = os.path.basename(str(self.input["GMAPBuild"]["db"]))
             # Align
             self.parallel(
                 self.program[

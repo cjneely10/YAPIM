@@ -42,7 +42,7 @@ class Hisat2(Task):
             self.parallel(
                 self.program[
                     "-p", self.threads,
-                    "-x", self.input["hisat2.build"]["db"],
+                    "-x", self.input["Hisat2Build"]["db"],
                     (*_parse_args),
                     "-S", out_prefix + ".sam",
                     (*self.added_flags),
