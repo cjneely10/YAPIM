@@ -4,7 +4,7 @@ from typing import List, Union, Type
 from yapim import Task, DependencyInput, touch
 
 
-class RModProcessRepeats(Task):
+class RMaskProcessRepeats(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, *kwargs)
         self.output = {
@@ -15,9 +15,7 @@ class RModProcessRepeats(Task):
 
     @staticmethod
     def requires() -> List[Union[str, Type]]:
-        return [
-            "Taxonomy"
-        ]
+        return ["Taxonomy"]
 
     @staticmethod
     def depends() -> List[DependencyInput]:

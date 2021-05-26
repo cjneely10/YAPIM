@@ -19,9 +19,7 @@ class RMaskRMOut(Task):
 
     @staticmethod
     def depends() -> List[DependencyInput]:
-        return [
-            DependencyInput("RMaskProcessRepeats")
-        ]
+        return [DependencyInput("RMaskProcessRepeats")]
 
     def run(self):
         """

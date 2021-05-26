@@ -1,6 +1,7 @@
 import inspect
 from typing import List, Dict, Tuple, Type, Iterable
 
+import networkx as nx
 from networkx import DiGraph, topological_sort, is_directed_acyclic_graph
 
 from yapim.tasks.task import Task
@@ -70,6 +71,7 @@ class DependencyGraph:
         self.graph.add_node(DependencyGraph.ROOT_NODE)
         self._build_dependency_graph(tasks)
         if not is_directed_acyclic_graph(self.graph):
+            print("Cycle found!")
             raise DependencyGraph.ERR
 
     def _build_dependency_graph(self, tasks: Iterable[Type[Task]]):
@@ -81,37 +83,41 @@ class DependencyGraph:
             if task.requires() is None:
                 return
             if not isinstance(task.requires(), list):
+                print("requires() must return a list")
                 raise DependencyGraph.ERR
             for requirement in task.requires():
                 if not isinstance(requirement, (str, type)):
+                    print("Requirements must be strings or class objects")
                     raise DependencyGraph.ERR
                 # Can pass in requirements by string or by type
                 if inspect.isclass(requirement):
                     requirement = requirement.__name__
                 if requirement not in self.idx.keys():
+                    print(f"Unable to locate {requirement}")
                     raise DependencyGraph.ERR
                 self.graph.add_edge(Node(DependencyGraph.ROOT, requirement), task_node)
 
-    def _add_dependencies(self, task_node: Node, step_list: list):
+    def _add_dependencies(self, task_node: Node, scope: str, graph: nx.Graph):
         # Link dependency names
         task = self.idx[task_node.name]
-
         dependency: DependencyInput
         if task.depends() is None:
             return
         if not isinstance(task.depends(), list):
+            print("depends() must return a list")
             raise DependencyGraph.ERR
         for dependency in task.depends():
             if not isinstance(dependency, DependencyInput) or not isinstance(dependency.name, (str, type)):
+                print("Dependency names must be strings or class objects")
                 raise DependencyGraph.ERR
             if inspect.isclass(dependency.name):
                 dependency.name = dependency.name.__name__
             if dependency.name not in self.idx.keys():
+                print(f"Unable to locate {dependency.name}")
                 raise DependencyGraph.ERR
-            dependency_node: Node = Node(task_node.name, dependency.name)
-            step_list.append(dependency_node)
-            self.graph.add_edge(task_node, dependency_node)
-            self._add_dependencies(dependency_node, step_list)
+            dependency_node: Node = Node(scope, dependency.name)
+            graph.add_edge(task_node, dependency_node)
+            self._add_dependencies(dependency_node, scope, graph)
 
     @property
     def sorted_graph_identifiers(self) -> List[List[Node]]:
@@ -119,8 +125,11 @@ class DependencyGraph:
         sorted_graph.remove(DependencyGraph.ROOT_NODE)
         out_steps = []
         for node in sorted_graph:
-            step_list = []
-            self._add_dependencies(node, step_list)
-            step_list.reverse()
-            out_steps.append([*step_list, node])
+            graph = nx.DiGraph()
+            self._add_dependencies(node, node.name, graph)
+            step_list = list(reversed(list(topological_sort(graph))))
+            if len(step_list) > 0:
+                out_steps.append(step_list)
+            else:
+                out_steps.append([node])
         return out_steps

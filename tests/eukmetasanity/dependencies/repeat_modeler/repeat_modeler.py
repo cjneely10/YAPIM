@@ -19,9 +19,7 @@ class RModRepeatModeler(Task):
 
     @staticmethod
     def depends() -> List[DependencyInput]:
-        return [
-            DependencyInput("RModBuildDatabase")
-        ]
+        return [DependencyInput("RModBuildDatabase")]
 
     def run(self):
         """

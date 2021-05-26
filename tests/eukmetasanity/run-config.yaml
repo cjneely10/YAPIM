@@ -1,0 +1,108 @@
+---  # document start
+
+###########################################
+## Pipeline input section
+INPUT:
+  root: all
+
+## Global settings
+GLOBAL:
+  # Maximum threads/cpus to use in analysis
+  MaxThreads: 10
+  # Maximum memory to use (in GB)
+  MaxMemory: 100
+
+###########################################
+
+SLURM:
+  ## Set to True if using SLURM
+  USE_CLUSTER: false
+  ## Pass any flags you wish below
+  ## DO NOT PASS the following:
+  ## --nodes, --ntasks, --mem, --cpus-per-task
+  --qos: unlim
+  --job-name: EukMS
+  user-id: uid
+
+Taxonomy:
+  # Number of threads task will use
+  threads: 1
+  # Amount of memory task will use (in GB)
+  memory: 8
+  time: "4:00:00"
+
+Repeats:
+  # Number of threads task will use
+  threads: 1
+  # Amount of memory task will use (in GB)
+  memory: 8
+  time: "4:00:00"
+  dependencies:
+    RModBuildDatabase:
+      program:
+
+    RModRepeatModeler:
+      program:
+
+    RMaskRepeatMasker:
+      program:
+
+    RMaskProcessRepeats:
+      program:
+
+    RMaskRMOut:
+      program:
+
+AbinitioAugustus:
+  # Number of threads task will use
+  threads: 1
+  # Amount of memory task will use (in GB)
+  memory: 8
+  time: "4:00:00"
+  dependencies:
+    MMSeqsCreateDB:
+      program:
+
+    MMSeqsSearch:
+      program:
+
+    MMSeqsConvertAlis:
+      program:
+
+    Augustus:
+      program:
+
+Evidence:
+  # Number of threads task will use
+  threads: 1
+  # Amount of memory task will use (in GB)
+  memory: 8
+  time: "4:00:00"
+  dependencies:
+    MetaEuk:
+      program:
+
+AbinitioGeneMark:
+  # Number of threads task will use
+  threads: 1
+  # Amount of memory task will use (in GB)
+  memory: 8
+  time: "4:00:00"
+  dependencies:
+    MMSeqsFilterTaxSeqDB:
+      program:
+
+    GeneMarkProtHint:
+      program:
+
+    GeneMarkPETAP:
+      program:
+
+Merge:
+  # Number of threads task will use
+  threads: 1
+  # Amount of memory task will use (in GB)
+  memory: 8
+  time: "4:00:00"
+
+...  # document end

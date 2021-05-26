@@ -38,9 +38,7 @@ class RMaskRepeatMasker(Task):
 
     @staticmethod
     def depends() -> List[DependencyInput]:
-        return [
-            DependencyInput("RModRepeatModeler")
-        ]
+        return [DependencyInput("RModRepeatModeler")]
 
     def run(self):
         """
