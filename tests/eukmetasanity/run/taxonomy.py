@@ -1,6 +1,6 @@
 from typing import List, Union, Type
 
-from EukMetaSanity import TaxonomyAssignment
+from .taxonomy_assignment import TaxonomyAssignment
 
 from yapim import Task, DependencyInput
 
