@@ -9,7 +9,6 @@ from Bio.SeqRecord import SeqRecord
 
 from yapim import Task, DependencyInput, prefix
 
-
 Result = namedtuple("Result", ("loc_type", "sstart", "send", "strand"))
 
 

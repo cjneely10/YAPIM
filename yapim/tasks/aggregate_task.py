@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, KeysView, ValuesView, ItemsView
+from typing import KeysView, ValuesView, ItemsView
 
 from yapim.tasks.task import Task
 from yapim.tasks.utils.input_dict import InputDict

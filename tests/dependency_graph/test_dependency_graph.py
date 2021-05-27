@@ -1,10 +1,7 @@
-import os
 import unittest
-from pathlib import Path
 from typing import Type, Iterable, Dict, Tuple, Union
 
 from tests.dependency_graph.class_stubs import *
-from yapim import AggregateTask
 from yapim.utils.config_manager import ConfigManager
 from yapim.utils.dependency_graph import DependencyGraph, Node, DependencyGraphGenerationError
 

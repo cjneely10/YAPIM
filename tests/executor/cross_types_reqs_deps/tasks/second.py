@@ -1,6 +1,6 @@
 from typing import List, Union, Type
 
-from yapim import DependencyInput, touch, prefix, AggregateTask
+from yapim import DependencyInput, touch, AggregateTask
 
 
 class Second(AggregateTask):
