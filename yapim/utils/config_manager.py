@@ -224,7 +224,7 @@ class ConfigManager:
             else:
                 raise MissingDataError("Dependency section is improperly configured!")
 
-    def get_slurm_flagged_arguments(self, task) -> List[Tuple[str, str]]:
+    def get_sbatch_flagged_arguments(self) -> List[Tuple[str, str]]:
         """ Get SLURM arguments from file
 
         :return: SLURM arguments parsed to input list
@@ -232,10 +232,6 @@ class ConfigManager:
         ignore_slurm_fields = {"USE_CLUSTER", "--nodes", "--ntasks", "--mem", "user-id"}
         slurm_section_data = {key: str(val)
                               for key, val in self.config["SLURM"].items() if key not in ignore_slurm_fields}
-        for section in (ConfigManager.SLURM_HEADER, ConfigManager.SBATCH):
-            section = self.find(task.full_name, section)
-            if section is not None:
-                slurm_section_data.update(section)
         return sorted([(key, value) for key, value in slurm_section_data.items()], key=lambda v: v[0])
 
     def get_slurm_userid(self):

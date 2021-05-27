@@ -29,7 +29,8 @@ class SLURMCaller:
                  cmd: Union[LocalCommand, str, List[Union[LocalCommand, str]]],
                  config_manager: ConfigManager,
                  task,
-                 time_override: Optional[str] = None
+                 time_override: Optional[str] = None,
+                 parallelize: bool = False
                  ):
         """ Generate SLURMCaller object using user metadata gathered from SLURM config section and
         the task's own metadata
@@ -37,6 +38,7 @@ class SLURMCaller:
         self.user_id = self.config_manager.get_slurm_userid()
         self.task = task
         self.cmd = cmd
+        self.parallelize = parallelize
         self.config_manager = config_manager
         self.time_override = time_override
 
@@ -133,16 +135,28 @@ class SLURMCaller:
                                             if self.time_override is None else self.time_override)
         )
         # Write additional header lines passed in by user
-        for added_arg in self.config_manager.get_slurm_flagged_arguments(self.task):
+        for added_arg in self.config_manager.get_sbatch_flagged_arguments():
             file_ptr.write(SLURMCaller._create_header_line(*added_arg))
         file_ptr.write("\n")
+
+        added_header = self.config_manager.find(self.task.full_name, ConfigManager.SLURM_HEADER)
+        if isinstance(added_header, list):
+            for header_line in added_header:
+                file_ptr.write(header_line)
+                file_ptr.write("\n")
+            file_ptr.write("\n")
         # Write command to run
+        if self.parallelize:
+            ending_string = " &\n"
+        else:
+            ending_string = "\n"
         if isinstance(self.cmd, list):
             for cmd in self.cmd:
-                file_ptr.write(str(cmd) + " &\n")
-            file_ptr.write("wait\n")
+                file_ptr.write(str(cmd) + ending_string)
         else:
             file_ptr.write("".join((str(self.cmd), "\n")))
+        if self.parallelize:
+            file_ptr.write("wait\n")
         file_ptr.close()
 
     @staticmethod
