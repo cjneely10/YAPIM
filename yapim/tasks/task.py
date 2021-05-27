@@ -253,6 +253,7 @@ class Task(BaseTask, ABC):
                 w.write(str(out))
         if isinstance(cmd, SLURMCaller) and os.path.exists(cmd.slurm_log_file):
             with open(os.path.join(self.wdir, "task.log"), "a") as w:
+                w.write("------BEGIN SLURM LOG OUTPUT SECTION------")
                 w.write("".join(open(cmd.slurm_log_file, "r").readlines()))
 
     def single(self, cmd: Union[LocalCommand, List[LocalCommand]], time_override: Optional[str] = None):

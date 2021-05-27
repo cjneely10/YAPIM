@@ -78,7 +78,11 @@ class ConfigManager:
     EXPECTED_RESULTS_DIR = "results"
     ROOT = "root"
     SLURM = "SLURM"
+    SBATCH = "SBATCH"
+    SLURM_HEADER = "SLURM_HEADER"
     INPUT = "INPUT"
+    NODES = "nodes"
+    TASKS = "tasks"
     THREADS = "threads"
     WORKERS = "workers"
     MEMORY = "memory"
@@ -170,13 +174,15 @@ class ConfigManager:
                 try:
                     threads = int(task_dict[ConfigManager.THREADS])
                     if threads > max_threads or threads < 1:
-                        raise InvalidResourcesError(f"Max threads is set a {max_threads} but {task_name} requests {threads}")
+                        raise InvalidResourcesError(f"Max threads is set a {max_threads} "
+                                                    f"but {task_name} requests {threads}")
                 except ValueError:
                     raise ValueError(f"Section {task_name} threads is invalid!")
                 try:
                     memory = int(task_dict[ConfigManager.MEMORY])
                     if memory > max_memory or memory < 1:
-                        raise InvalidResourcesError(f"Max memory is set a {max_memory} but {task_name} requests {memory}")
+                        raise InvalidResourcesError(f"Max memory is set a {max_memory} "
+                                                    f"but {task_name} requests {memory}")
                 except ValueError:
                     raise ValueError(f"Section {task_name} memory is invalid!")
             if "skip" in task_dict.keys() and task_dict["skip"] is True:
@@ -218,15 +224,19 @@ class ConfigManager:
             else:
                 raise MissingDataError("Dependency section is improperly configured!")
 
-    def get_slurm_flagged_arguments(self) -> List[Tuple[str, str]]:
+    def get_slurm_flagged_arguments(self, task) -> List[Tuple[str, str]]:
         """ Get SLURM arguments from file
 
         :return: SLURM arguments parsed to input list
         """
-        return sorted([
-            (key, str(val)) for key, val in self.config["SLURM"].items()
-            if key not in {"USE_CLUSTER", "--nodes", "--ntasks", "--mem", "user-id"}
-        ], key=lambda v: v[0])
+        ignore_slurm_fields = {"USE_CLUSTER", "--nodes", "--ntasks", "--mem", "user-id"}
+        slurm_section_data = {key: str(val)
+                              for key, val in self.config["SLURM"].items() if key not in ignore_slurm_fields}
+        for section in (ConfigManager.SLURM_HEADER, ConfigManager.SBATCH):
+            section = self.find(task.full_name, section)
+            if section is not None:
+                slurm_section_data.update(section)
+        return sorted([(key, value) for key, value in slurm_section_data.items()], key=lambda v: v[0])
 
     def get_slurm_userid(self):
         """ Get user id from slurm section.

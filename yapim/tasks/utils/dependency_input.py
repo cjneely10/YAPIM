@@ -12,10 +12,7 @@ class DependencyInput:
     def __init__(self, name: Union[str, Type],
                  collect_by: Optional[Dict[str, Union[Dict[str, str], MutableSequence[str]]]] = None):
         self.name = name
-        if collect_by is None:
-            self.collect_by = None
-        else:
-            self.collect_by = collect_by
+        self.collect_by = collect_by
 
     def __str__(self):  # pragma: no cover
         return f"<Dependency name: {self.name}, collection: {self.collect_by}>"

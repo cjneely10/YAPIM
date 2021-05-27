@@ -11,12 +11,11 @@ from plumbum.machines.local import LocalCommand, local
 from yapim.utils.config_manager import ConfigManager
 
 
-class SlurmRunError(Exception):  # pragma: no cover
+class SlurmRunError(Exception):
     pass
 
 
-# TODO: Integrate multiple nodes/MPI commands
-class SLURMCaller:  # pragma: no cover
+class SLURMCaller:
     """ SLURMCaller handles running a program on a SLURM cluster
 
     Overrides __str__ and __call__ method to allow script command to be displayed within config
@@ -27,7 +26,7 @@ class SLURMCaller:  # pragma: no cover
     FAILED_ID = "failed-job-id"
 
     def __init__(self,
-                 cmd: Union[LocalCommand, List[LocalCommand]],
+                 cmd: Union[LocalCommand, str, List[Union[LocalCommand, str]]],
                  config_manager: ConfigManager,
                  task,
                  time_override: Optional[str] = None
@@ -36,13 +35,9 @@ class SLURMCaller:  # pragma: no cover
         the task's own metadata
         """
         self.user_id = self.config_manager.get_slurm_userid()
-        self.wdir = task.wdir
-        self.threads = task.threads
+        self.task = task
         self.cmd = cmd
         self.config_manager = config_manager
-        self.memory = self.config_manager.find(task.full_name, ConfigManager.MEMORY)
-        self.time = self.config_manager.find(task.full_name, ConfigManager.TIME)
-        self.added_flags = self.config_manager.get_slurm_flagged_arguments()
         self.time_override = time_override
 
         # Generated job id
@@ -50,7 +45,7 @@ class SLURMCaller:  # pragma: no cover
         # Initialize as not running
         self.running = False
         # Path of script that will run
-        self.script = str(os.path.join(self.wdir, SLURMCaller.OUTPUT_SCRIPTS))
+        self.script = str(os.path.join(task.wdir, SLURMCaller.OUTPUT_SCRIPTS))
         # Create slurm script in working directory
         self._generate_script()
 
@@ -114,14 +109,31 @@ class SLURMCaller:  # pragma: no cover
         file_ptr.write("#!/bin/bash\n\n")
 
         # Write all header lines
-        file_ptr.write(SLURMCaller._create_header_line("--nodes", "1"))
-        file_ptr.write(SLURMCaller._create_header_line("--tasks", "1"))
-        file_ptr.write(SLURMCaller._create_header_line("--cpus-per-task", self.threads))
-        file_ptr.write(SLURMCaller._create_header_line("--mem", self.memory))
-        file_ptr.write(SLURMCaller._create_header_line("--time",
-                                                       self.time if self.time_override is None else self.time_override))
+        nodes = self.config_manager.find(self.task.full_name, ConfigManager.NODES)
+        if nodes is None:
+            nodes = "1"
+        file_ptr.write(SLURMCaller._create_header_line("--nodes", nodes))
+
+        tasks = self.config_manager.find(self.task.full_name, ConfigManager.TASKS)
+        if tasks is None:
+            tasks = "1"
+        file_ptr.write(SLURMCaller._create_header_line("--tasks", tasks))
+
+        file_ptr.write(
+            SLURMCaller._create_header_line("--cpus-per-task",
+                                            self.config_manager.find(self.task.full_name, ConfigManager.THREADS))
+        )
+        file_ptr.write(
+            SLURMCaller._create_header_line("--mem",
+                                            self.config_manager.find(self.task.full_name, ConfigManager.MEMORY))
+        )
+        file_ptr.write(
+            SLURMCaller._create_header_line("--time",
+                                            self.config_manager.find(self.task.full_name, ConfigManager.TIME)
+                                            if self.time_override is None else self.time_override)
+        )
         # Write additional header lines passed in by user
-        for added_arg in self.added_flags:
+        for added_arg in self.config_manager.get_slurm_flagged_arguments(self.task):
             file_ptr.write(SLURMCaller._create_header_line(*added_arg))
         file_ptr.write("\n")
         # Write command to run
