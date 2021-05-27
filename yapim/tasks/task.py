@@ -215,7 +215,8 @@ class Task(BaseTask, ABC):
                     # Then move on
                     is_complete = False
                     break
-                is_complete = True
+                else:
+                    is_complete = True
         if is_complete is None:
             is_complete = False
         self.is_complete = is_complete
