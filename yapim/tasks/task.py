@@ -38,8 +38,8 @@ class Task(BaseTask, ABC):
                  added_data: dict,
                  wdir: str,
                  display_messages: bool):
-        self.record_id: str = record_id
-        self._task_scope = task_scope
+        self.record_id: str = str(record_id)
+        self._task_scope = str(task_scope)
         added_data.update(input_data)
         self.input: InputDict = InputDict(added_data)
         self.output = {}
@@ -235,6 +235,7 @@ class Task(BaseTask, ABC):
         self.parallel(self.local["pwd"], "1:00")
 
         :param cmd: plumbum LocalCommand object to run, or list of commands to run
+        :param time_override:
         :raises: MissingDataError if SLURM section improperly configured
         """
         # Write command to slurm script file and run
@@ -262,6 +263,7 @@ class Task(BaseTask, ABC):
         self.single(self.local["pwd"])
 
         :param cmd: plumbum LocalCommand object to run, or list of commands to run
+        :param time_override:
         """
         self.parallel(cmd, time_override)
 

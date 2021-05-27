@@ -145,6 +145,8 @@ class TaskChainDistributor(dict):
             output = task.deaggregate()
             if not isinstance(output, dict):
                 output = task.output
+            else:
+                output.update(result)
             with TaskChainDistributor.update_lock:
                 keys = set(output.keys())
                 for key, value in output.items():
@@ -188,12 +190,16 @@ class TaskChainDistributor(dict):
         for dependency in requirement_node.depends():
             if dependency.collect_by is not None:
                 for prior_id, prior_mapping in dependency.collect_by.items():
-                    if prior_id.lower() != ConfigManager.ROOT.lower():
-                        for _from, _to in prior_mapping.items():
-                            amended_dict[_to] = TaskChainDistributor.results[record_id][prior_id][_from]
+                    if isinstance(prior_mapping, dict):
+                        if prior_id.lower() != ConfigManager.ROOT.lower():
+                            for _from, _to in prior_mapping.items():
+                                amended_dict[_to] = TaskChainDistributor.results[record_id][prior_id][_from]
+                        else:
+                            for _from, _to in prior_mapping.items():
+                                amended_dict[_to] = TaskChainDistributor.results[record_id][_from]
                     else:
-                        for _from, _to in prior_mapping.items():
-                            amended_dict[_to] = TaskChainDistributor.results[record_id][_from]
+                        for attr in dependency.collect_by:
+                            amended_dict[attr] = TaskChainDistributor.results[record_id][attr]
             else:
                 amended_dict.update(TaskChainDistributor.results[record_id])
         return amended_dict

@@ -20,4 +20,4 @@ class Third(Task):
 
     @staticmethod
     def depends() -> List[DependencyInput]:
-        return [DependencyInput("Program")]
+        return [DependencyInput("Program", {"Second": ["result"]})]

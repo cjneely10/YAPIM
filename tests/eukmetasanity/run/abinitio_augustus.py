@@ -18,7 +18,7 @@ class AbinitioAugustus(Task):
     @staticmethod
     def depends() -> List[DependencyInput]:
         return [
-            DependencyInput("Augustus", {"Repeats": {"mask-fna": "mask-fna"}})
+            DependencyInput("Augustus", {"Repeats": ["mask-fna"]})
         ]
 
     def run(self):

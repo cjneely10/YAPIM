@@ -2,7 +2,7 @@
 Module holds DependencyInput `struct` that is used to in TaskList.depends member
 """
 
-from typing import Dict, Optional, Union, Type
+from typing import Dict, Optional, Union, Type, Iterable
 
 
 class DependencyInput:
@@ -10,7 +10,7 @@ class DependencyInput:
 
     """
     def __init__(self, name: Union[str, Type],
-                 collect_by: Optional[Dict[str, Dict[str, str]]] = None):
+                 collect_by: Optional[Dict[str, Union[Dict[str, str], Iterable[str]]]] = None):
         self.name = name
         if collect_by is None:
             self.collect_by = None
