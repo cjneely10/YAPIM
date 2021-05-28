@@ -4,7 +4,7 @@ from typing import List, Union, Type
 from yapim import Task, DependencyInput
 
 
-class Kofamscan(Task):
+class KofamscanExecAnnotation(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {

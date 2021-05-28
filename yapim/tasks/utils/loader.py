@@ -8,6 +8,7 @@ from pathlib import Path
 from yapim.tasks.task import Task
 
 
+# TODO: Figure out relative imports from user-defined classes
 def get_modules(package_dir: Path) -> dict:
     out = {}
     for loader, module_name, is_pkg in pkgutil.walk_packages([str(package_dir)]):

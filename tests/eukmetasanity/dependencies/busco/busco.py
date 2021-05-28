@@ -25,7 +25,7 @@ class Busco(Task):
         Run busco
         """
         results_directory = os.path.dirname(str(self.output["results"]))
-        self.parallel(
+        script = self.create_script(
             self.program[
                 "-i", self.input["prot"],
                 "--out_path", results_directory,
@@ -34,8 +34,10 @@ class Busco(Task):
                 "-l", self.config["lineage"],
                 "--cpu", self.threads,
                 (*self.added_flags)
-            ]
+            ],
+            "busco.sh"
         )
+        self.parallel(script)
         # Change name of output file
         os.replace(
             glob.glob(os.path.join(self.wdir, self.record_id, "*", "short_summary*.txt"))[0],
