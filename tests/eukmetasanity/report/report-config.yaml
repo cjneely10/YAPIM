@@ -4,6 +4,8 @@
 ## Pipeline input section
 INPUT:
   root: all
+  run:
+    prot: prot-genemark
 
 ## Global settings
 GLOBAL:
@@ -52,7 +54,7 @@ MMSeqs:
 
     MMSeqsSearch:
       data:
-        /path/to/data/odb-mmetsp_db
+        /media/user/2TB/Data/EukMetaSanity/data/odb-mmetsp_db
       program: mmseqs
       subname: search
       FLAGS:
@@ -65,7 +67,7 @@ MMSeqs:
 
     MMSeqsConvertAlis:
       data:
-        /path/to/data/odb-mmetsp_db
+        /media/user/2TB/Data/EukMetaSanity/data/odb-mmetsp_db
       program: mmseqs
 
 KOFamScan:

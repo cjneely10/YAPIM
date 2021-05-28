@@ -1,4 +1,4 @@
-name: EukMS_report
+name: EukMS_reporttest
 channels:
   - bioconda
   - conda-forge

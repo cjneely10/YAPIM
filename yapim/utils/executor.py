@@ -147,7 +147,7 @@ class Executor:
             if isinstance(pipeline_input, dict):
                 pkl_data = InputLoader.load_pkl_data(pkl_file)
                 pkl_input_data = {key: {} for key in pkl_data.keys() if key in self.input_data_dict.keys()}
-                for _from, _to in pipeline_input.items():
+                for _to, _from in pipeline_input.items():
                     for record_id in pkl_input_data.keys():
                         if _from in pkl_data[record_id].keys():
                             pkl_input_data[record_id][_to] = pkl_data[record_id][_from]
