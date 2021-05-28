@@ -198,8 +198,11 @@ class TaskChainDistributor(dict):
                             for _from, _to in prior_mapping.items():
                                 amended_dict[_to] = TaskChainDistributor.results[record_id][_from]
                     else:
-                        for attr in dependency.collect_by:
-                            amended_dict[attr] = TaskChainDistributor.results[record_id][attr]
+                        for attr in prior_mapping:
+                            if attr.lower() != ConfigManager.ROOT.lower():
+                                amended_dict[attr] = TaskChainDistributor.results[record_id][attr]
+                            else:
+                                amended_dict[attr] = TaskChainDistributor.results[attr]
             else:
                 amended_dict.update(TaskChainDistributor.results[record_id])
         return amended_dict

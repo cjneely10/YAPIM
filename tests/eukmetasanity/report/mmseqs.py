@@ -17,7 +17,7 @@ class MMSeqs(Task):
 
     @staticmethod
     def depends() -> List[DependencyInput]:
-        return [DependencyInput("MMSeqsConvertAlis", {"root": {"fasta": "prot"}})]
+        return [DependencyInput("MMSeqsConvertAlis", {"root": {"prot": "fasta"}})]
 
     def run(self):
         pass

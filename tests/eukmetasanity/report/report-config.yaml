@@ -10,7 +10,7 @@ INPUT:
 ## Global settings
 GLOBAL:
   # Maximum threads/cpus to use in analysis
-  MaxThreads: 10
+  MaxThreads: 20
   # Maximum memory to use (in GB)
   MaxMemory: 100
 
@@ -43,9 +43,9 @@ Quality:
 
 MMSeqs:
   # Number of threads task will use
-  threads: 8
+  threads: 16
   # Amount of memory task will use (in GB)
-  memory: 16
+  memory: 90
   time: "4:00:00"
   skip: false
   dependencies:
@@ -58,7 +58,7 @@ MMSeqs:
       program: mmseqs
       subname: search
       FLAGS:
-        --split-memory-limit 12G
+        --split-memory-limit 75G
         -s 7
         -k 7
         -c 0.3
