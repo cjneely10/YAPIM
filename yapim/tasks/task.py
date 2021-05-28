@@ -45,11 +45,8 @@ class Task(BaseTask, ABC):
         self.output = {}
         self.wdir: Path = Path(wdir).resolve()
         self.config_manager = config_manager
-        try:
-            is_skip = self.config_manager.find(self.full_name, ConfigManager.SKIP)
-        except BaseException:
-            raise TaskExecutionError(f"Error completing {self.name}")
-        if is_skip is not None and str(is_skip) == "true":
+        is_skip = self.config_manager.find(self.full_name, ConfigManager.SKIP)
+        if is_skip is not None and str(is_skip).lower() == "true":
             self.is_skip = True
         else:
             self.is_skip = False
@@ -128,7 +125,7 @@ class Task(BaseTask, ABC):
         :return:
         """
         if self.is_skip:
-            return TaskResult(self.record_id, self.name, {})
+            return TaskResult(self.record_id, self.name, self.output)
 
         if not self.is_complete:
             if self.display_messages:

@@ -7,6 +7,9 @@ from yapim import Task, DependencyInput
 class EMapper(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.output = {
+            "emapper": os.path.join(self.wdir, self.record_id + ".txt")
+        }
 
     @staticmethod
     def requires() -> List[Union[str, Type]]:
@@ -24,7 +27,7 @@ class EMapper(Task):
             self.local[self.config["python"]][
                 self.program,
                 "-i", self.input["prot"],
-                "--output", os.path.join(self.wdir, self.record_id),
+                "--output", self.output["emapper"].replace(".txt", ""),
                 "--cpu", self.threads,
                 (*self.added_flags),
             ]

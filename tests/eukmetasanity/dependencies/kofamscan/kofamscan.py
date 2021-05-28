@@ -8,7 +8,7 @@ class KofamscanExecAnnotation(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {
-
+            "kegg": self.wdir.joinpath(self.record_id + ".kegg.txt")
         }
 
     @staticmethod

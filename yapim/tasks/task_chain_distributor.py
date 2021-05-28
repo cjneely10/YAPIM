@@ -163,6 +163,8 @@ class TaskChainDistributor(dict):
             with TaskChainDistributor.update_lock:
                 TaskChainDistributor.results[result.record_id][result.task_name] = result
             self[result.task_name] = result
+        if task.is_skip:
+            return
         for result_key, result_data in result.items():
             if result_key == "final":
                 if not isinstance(result_data, list):
