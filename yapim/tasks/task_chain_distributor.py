@@ -202,9 +202,9 @@ class TaskChainDistributor(dict):
                     else:
                         for attr in prior_mapping:
                             if attr.lower() != ConfigManager.ROOT.lower():
-                                amended_dict[attr] = TaskChainDistributor.results[record_id][attr]
+                                amended_dict[attr] = TaskChainDistributor.results[record_id][prior_id][attr]
                             else:
-                                amended_dict[attr] = TaskChainDistributor.results[attr]
+                                amended_dict[attr] = TaskChainDistributor.results[record_id][attr]
             else:
                 amended_dict.update(TaskChainDistributor.results[record_id])
         return amended_dict

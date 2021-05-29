@@ -18,7 +18,7 @@ class AbinitioGeneMark(Task):
     @staticmethod
     def depends() -> List[DependencyInput]:
         return [
-            DependencyInput("GeneMarkPETAP", {"Repeats": ["mask-fna"]})
+            DependencyInput("GeneMarkPETAP", {"Repeats": {"mask-fna": "fasta"}})
         ]
 
     def run(self):
