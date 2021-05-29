@@ -10,7 +10,7 @@ GLOBAL:
   # Maximum threads/cpus to use in analysis
   MaxThreads: 20
   # Maximum memory to use (in GB)
-  MaxMemory: 100
+  MaxMemory: 120
 
 ###########################################
 
@@ -28,7 +28,7 @@ Evidence:
   # Number of threads task will use
   threads: 16
   # Amount of memory task will use (in GB)
-  memory: 90
+  memory: 100
   time: "12:00:00"
   dependencies:
     MetaEuk:
@@ -39,7 +39,6 @@ Evidence:
       FLAGS:
         --min-length 30
         --metaeuk-eval 0.0001
-        --split-memory-limit 75G
         -s 5
         --cov-mode 0
         -c 0.3
@@ -50,7 +49,7 @@ Taxonomy:
   # Number of threads task will use
   threads: 16
   # Amount of memory task will use (in GB)
-  memory: 90
+  memory: 100
   time: "8:00:00"
   cutoff: 8.0  # Minimum % of mapped reads to tax level
   dependencies:
@@ -69,7 +68,6 @@ Taxonomy:
         --min-seq-id 0.40
         -c 0.3
         --cov-mode 0
-        --split-memory-limit 75G
 
 Repeats:
   # Number of threads task will use
@@ -79,6 +77,7 @@ Repeats:
   time: "24:00:00"
   dependencies:
     RModBuildDatabase:
+      time: "10:00"
       threads: 1
       program: BuildDatabase
 
@@ -95,12 +94,14 @@ Repeats:
         -nolow
 
     RMaskProcessRepeats:
+      time: "30:00"
       threads: 1
       program: ProcessRepeats
       FLAGS:
         -nolow
 
     RMaskRMOut:
+      time: "10:00"
       threads: 1
       program: rmOutToGFF3.pl
 
@@ -114,6 +115,7 @@ AbinitioGeneMark:
   dependencies:
     MMSeqsFilterTaxSeqDB:
       threads: 1
+      time: "10:00"
       program: mmseqs
       level: order
       data:
@@ -144,6 +146,7 @@ AbinitioAugustus:
   time: "24:00:00"
   dependencies:
     MMSeqsCreateDB:
+      time: "10:00"
       program: mmseqs
       threads: 1
 
@@ -162,6 +165,7 @@ AbinitioAugustus:
         --remove-tmp-files
 
     MMSeqsConvertAlis:
+      time: "2:00:00"
       data:
         /media/user/2TB/Data/EukMetaSanity/data/odb-mmetsp_db
       program: mmseqs
@@ -179,6 +183,6 @@ Merge:
   threads: 1
   # Amount of memory task will use (in GB)
   memory: 8
-  time: "1:00:00"
+  time: "10:00"
 
 ...  # document end

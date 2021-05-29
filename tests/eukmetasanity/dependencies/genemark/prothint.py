@@ -26,21 +26,20 @@ class GeneMarkProtHint(Task):
         """
         Run gmes.prothint
         """
-        touch(str(self.output["hints"]))
-        touch(str(self.output["evidence"]))
         try:
-            tmp_file = os.path.join(self.wdir, "fasta.tmp")
-            (self.local["cat"][
-                 str(self.input["Evidence"]["prot"]), str(self.input["MMSeqsFilterTaxSeqDB"]["fastas"][0])
-             ] > tmp_file)()
+            # tmp_file = os.path.join(self.wdir, "fasta.tmp")
+            # (self.local["cat"][
+            #      str(self.input["Evidence"]["prot"]), str(self.input["MMSeqsFilterTaxSeqDB"]["fastas"][0])
+            #  ] > tmp_file)()
             # Run prothint
             self.parallel(
                 self.program[
                     str(self.input["fasta"]),
-                    tmp_file,
+                    str(self.input["MMSeqsFilterTaxSeqDB"]["fastas"][0]),
                     "--workdir", self.wdir,
                     "--threads", self.threads,
                 ]
             )
         except:
-            return
+            touch(str(self.output["hints"]))
+            touch(str(self.output["evidence"]))

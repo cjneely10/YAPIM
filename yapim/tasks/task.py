@@ -40,8 +40,10 @@ class Task(BaseTask, ABC):
                  display_messages: bool):
         self.record_id: str = str(record_id)
         self._task_scope = str(task_scope)
-        added_data.update(input_data)
-        self.input: InputDict = InputDict(added_data)
+        input_data.update(added_data)
+        self.input = input_data
+        # added_data.update(input_data)
+        # self.input: InputDict = InputDict(added_data)
         self.output = {}
         self.wdir: Path = Path(wdir).resolve()
         self.config_manager = config_manager
