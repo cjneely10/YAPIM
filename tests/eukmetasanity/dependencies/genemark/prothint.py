@@ -14,7 +14,7 @@ class GeneMarkProtHint(Task):
 
     @staticmethod
     def requires() -> List[Union[str, Type]]:
-        return ["Evidence"]
+        return []
 
     @staticmethod
     def depends() -> List[DependencyInput]:
@@ -27,10 +27,6 @@ class GeneMarkProtHint(Task):
         Run gmes.prothint
         """
         try:
-            # tmp_file = os.path.join(self.wdir, "fasta.tmp")
-            # (self.local["cat"][
-            #      str(self.input["Evidence"]["prot"]), str(self.input["MMSeqsFilterTaxSeqDB"]["fastas"][0])
-            #  ] > tmp_file)()
             # Run prothint
             self.parallel(
                 self.program[

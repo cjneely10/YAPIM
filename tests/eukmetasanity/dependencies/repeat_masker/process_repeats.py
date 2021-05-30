@@ -15,7 +15,7 @@ class RMaskProcessRepeats(Task):
 
     @staticmethod
     def requires() -> List[Union[str, Type]]:
-        return ["Taxonomy"]
+        return []
 
     @staticmethod
     def depends() -> List[DependencyInput]:
@@ -54,7 +54,7 @@ class RMaskProcessRepeats(Task):
             self.single(
                 self.program[
                     # Input taxonomy from OrthoDB search
-                    "-species", self.input["Taxonomy"]["taxonomy"].assignment("family").value,
+                    "-species", self.input["taxonomy"]["family"]["value"],
                     "-maskSource", str(self.input["fasta"]),
                     (*self.added_flags),
                     final_out,

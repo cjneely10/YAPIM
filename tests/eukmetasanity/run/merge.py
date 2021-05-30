@@ -4,6 +4,7 @@ from typing import List, Union, Type
 from yapim import Task, DependencyInput
 
 
+# TODO: Make part of dependencies
 class Merge(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

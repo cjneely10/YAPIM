@@ -14,7 +14,7 @@ class GeneMarkPETAP(Task):
 
     @staticmethod
     def requires() -> List[Union[str, Type]]:
-        return ["Taxonomy"]
+        return []
 
     @staticmethod
     def depends() -> List[DependencyInput]:
@@ -62,8 +62,8 @@ class GeneMarkPETAP(Task):
                 (*ev_vals),
                 "--cores", self.threads, (*self.added_flags),
                 ("--fungus"
-                 if self.input["Taxonomy"]["taxonomy"].kingdom is not None and
-                    self.input["Taxonomy"]["taxonomy"].kingdom.value.lower() == "fungi" else "")
+                 if self.input["taxonomy"]["kingdom"] is not None and
+                    self.input["taxonomy"]["kingdom"]["value"].lower() == "fungi" else "")
             ],
             script_name
         )

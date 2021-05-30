@@ -23,7 +23,7 @@ class MMSeqsFilterTaxSeqDB(Task):
 
     @staticmethod
     def requires() -> List[Union[str, Type]]:
-        return ["Taxonomy"]
+        return []
 
     @staticmethod
     def depends() -> List[DependencyInput]:
@@ -33,7 +33,7 @@ class MMSeqsFilterTaxSeqDB(Task):
         """
         Run mmseqs.filtertaxseqdb
         """
-        tax = self.input["Taxonomy"]["taxonomy"].assignment(self.config["level"]).tax_id
+        tax = self.input["taxonomy"][self.config["level"]]["taxid"]
         for database, subset_db_outpath, out_fasta in zip(self.data, self.output["dbs"], self.output["fastas"]):
             if tax is None:
                 touch(out_fasta)

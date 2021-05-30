@@ -13,7 +13,7 @@ class RMaskRepeatMasker(Task):
         data_files = []
         data_files += [_f for _f in self.data if _f != ""]
         # Perform on optimal taxonomic identification
-        assignment = self.input["Taxonomy"]["taxonomy"].assignment(self.config["level"])
+        assignment = self.input["taxonomy"][self.config["level"].lower()]
         if assignment is not None:
             data_files += [assignment.value]
         _file = str(self.input["RModRepeatModeler"]["model"])
@@ -34,7 +34,7 @@ class RMaskRepeatMasker(Task):
 
     @staticmethod
     def requires() -> List[Union[str, Type]]:
-        return ["Taxonomy"]
+        return []
 
     @staticmethod
     def depends() -> List[DependencyInput]:
