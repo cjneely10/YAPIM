@@ -10,7 +10,6 @@ from plumbum import local, colors
 from plumbum.machines import LocalMachine, LocalCommand
 
 from yapim.tasks.utils.base_task import BaseTask
-from yapim.tasks.utils.input_dict import InputDict
 from yapim.tasks.utils.slurm_caller import SLURMCaller
 from yapim.tasks.utils.task_result import TaskResult
 from yapim.utils.config_manager import ConfigManager, MissingDataError, MissingProgramSection
