@@ -13,12 +13,12 @@ class AbinitioGeneMark(Task):
 
     @staticmethod
     def requires() -> List[Union[str, Type]]:
-        return ["Repeats"]
+        return ["Repeats", "Taxonomy"]
 
     @staticmethod
     def depends() -> List[DependencyInput]:
         return [
-            DependencyInput("GeneMarkPETAP", {"Repeats": {"mask-fna": "fasta"}})
+            DependencyInput("GeneMarkPETAP", {"Repeats": {"mask-fna": "fasta"}, "Taxonomy": ["taxonomy"]})
         ]
 
     def run(self):

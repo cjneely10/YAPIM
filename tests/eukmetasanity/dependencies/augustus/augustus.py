@@ -13,7 +13,8 @@ class Augustus(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {
-            "ab-gff3": self.wdir.joinpath(self.record_id + ".gff3")
+            "ab-gff3": self.wdir.joinpath(self.record_id + ".gff3"),
+            "prot": self.wdir.joinpath(self.record_id + ".faa")
         }
 
     @staticmethod
@@ -84,7 +85,9 @@ class Augustus(Task):
         )
         # # Combine files
         self.single(
-            self.local["gffread"]["-o", out_gff, "-F", "-G", "--keep-comments", out_gff + ".tmp"],
+            self.local["gffread"]["-o", out_gff, "-F", "-G", "--keep-comments", out_gff + ".tmp",
+                                  "-g", self.input["fasta"],
+                                  "-y", self.output["prot"]],
             "5:00"
         )
         return out_gff
@@ -129,7 +132,6 @@ class Augustus(Task):
             ],
             "2:00"
         )
-
         species_config_prefix = self.record_id + str(_round)
         # Write new species config file
         self.single(
@@ -148,50 +150,6 @@ class Augustus(Task):
             "10:00"
         )
         return out_gff
-
-    @staticmethod
-    def _make_unique(out_gff: str):
-        """ Make gene identifiers in GFF3 file unique
-
-        :param out_gff: Path to output gff3 file (less the .tmp identifier)
-        """
-        gff_fp = open(out_gff + ".tmp", "r")
-        out_fp = open(out_gff, "w")
-        i = 1
-        line = next(gff_fp)
-        while True:
-            if line.startswith("#"):
-                out_fp.write(line)
-            else:
-                line = line.split("\t")
-                if line[2] == "transcript":
-                    out_fp.write("\t".join((
-                        line[0],
-                        "augustus",
-                        *line[2:-1],
-                        "ID=gene%i\n" % i
-                    )))
-                    try:
-                        line = next(gff_fp).split("\t")
-                    except StopIteration:
-                        break
-                    while line[2] != "transcript":
-                        out_fp.write("\t".join((
-                            line[0],
-                            "augustus",
-                            *line[2:-1],
-                            "Parent=gene%i\n" % i
-                        )))
-                        try:
-                            line = next(gff_fp).split("\t")
-                        except StopIteration:
-                            break
-                    i += 1
-            try:
-                line = next(gff_fp)
-            except StopIteration:
-                break
-        out_fp.close()
 
     @staticmethod
     def out_path(_file_name: str, _ext: str) -> str:

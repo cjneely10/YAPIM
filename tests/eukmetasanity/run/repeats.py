@@ -20,8 +20,8 @@ class Repeats(Task):
     @staticmethod
     def depends() -> List[DependencyInput]:
         return [
-            DependencyInput("RMaskRMOut"),
-            DependencyInput("RMaskProcessRepeats")
+            DependencyInput("RMaskRMOut", {"Taxonomy": ["taxonomy"]}),
+            DependencyInput("RMaskProcessRepeats", {"Taxonomy": ["taxonomy"]})
         ]
 
     def run(self):

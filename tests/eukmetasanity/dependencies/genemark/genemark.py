@@ -9,7 +9,8 @@ class GeneMarkPETAP(Task):
         super().__init__(*args, **kwargs)
         self.output = {
             "gtf": self.wdir.joinpath("genemark.gtf"),
-            "ab-gff3": self.wdir.joinpath(self.record_id + ".gff3")
+            "ab-gff3": self.wdir.joinpath(self.record_id + ".gff3"),
+            "prot": self.wdir.joinpath(self.record_id + ".faa")
         }
 
     @staticmethod
@@ -43,13 +44,16 @@ class GeneMarkPETAP(Task):
         if os.path.exists(self.output["gtf"]):
             self.single(
                 self.local["gffread"][
-                    self.output["gtf"], "-G", "-o", str(self.output["ab-gff3"])
+                    self.output["gtf"], "-G", "-o", str(self.output["ab-gff3"]),
+                    "-g", self.input["fasta"],
+                    "-y", self.output["prot"]
                 ],
                 "30:00"
             )
         else:
             touch(str(self.output["ab-gff3"]))
             touch(str(self.output["gtf"]))
+            touch(str(self.output["prot"]))
 
     def _run_petap(self, ev_vals: List[str], script_name: str):
         """ Run gmes_petap.pl

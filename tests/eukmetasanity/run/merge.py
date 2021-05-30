@@ -25,19 +25,4 @@ class Merge(Task):
         return []
 
     def run(self):
-        if os.path.exists(str(self.input["AbinitioGeneMark"]["ab-gff3"])):
-            self.single(
-                self.local["gffread"][
-                    "-g", self.input["fasta"],
-                    str(self.input["AbinitioGeneMark"]["ab-gff3"]),
-                    "-y", self.output["prot-genemark"]
-                ]
-            )
-        if os.path.exists(str(self.input["AbinitioAugustus"]["ab-gff3"])):
-            self.single(
-                self.local["gffread"][
-                    "-g", self.input["fasta"],
-                    str(self.input["AbinitioAugustus"]["ab-gff3"]),
-                    "-y", self.output["prot-augustus"]
-                ]
-            )
+        pass
