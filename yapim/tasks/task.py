@@ -3,6 +3,7 @@ import os
 import threading
 import time
 import traceback
+from copy import deepcopy
 from abc import ABC
 from pathlib import Path
 from typing import Tuple, List, Union, Optional, Hashable
@@ -11,6 +12,7 @@ from plumbum import local, colors
 from plumbum.machines import LocalMachine, LocalCommand
 
 from yapim.tasks.utils.base_task import BaseTask
+from yapim.tasks.utils.input_dict import InputDict
 from yapim.tasks.utils.slurm_caller import SLURMCaller
 from yapim.tasks.utils.task_result import TaskResult
 from yapim.utils.config_manager import ConfigManager, MissingDataError, MissingProgramSection
@@ -42,10 +44,14 @@ class Task(BaseTask, ABC):
                  display_messages: bool):
         self.record_id: str = str(record_id)
         self._task_scope = str(task_scope)
-        input_data.update(added_data)
-        self.input = input_data
+        # input_data.update(added_data)
+        # self.input = input_data
         # added_data.update(input_data)
-        # self.input: InputDict = InputDict(added_data)
+        self.input = deepcopy(input_data)
+        self.input.update(added_data)
+        self.input = InputDict(self.input)
+        # print(self.input)
+        # print(added_data)
         self.output = {}
         self.wdir: Path = Path(wdir).resolve()
         self.config_manager = config_manager
