@@ -3,6 +3,8 @@ import os
 import shutil
 from typing import List, Union, Type
 
+from plumbum import ProcessExecutionError
+
 from yapim import Task, DependencyInput, touch
 
 
@@ -32,11 +34,14 @@ class RModRepeatModeler(Task):
             ],
             "modeler.sh"
         )
-        self.parallel(script)
-        _output = glob.glob(os.path.join(self.wdir, "RM*", "consensi.fa.classified"))
-        if len(_output) > 0:
-            shutil.copyfile(_output[0], str(self.output["model"]))
-        else:
+        try:
+            self.parallel(script)
+            _output = self.get_output_file()
+            if len(_output) > 0:
+                shutil.copyfile(_output[0], str(self.output["model"]))
+            else:
+                touch(str(self.output["model"]))
+        except ProcessExecutionError:
             touch(str(self.output["model"]))
 
     def get_output_file(self):

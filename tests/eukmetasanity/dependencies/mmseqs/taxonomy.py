@@ -82,6 +82,9 @@ class MMSeqsTaxonomy(Task):
             "taxonomy": {},
             "taxonomy-actual": {}
         }
+        self.output["taxonomy"], self.output["taxonomy-actual"] = MMSeqsTaxonomyParser.get_taxonomy(
+            self.output["tax-report"], self.config["cutoff"]
+        )
 
     @staticmethod
     def requires() -> List[Union[str, Type]]:
@@ -119,7 +122,4 @@ class MMSeqsTaxonomy(Task):
                 self.output["tax-report"]
             ],
             "1:00:00"
-        )
-        self.output["taxonomy"], self.output["taxonomy-actual"] = MMSeqsTaxonomyParser.get_taxonomy(
-            self.output["tax-report"], self.config["cutoff"]
         )

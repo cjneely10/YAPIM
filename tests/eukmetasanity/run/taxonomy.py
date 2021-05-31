@@ -7,7 +7,7 @@ class Taxonomy(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {
-            "taxonomy": self.input["MMSeqsTaxonomy"]["tax-report"],
+            "taxonomy": self.input["MMSeqsTaxonomy"]["taxonomy"],
             "taxonomy-actual": self.input["MMSeqsTaxonomy"]["taxonomy-actual"],
             "tax-report": self.input["MMSeqsTaxonomy"]["tax-report"],
             "final": ["tax-report", "taxonomy"]

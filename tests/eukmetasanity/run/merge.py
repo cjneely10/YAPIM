@@ -10,10 +10,12 @@ class Merge(Task):
         super().__init__(*args, **kwargs)
         self.output = {"final": []}
         if os.path.exists(str(self.input["AbinitioGeneMark"]["ab-gff3"])):
-            self.output["prot-genemark"] = os.path.join(self.wdir, self.record_id + ".gmes.faa")
+            self.output["prot-genemark"] = self.input["AbinitioGeneMark"]["ab-gff3"]
+            self.output["gff3-genemark"] = self.input["AbinitioGeneMark"]["prot"]
             self.output["final"].append("prot-genemark")
         if os.path.exists(str(self.input["AbinitioAugustus"]["ab-gff3"])):
-            self.output["prot-augustus"] = os.path.join(self.wdir, self.record_id + ".augustus.faa")
+            self.output["gff3-augustus"] = self.input["AbinitioAugustus"]["ab-gff3"]
+            self.output["gff3-augustus"] = self.input["AbinitioAugustus"]["prot"]
             self.output["final"].append("prot-augustus")
 
     @staticmethod
