@@ -14,7 +14,7 @@ class RMaskRepeatMasker(Task):
         data_files += [_f for _f in self.data if _f != ""]
         # Perform on optimal taxonomic identification
         assignment = self.input["taxonomy"][self.config["level"].lower()]
-        if assignment is not None:
+        if assignment["value"] is not None:
             data_files += [assignment["value"]]
         _file = str(self.input["RModRepeatModeler"]["model"])
         if os.path.exists(_file) and os.path.getsize(_file) > 0:

@@ -1,5 +1,6 @@
 import logging
 import os
+import threading
 import time
 import traceback
 from abc import ABC
@@ -29,6 +30,8 @@ class TaskExecutionError(RuntimeError):
 
 
 class Task(BaseTask, ABC):
+    print_lock = threading.Lock()
+
     def __init__(self,
                  record_id: Union[str, Hashable],
                  task_scope: str,
@@ -129,22 +132,24 @@ class Task(BaseTask, ABC):
             return TaskResult(self.record_id, self.name, self.output)
 
         if not self.is_complete:
-            if self.display_messages:
-                print(colors.green & colors.bold | "\nRunning:\n  %s" % (
-                        (self.task_scope() + " " if self.task_scope() != ConfigManager.ROOT else "")
-                        + (self.name if self.task_scope() == ConfigManager.ROOT else f"(using {self.name})")
-                ))
-            _str = "In progress:  {}".format(self.record_id)
-            logging.info(_str)
-            if self.display_messages:
-                print(colors.blue & colors.bold | _str)
+            with Task.print_lock:
+                if self.display_messages:
+                    print(colors.green & colors.bold | "\nRunning:\n  %s" % (
+                            (self.task_scope() + " " if self.task_scope() != ConfigManager.ROOT else "")
+                            + (self.name if self.task_scope() == ConfigManager.ROOT else f"(using {self.name})")
+                    ))
+                _str = "In progress:  {}".format(self.record_id)
+                logging.info(_str)
+                if self.display_messages:
+                    print(colors.blue & colors.bold | _str)
             start_time = time.time()
             self.try_run()
             end_time = time.time()
-            _str = "Is complete:  {} ({:.3f}{})".format(self.record_id, *Task._parse_time(end_time - start_time))
-            logging.info(_str)
-            if self.display_messages:
-                print(colors.blue & colors.bold | _str)
+            with Task.print_lock:
+                _str = "Is complete:  {} ({:.3f}{})".format(self.record_id, *Task._parse_time(end_time - start_time))
+                logging.info(_str)
+                if self.display_messages:
+                    print(colors.blue & colors.bold | _str)
 
         for key, output in self.output.items():
             if key != "final":

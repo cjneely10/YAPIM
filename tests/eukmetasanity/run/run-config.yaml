@@ -178,11 +178,4 @@ AbinitioAugustus:
       cutoff: 25.0
       rounds: 1
 
-Merge:
-  # Number of threads task will use
-  threads: 1
-  # Amount of memory task will use (in GB)
-  memory: 8
-  time: "10:00"
-
 ...  # document end

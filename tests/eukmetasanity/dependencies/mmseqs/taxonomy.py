@@ -21,7 +21,11 @@ class MMSeqsTaxonomyParser:
     def new():
         out = {}
         for level in MMSeqsTaxonomyParser._tax_order:
-            out[level] = {}
+            out[level] = {
+                "taxid": None,
+                "value": None,
+                "score": None
+            }
         return out
 
     @staticmethod

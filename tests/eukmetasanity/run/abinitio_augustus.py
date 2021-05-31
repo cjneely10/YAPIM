@@ -8,7 +8,8 @@ class AbinitioAugustus(Task):
         super().__init__(*args, **kwargs)
         self.output = {
             "ab-gff3": self.input["Augustus"]["ab-gff3"],
-            "final": ["ab-gff3"]
+            "prot": self.input["Augustus"]["prot"],
+            "final": ["ab-gff3", "prot"]
         }
 
     @staticmethod

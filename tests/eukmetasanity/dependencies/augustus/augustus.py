@@ -60,6 +60,10 @@ class Augustus(Task):
         self._handle_config_output()
         # Rename final file
         os.replace(out_gff, str(self.output["ab-gff3"]))
+        self.single(
+            self.local["gffread"][str(self.output["ab-gff3"]), "-y", self.output["prot"], "-g", self.input["fasta"]],
+            "5:00"
+        )
 
     def _augustus(self, species: str, _round: int, _file: str, _last: bool = False) -> str:
         """ Run augustus training round
@@ -78,18 +82,17 @@ class Augustus(Task):
                 "--codingseq=on",
                 "--stopCodonExcludedFromCDS=false",
                 "--species=%s" % species,
-                "--outfile=%s" % out_gff + ".tmp",
+                "--outfile=%s" % out_gff,
                 ("--gff3=on" if _last else "--gff3=off"),
                 str(self.input["fasta"]),
             ]
         )
         # # Combine files
-        self.single(
-            self.local["gffread"]["-o", out_gff, "-F", "-G", "--keep-comments", out_gff + ".tmp",
-                                  "-g", self.input["fasta"],
-                                  "-y", self.output["prot"]],
-            "5:00"
-        )
+        # self.single(
+        #     self.local["gffread"]["-o", out_gff, "-F", "-G", "--keep-comments", out_gff + ".tmp",
+        #                           "-g", self.input["fasta"]],
+        #     "5:00"
+        # )
         return out_gff
 
     def _handle_config_output(self):
