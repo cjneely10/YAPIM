@@ -7,9 +7,9 @@ class AbinitioAugustus(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {
-            "ab-gff3": self.input["Augustus"]["ab-gff3"],
-            "prot": self.input["Augustus"]["prot"],
-            "final": ["ab-gff3", "prot"]
+            "aug-gff3": self.input["Augustus"]["ab-gff3"],
+            "aug-prot": self.input["Augustus"]["prot"],
+            "final": ["aug-gff3", "aug-prot"]
         }
 
     @staticmethod

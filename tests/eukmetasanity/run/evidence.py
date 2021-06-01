@@ -7,9 +7,9 @@ class Evidence(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {
-            "gff3": self.input["MetaEuk"]["gff3"],
-            "prot": self.input["MetaEuk"]["prot"],
-            "final": ["prot", "gff3"]
+            "evidence-gff3": self.input["MetaEuk"]["gff3"],
+            "evidence-prot": self.input["MetaEuk"]["prot"],
+            "final": ["evidence-prot", "evidence-gff3"]
         }
 
     @staticmethod

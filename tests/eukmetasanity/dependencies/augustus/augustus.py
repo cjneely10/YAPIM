@@ -42,9 +42,7 @@ class Augustus(Task):
         )
         if len(open(out_gff, "r").readlines()) < 200 or int(self.config["rounds"]) == 0:
             # Move any augustus-generated config stuff
-            self._handle_config_output()
-            # Rename final file
-            os.replace(out_gff, str(self.output["ab-gff3"]))
+            self._finalize_output(out_gff)
             return
         self._train_augustus(1, str(self.input["fasta"]), out_gff)
         # Remaining rounds of re-training on generated predictions
@@ -58,6 +56,9 @@ class Augustus(Task):
             if i != int(self.config["rounds"]) - 1:
                 self._train_augustus(i + 2, str(self.input["fasta"]), out_gff)
         # Move any augustus-generated config stuff
+        self._finalize_output(out_gff)
+
+    def _finalize_output(self, out_gff: str):
         self._handle_config_output()
         # Rename final file
         os.replace(out_gff, str(self.output["ab-gff3"]))

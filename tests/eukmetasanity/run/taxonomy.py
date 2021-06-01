@@ -20,7 +20,7 @@ class Taxonomy(Task):
     @staticmethod
     def depends() -> List[DependencyInput]:
         return [
-            DependencyInput("MMSeqsTaxonomy", {"Evidence": {"prot": "fasta"}})
+            DependencyInput("MMSeqsTaxonomy", {"Evidence": {"evidence-prot": "fasta"}})
         ]
 
     def run(self):
