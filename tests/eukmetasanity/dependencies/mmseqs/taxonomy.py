@@ -86,6 +86,10 @@ class MMSeqsTaxonomy(Task):
             "taxonomy": {},
             "taxonomy-actual": {}
         }
+        if os.path.exists(self.output["tax-report"]):
+            self.output["taxonomy"], self.output["taxonomy-actual"] = MMSeqsTaxonomyParser.get_taxonomy(
+                self.output["tax-report"], self.config["cutoff"]
+            )
 
     @staticmethod
     def requires() -> List[Union[str, Type]]:

@@ -255,15 +255,19 @@ class Task(BaseTask, ABC):
         logging.info(str(cmd))
         if self.display_messages:
             print("  " + str(cmd))
+        with open(os.path.join(self.wdir, "task.log"), "a") as w:
+            w.write(str(cmd) + "\n")
         out = cmd()
         # Store log info in any was generated
         if out is not None:
             with open(os.path.join(self.wdir, "task.log"), "a") as w:
-                w.write(str(out))
+                w.write(str(out) + "\n")
         if isinstance(cmd, SLURMCaller) and os.path.exists(cmd.slurm_log_file):
             with open(os.path.join(self.wdir, "task.log"), "a") as w:
                 w.write("------BEGIN SLURM LOG OUTPUT SECTION------")
                 w.write("".join(open(cmd.slurm_log_file, "r").readlines()))
+        with open(os.path.join(self.wdir, "task.log"), "a") as w:
+            w.write("\n")
 
     def single(self, cmd: Union[LocalCommand, List[LocalCommand]], time_override: Optional[str] = None):
         """ Launch a command that uses a single thread.
