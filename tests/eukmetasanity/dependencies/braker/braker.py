@@ -29,19 +29,16 @@ class Braker(Task):
         """
         Run braker
         """
-        bams = self._get_bams()
-        tax = getattr(self.input["taxonomy"]["taxonomy"], self.config["level"])
         _tax = []
-        if "fungi" in tax[0]:
+        if "fungi" in self.input["taxonomy"]["kingdom"]["value"].lower():
             _tax = ["--fungus"]
-        _fasta_output = self.input["mmseqs.filtertaxseqdb"]["fastas"]
+        _fasta_output = self.input["prots"]
         _added = []
-        gffread = self.local["gffread"]
         if "--skipGeneMark-ES" in self.added_flags:
             # Output CDS and prot fasta
             _gtf = os.path.join(self.wdir, self.record_id + ".gtf")
             self.single(
-                gffread[self.input["root"]["nr-gff3"]] > _gtf,
+                self.local["gffread"][self.input["gff3"]] > _gtf,
                 "30:00"
             )
             _added = ["--geneMarkGtf=%s" % _gtf]
@@ -51,7 +48,7 @@ class Braker(Task):
                 self.program[
                     "--cores=%s" % str(self.threads),
                     "--genome=%s" % self.input["fasta"],
-                    (*bams),
+                    (*self._get_bams()),
                     "--prot_seq=%s" % _fasta_output,
                     "--workingdir=%s" % self.wdir,
                     (*_tax),
@@ -75,13 +72,13 @@ class Braker(Task):
         # Merge final results if final output failed
         if not os.path.exists(_out):
             self.single(
-                self.local[self.config["program_gffread"]][
+                self.local["gffread"][
                     (*_files),
                     "--merge", "-G", "-S",
-                    "-o", os.path.join(self.wdir, self.record_id + ".gff3"),
-                    "-g", self.input["fasta"],
-                    "-x", os.path.join(self.wdir, self.record_id + ".cds.fna"),
-                    "-y", os.path.join(self.wdir, self.record_id + ".faa"),
+                    "-o", str(self.output["nr_gff3"]),
+                    "-g", str(self.input["fasta"]),
+                    "-x", str(self.output["cds"]),
+                    "-y", str(self.output["prot"]),
                 ],
                 "30:00"
             )
