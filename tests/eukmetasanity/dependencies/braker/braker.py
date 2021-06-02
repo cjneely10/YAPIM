@@ -17,13 +17,11 @@ class Braker(Task):
 
     @staticmethod
     def requires() -> List[Union[str, Type]]:
-        return ["Mapping", "Taxonomy"]
+        return []
 
     @staticmethod
     def depends() -> List[DependencyInput]:
-        return [
-            DependencyInput("MMSeqsFilterTaxSeqDB")
-        ]
+        return []
 
     def run(self):
         """
