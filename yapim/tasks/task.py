@@ -47,7 +47,7 @@ class Task(BaseTask, ABC):
         # input_data.update(added_data)
         # self.input = input_data
         # added_data.update(input_data)
-        self.input = deepcopy(input_data)
+        self.input = input_data.copy()
         self.input.update(added_data)
         self.input = InputDict(self.input)
         # print(self.input)

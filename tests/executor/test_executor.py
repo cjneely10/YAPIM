@@ -138,6 +138,30 @@ class TestExecutor(unittest.TestCase):
             ["cross_types_reqs_deps/dependencies"]
         ).run()
 
+    def test_added_imports(self):
+        Executor(
+            TestExecutor.TestLoader(10),
+            TestExecutor.file.joinpath("added_imports/added_imports-config.yaml"),
+            TestExecutor.file.joinpath("added_imports-out"),
+            "added_imports/tasks",
+        ).run()
+
+    def test_confirm_not_overwritten(self):
+        class TestIDLoader(InputLoader):
+            def __init__(self, n: int):
+                self.n = n
+
+            def load(self) -> Dict[str, Dict]:
+                return {str(i): {"input": str(i), "other": "other"} for i in range(self.n)}
+
+        Executor(
+            TestIDLoader(10),
+            TestExecutor.file.joinpath("confirm_not_overwritten/confirm_not_overwritten-config.yaml"),
+            TestExecutor.file.joinpath("confirm_not_overwritten-out"),
+            "confirm_not_overwritten/tasks",
+            ["confirm_not_overwritten/dependencies"]
+        ).run()
+
 
 if __name__ == '__main__':
     unittest.main()

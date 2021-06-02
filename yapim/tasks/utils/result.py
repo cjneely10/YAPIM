@@ -7,3 +7,6 @@ class Result:
 
     def __str__(self):  # pragma: no cover
         return str(self._value)
+
+    def __repr__(self):  # pragma: no cover
+        return str(self)

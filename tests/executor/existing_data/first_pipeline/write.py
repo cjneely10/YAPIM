@@ -15,11 +15,11 @@ class Write(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {
-            "result": self.wdir.joinpath("result.txt"),
-            "final": ["result"]
+            "write-result": self.wdir.joinpath("result.txt"),
+            "final": ["write-result"]
         }
 
     def run(self):
         self.single(
-            self.local["echo"][self.record_id] > str(self.output["result"])
+            self.local["echo"][self.record_id] > str(self.output["write-result"])
         )

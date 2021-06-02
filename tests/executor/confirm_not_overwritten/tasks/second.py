@@ -1,24 +1,22 @@
 from typing import List, Union, Type
 
-from yapim import Task, DependencyInput
+from yapim import Task, DependencyInput, Result
 
 
-class Print(Task):
+class Second(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {
-            "output": self.wdir.joinpath("out.txt"),
-            "final": ["output"]
+            "output": Result(self.input["Dependency"]["output"])
         }
 
     @staticmethod
     def requires() -> List[Union[str, Type]]:
-        return []
+        return ["First"]
 
     @staticmethod
     def depends() -> List[DependencyInput]:
-        return []
+        return [DependencyInput("Dependency", {"root": {"other": "input"}})]
 
     def run(self):
-        print(self.input)
-        open(self.output["output"], "a").close()
+        pass

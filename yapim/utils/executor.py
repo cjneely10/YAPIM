@@ -151,7 +151,10 @@ class Executor:
                     for record_id in pkl_input_data.keys():
                         if _from in pkl_data[record_id].keys():
                             pkl_input_data[record_id][_to] = pkl_data[record_id][_from]
+                        else:
+                            raise err
                 requested_input.update(pkl_input_data)
             else:
                 raise err
+        print(requested_input)
         return requested_input

@@ -29,7 +29,7 @@ class TestConfigManager(unittest.TestCase):
     def test_slurm_info(self):
         self.assertEqual(
             [('--job-name', 'EukMS'), ('--qos', 'unlim')],
-            TestConfigManager.cfg.get_slurm_flagged_arguments()
+            TestConfigManager.cfg.get_sbatch_flagged_arguments()
         )
 
     def test_get_outer(self):

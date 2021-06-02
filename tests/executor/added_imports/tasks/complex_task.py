@@ -1,24 +1,27 @@
 from typing import List, Union, Type
 
+try:
+    from tasks.external_functions import add_one
+except ModuleNotFoundError:
+    from tests.executor.added_imports.tasks.external_functions import add_one
 from yapim import Task, DependencyInput
 
 
-class Print(Task):
+class ComplexTask(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {
-            "output": self.wdir.joinpath("out.txt"),
-            "final": ["output"]
+            "result": -1
         }
 
     @staticmethod
     def requires() -> List[Union[str, Type]]:
-        return []
+        pass
 
     @staticmethod
     def depends() -> List[DependencyInput]:
-        return []
+        pass
 
     def run(self):
-        print(self.input)
-        open(self.output["output"], "a").close()
+        self.output["result"] = add_one(self.record_id)
+        print(self.output["result"])

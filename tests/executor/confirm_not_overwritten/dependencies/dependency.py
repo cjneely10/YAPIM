@@ -1,24 +1,25 @@
 from typing import List, Union, Type
 
-from yapim import Task, DependencyInput
+from yapim import Task, DependencyInput, Result
+from yapim.tasks.task import TaskExecutionError
 
 
-class Print(Task):
+class Dependency(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {
-            "output": self.wdir.joinpath("out.txt"),
-            "final": ["output"]
+            "output": Result(self.record_id + "-dependency")
         }
 
     @staticmethod
     def requires() -> List[Union[str, Type]]:
-        return []
+        pass
 
     @staticmethod
     def depends() -> List[DependencyInput]:
-        return []
+        pass
 
     def run(self):
         print(self.input)
-        open(self.output["output"], "a").close()
+        if self.input["input"] != "other":
+            raise TaskExecutionError()

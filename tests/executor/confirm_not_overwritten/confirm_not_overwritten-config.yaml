@@ -4,8 +4,6 @@
 ## Pipeline input section
 INPUT:
   root: all
-  first_pipeline:
-    input: update-result
 
 ## Global settings
 GLOBAL:
@@ -26,9 +24,28 @@ SLURM:
   --job-name: EukMS
   user-id: uid
 
-Print:
+First:
+  # Number of threads task will use
   threads: 1
-  memory: 40
+  # Amount of memory task will use (in GB)
+  memory: 8
+  time: "4:00:00"
+
+Second:
+  # Number of threads task will use
+  threads: 1
+  # Amount of memory task will use (in GB)
+  memory: 8
+  time: "4:00:00"
+  dependencies:
+    Dependency:
+      program: cat
+
+Third:
+  # Number of threads task will use
+  threads: 1
+  # Amount of memory task will use (in GB)
+  memory: 8
   time: "4:00:00"
 
 ...  # document end
