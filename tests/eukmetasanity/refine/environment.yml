@@ -3,7 +3,7 @@ channels:
   - bioconda
   - conda-forge
 dependencies:
-  - python=3.6.9
+  - python=3.8.6
   - gffread=0.12.1
   - mmseqs2=12.113e3
   - sqlite=3.33
