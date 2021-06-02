@@ -12,7 +12,7 @@ class Braker(Task):
         self.output = {
             "cds": self.wdir.joinpath(self.record_id + ".cds.fna"),
             "prot": self.wdir.joinpath(self.record_id + ".faa"),
-            "nr_gff3": self.wdir.joinpath(self.record_id + ".gff3"),
+            "gff3": self.wdir.joinpath(self.record_id + ".gff3"),
         }
 
     @staticmethod
