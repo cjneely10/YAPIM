@@ -162,6 +162,6 @@ class MetaEuk(Task):
         # Call parsing function - ensured to exist
         metaeuk(open(_outfile + ".fas"), data)
         # Write results
-        GFF.write(_iter_gff(str(self.output["gff3"]), data), open(str(self.output["gff3"]), "w"))
+        GFF.write(_iter_gff(str(self.input["fasta"]), data), open(str(self.output["gff3"]), "w"))
         # Rename output file
         os.replace(_outfile + ".fas", str(self.output["prot"]))
