@@ -8,7 +8,7 @@ INPUT:
 ## Global settings
 GLOBAL:
   # Maximum threads/cpus to use in analysis
-  MaxThreads: 10
+  MaxThreads: 20
   # Maximum memory to use (in GB)
   MaxMemory: 100
 
@@ -30,7 +30,7 @@ Transcriptomes:
   # Amount of memory task will use (in GB)
   memory: 8
   time: "4:00:00"
-  skip: false
+  skip: true
   dependencies:
     GMAPBuild:
       program: gmapindex
@@ -48,20 +48,21 @@ Transcriptomes:
 
 RNASeq:
   # Number of threads task will use
-  threads: 1
+  threads: 16
   # Amount of memory task will use (in GB)
   memory: 8
   time: "4:00:00"
   skip: false
   dependencies:
     Hisat2Build:
+      threads: 1
       program: hisat2-build
 
     Hisat2:
       program: hisat2
       # Should be in format (excluding spaces around tab):
       # file-basename \t /path/to/r1.fq[,/path/to/r2.fq][;/path/to/r3.fq[,/path/to/r4.fq]]
-      rnaseq: /path/to/rnaseq-mapping-file
+      rnaseq: /home/user/BioProjects/YAPIM/tests/eukmetasanity/refine/rnaseq-mapping.list
       FLAGS:
         ""
 
@@ -69,7 +70,7 @@ MergeBams:
   # Number of threads task will use
   threads: 1
   # Amount of memory task will use (in GB)
-  memory: 8
+  memory: 16
   time: "4:00:00"
   dependencies:
     SambambaView:
@@ -80,26 +81,26 @@ MergeBams:
     SambambaSort:
       program: sambamba
       FLAGS:
-        -m 10G
+        -m 16G
 
 GatherProteins:
   # Number of threads task will use
-  threads: 1
+  threads: 16
   # Amount of memory task will use (in GB)
-  memory: 8
+  memory: 16
   time: "4:00:00"
   dependencies:
     MMSeqsFilterTaxSeqDB:
       program: mmseqs
       level: order
       data:
-        /path/to/data/odb-mmetsp_db
+        /media/user/2TB/Data/EukMetaSanity/data/odb-mmetsp_db
 
 RunBraker:
   # Number of threads task will use
-  threads: 1
+  threads: 16
   # Amount of memory task will use (in GB)
-  memory: 8
+  memory: 90
   time: "4:00:00"
   dependencies:
     Braker:

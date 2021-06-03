@@ -60,6 +60,6 @@ class Hisat2(Task):
         file_ptr = open(_path, "r")
         for line in file_ptr:
             if line.startswith(self.record_id):
-                pairs_string = line.rstrip("\r\n").split("\t")[1].split(";")
+                pairs_string = line.rstrip("\r\n").split()[1].split(";")
                 return [tuple(pair.split(",")) for pair in pairs_string]
         return []
