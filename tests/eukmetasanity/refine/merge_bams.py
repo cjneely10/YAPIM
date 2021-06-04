@@ -7,7 +7,7 @@ class MergeBams(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {
-            "bams": self.input["SambambaSort"]["bams"]
+            "bams": self.input["SambambaSort"]["sorted.bams"]
         }
 
     @staticmethod

@@ -89,7 +89,7 @@ class Braker(Task):
 
         :return:
         """
-        bams = (",".join(self.input["mapping"]["sorted-bams"]))
+        bams = ",".join(self.input["bams"])
         if len(bams) > 0:
             return ["--bam=%s" % ",".join(bams)]
         return []

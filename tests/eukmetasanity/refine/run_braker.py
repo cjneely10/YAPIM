@@ -19,7 +19,10 @@ class RunBraker(Task):
 
     @staticmethod
     def depends() -> List[DependencyInput]:
-        return [DependencyInput("Braker", {"MergeBams": ["bams"], "GatherProteins": ["prots"]})]
+        return [DependencyInput(
+            "Braker",
+            {"MergeBams": ["bams"], "GatherProteins": ["prots"], "root": {"mask-fna": "fasta"}}
+        )]
 
     def run(self):
         pass

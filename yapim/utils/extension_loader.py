@@ -9,7 +9,7 @@ from yapim.utils.input_loader import InputLoader
 
 
 class ExtensionLoader(InputLoader):
-    def __init__(self, directory: Path, write_dir: Path,
+    def __init__(self, directory: Optional[Path], write_dir: Path,
                  extension_mapping: Optional[Dict[Tuple, Tuple[str, Callable]]] = None):
         if extension_mapping is None:
             mapping = {
@@ -36,6 +36,9 @@ class ExtensionLoader(InputLoader):
     def load(self) -> Dict[str, Dict]:
         out = {}
         print("Populating input...")
+        if self.directory is None:
+            print("Done")
+            return out
         with ThreadPoolExecutor() as executor:
             futures = []
             for file in os.listdir(self.directory):

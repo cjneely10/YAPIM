@@ -185,6 +185,9 @@ class TaskChainDistributor(dict):
                         copy(obj, _out)
                         with TaskChainDistributor.update_lock:
                             TaskChainDistributor.output_data_to_pickle[result.record_id][file_str] = _out
+                    else:
+                        with TaskChainDistributor.update_lock:
+                            TaskChainDistributor.output_data_to_pickle[result.record_id][file_str] = obj
 
     @staticmethod
     def _update_distributed_input(record_id: str, requirement_node: Type[Task]) -> Dict:

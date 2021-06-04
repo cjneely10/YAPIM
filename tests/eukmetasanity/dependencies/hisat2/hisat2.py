@@ -31,9 +31,12 @@ class Hisat2(Task):
         """
         Run hisat2
         """
+
         rna_pairs = self.get_rna_read_pairs()
         for pair in rna_pairs:
             out_prefix = os.path.join(self.wdir, prefix(pair[0]))
+            if os.path.exists(out_prefix + ".sam"):
+                continue
             if len(pair) > 1:
                 _parse_args = ["-1", pair[0], "-2", pair[1]]
             else:

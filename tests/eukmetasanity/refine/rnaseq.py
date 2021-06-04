@@ -16,7 +16,7 @@ class RNASeq(Task):
 
     @staticmethod
     def depends() -> List[DependencyInput]:
-        return [DependencyInput("Hisat2")]
+        return [DependencyInput("Hisat2", {"root": {"mask-fna": "fasta"}})]
 
     def run(self):
         pass

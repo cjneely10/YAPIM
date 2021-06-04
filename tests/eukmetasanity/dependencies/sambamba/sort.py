@@ -9,7 +9,7 @@ class SambambaSort(Task):
         super().__init__(*args, **kwargs)
         self.output = {
             "sorted.bams": [os.path.join(self.wdir, prefix(db) + ".sorted.bam")
-                            for db in self.input["sambamba.view"]["bams"]]
+                            for db in self.input["SambambaView"]["bams"]]
         }
 
     @staticmethod
