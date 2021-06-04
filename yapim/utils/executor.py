@@ -156,5 +156,4 @@ class Executor:
                 requested_input.update(pkl_input_data)
             else:
                 requested_input.update(pkl_data)
-        print(requested_input)
         return requested_input
