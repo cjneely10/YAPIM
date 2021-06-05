@@ -3,11 +3,13 @@ from typing import List, Union, Type
 from yapim import Task, DependencyInput
 
 
-class MergeBams(Task):
+class MergeSams(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        output = self.input["RNASeq"]["sams"]
+        output.extend(self.input["Transcriptomes"]["sams"])
         self.output = {
-            "bams": self.input["SambambaSort"]["sorted.bams"]
+            "sams": output
         }
 
     @staticmethod
@@ -16,7 +18,7 @@ class MergeBams(Task):
 
     @staticmethod
     def depends() -> List[DependencyInput]:
-        return [DependencyInput("SambambaSort", {"RNASeq": ["sams"], "Transcriptomes": ["sams"]})]
+        pass
 
     def run(self):
         pass

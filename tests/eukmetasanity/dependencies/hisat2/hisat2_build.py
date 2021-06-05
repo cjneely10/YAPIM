@@ -9,7 +9,7 @@ class Hisat2Build(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {
-            "db": (Result(os.path.join(self.wdir, self.record_id + "_db")) if not self.is_skip else [])
+            "db": Result(os.path.join(self.wdir, self.record_id + "_db"))
         }
 
     @staticmethod
@@ -29,7 +29,6 @@ class Hisat2Build(Task):
         self.single(
             self.program[
                 self.input["fasta"],
-                self.output["db"]
-            ],
-            "30:00"
+                str(self.output["db"])
+            ]
         )

@@ -1,14 +1,14 @@
 import os
 from typing import List, Union, Type
 
-from yapim import Task, DependencyInput
+from yapim import Task, DependencyInput, Result
 
 
 class GMAPBuild(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {
-            "db": (os.path.join(self.wdir, self.record_id + "_db") if not self.is_skip else [])
+            "db": Result(os.path.join(self.wdir, self.record_id + "_db"))
         }
 
     @staticmethod
@@ -27,7 +27,7 @@ class GMAPBuild(Task):
         _genome_basename = os.path.basename(str(self.input["fasta"]))
         self.single(
             self.program[
-                "-d", self.output["db"],
+                "-d", str(self.output["db"]),
                 "-D", _genome_dir, _genome_basename
             ],
             "30:00"

@@ -1,4 +1,3 @@
-import os
 from typing import List, Union, Type
 
 from yapim import Task, DependencyInput, prefix
@@ -8,7 +7,7 @@ class SambambaView(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {
-            "bams": []
+            "bams": [str(self.wdir.joinpath(prefix(sam_file))) + ".bam" for sam_file in self.input["sams"]]
         }
 
     @staticmethod
@@ -20,11 +19,11 @@ class SambambaView(Task):
         return []
 
     def run(self):
-        for bam_file in [os.path.join(self.wdir, prefix(db) + ".bam") for db in self.input["sams"]]:
+        for sam_file, bam_file in zip(self.input["sams"], self.output["bams"]):
             self.parallel(
                 self.program[
                     "view",
-                    "-S", os.path.splitext(bam_file)[0] + ".sam",
+                    "-S", sam_file,
                     "-t", self.threads,
                     "-o", bam_file,
                     (*self.added_flags)

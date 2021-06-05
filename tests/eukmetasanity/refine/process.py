@@ -3,20 +3,20 @@ from typing import List, Union, Type
 from yapim import Task, DependencyInput
 
 
-class RNASeq(Task):
+class ProcessMapping(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {
-            "sams": self.input["Hisat2"]["sams"]
+            "sorted_bams": self.input["SambambaSort"]["sorted_bams"]
         }
 
     @staticmethod
     def requires() -> List[Union[str, Type]]:
-        return ["CollectInput"]
+        return ["MergeSams"]
 
     @staticmethod
     def depends() -> List[DependencyInput]:
-        return [DependencyInput("Hisat2", {"root": {"mask-fna": "fasta"}})]
+        return [DependencyInput("SambambaSort", {"MergeSams": ["sams"]})]
 
     def run(self):
         pass

@@ -15,6 +15,7 @@ from yapim.utils.extension_loader import ExtensionLoader
 from yapim.utils.input_loader import InputLoader
 
 
+# TODO: Helper `clean` command
 class YAPIM(cli.Application):
     """
     Create and run Yet Another PIpeline (Manager)

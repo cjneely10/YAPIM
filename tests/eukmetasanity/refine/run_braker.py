@@ -21,7 +21,7 @@ class RunBraker(Task):
     def depends() -> List[DependencyInput]:
         return [DependencyInput(
             "Braker",
-            {"MergeBams": ["bams"], "GatherProteins": ["prots"], "root": {"mask-fna": "fasta"}}
+            {"ProcessMapping": {"sorted_bams": "bams"}, "GatherProteins": ["prots"], "root": {"mask-fna": "fasta"}}
         )]
 
     def run(self):

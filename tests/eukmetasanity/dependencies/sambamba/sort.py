@@ -1,4 +1,3 @@
-import os
 from typing import List, Union, Type
 
 from yapim import Task, DependencyInput, prefix
@@ -8,8 +7,8 @@ class SambambaSort(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {
-            "sorted.bams": [os.path.join(self.wdir, prefix(db) + ".sorted.bam")
-                            for db in self.input["SambambaView"]["bams"]]
+            "sorted_bams": [self.wdir.joinpath(prefix(bam_file) + ".sorted.bam")
+                            for bam_file in self.input["SambambaView"]["bams"]]
         }
 
     @staticmethod
@@ -26,13 +25,12 @@ class SambambaSort(Task):
         """
         Run sambamba.sort
         """
-        for bam_file in self.output["sorted.bams"]:
-            out_prefix = os.path.splitext(bam_file)[0]
+        for bam_file, sorted_bam_file in zip(self.input["SambambaView"]["bams"], self.output["sorted_bams"]):
             self.parallel(
                 self.program[
                     "sort",
                     "-t", self.threads,
-                    "-o", out_prefix + ".sorted.bam",
+                    "-o", sorted_bam_file,
                     bam_file,
                     (*self.added_flags)
                 ]

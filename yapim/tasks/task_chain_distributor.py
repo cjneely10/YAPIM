@@ -141,6 +141,7 @@ class TaskChainDistributor(dict):
             if result.record_id not in TaskChainDistributor.results.keys():
                 TaskChainDistributor.results[result.record_id] = {}
                 TaskChainDistributor.output_data_to_pickle[result.record_id] = {}
+        # TODO: Implement output finalization at class level, per subclass of Task to allow for future Task class impls
         if isinstance(task, AggregateTask):
             output = task.deaggregate()
             if not isinstance(output, dict):
@@ -165,6 +166,7 @@ class TaskChainDistributor(dict):
             self[result.task_name] = result
         if task.is_skip:
             return
+        # TODO: Zip non-finalized output for storage
         for result_key, result_data in result.items():
             if result_key == "final":
                 if not isinstance(result_data, list):
