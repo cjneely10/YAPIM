@@ -8,7 +8,7 @@ INPUT:
 ## Global settings
 GLOBAL:
   # Maximum threads/cpus to use in analysis
-  MaxThreads: 20
+  MaxThreads: 24
   # Maximum memory to use (in GB)
   MaxMemory: 100
 
@@ -58,6 +58,7 @@ Transcriptomes:
   time: "4:00:00"
   dependencies:
     GMAPBuild:
+      threads: 1
       program: gmapindex
 
     GMAP:
@@ -106,7 +107,7 @@ ProcessMapping:
 
 RunBraker:
   # Number of threads task will use
-  threads: 1
+  threads: 8
   # Amount of memory task will use (in GB)
   memory: 8
   time: "4:00:00"

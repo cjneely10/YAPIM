@@ -210,12 +210,8 @@ class ConfigManager:
             # Provided as dict with program path and FLAGS
             if isinstance(prog_data, dict):
                 try:
-                    if "program" not in prog_data or prog_data["program"] is None:
-                        # pylint: disable=raise-missing-from
-                        raise InvalidPathError(
-                            "Dependency %s is missing a program path in your config file!" % prog_name
-                        )
-                    bool(local[prog_data["program"]])
+                    if "program" in prog_data.keys():
+                        local.which(prog_data["program"])
                 except CommandNotFound:
                     # pylint: disable=raise-missing-from
                     raise InvalidPathError(

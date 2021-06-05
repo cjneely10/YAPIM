@@ -15,7 +15,8 @@ from yapim.utils.extension_loader import ExtensionLoader
 from yapim.utils.input_loader import InputLoader
 
 
-# TODO: Helper `clean` command
+# TODO: Helper `clean` command for intermediary files for given commands
+# TODO: Helper `remove` command for input ids
 class YAPIM(cli.Application):
     """
     Create and run Yet Another PIpeline (Manager)
