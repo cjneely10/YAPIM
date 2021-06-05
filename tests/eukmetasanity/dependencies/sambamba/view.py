@@ -1,3 +1,4 @@
+import os
 from typing import List, Union, Type
 
 from yapim import Task, DependencyInput, prefix
@@ -20,6 +21,8 @@ class SambambaView(Task):
 
     def run(self):
         for sam_file, bam_file in zip(self.input["sams"], self.output["bams"]):
+            if os.path.exists(bam_file):
+                continue
             self.parallel(
                 self.program[
                     "view",

@@ -1,3 +1,4 @@
+import os
 from typing import List, Union, Type
 
 from yapim import Task, DependencyInput, prefix
@@ -26,12 +27,14 @@ class SambambaSort(Task):
         Run sambamba.sort
         """
         for bam_file, sorted_bam_file in zip(self.input["SambambaView"]["bams"], self.output["sorted_bams"]):
+            if os.path.exists(sorted_bam_file):
+                continue
             self.parallel(
                 self.program[
                     "sort",
                     "-t", self.threads,
                     "-o", sorted_bam_file,
-                    "-m", self.memory + "GB",
+                    "-m", str(self.memory) + "GB",
                     bam_file,
                     (*self.added_flags)
                 ]
