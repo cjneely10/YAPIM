@@ -74,6 +74,14 @@ class Task(BaseTask, ABC):
         return self.config_manager.find(self.full_name, ConfigManager.THREADS)
 
     @property
+    def memory(self) -> str:
+        """ Number of threads when running task (as set in config file)
+
+        :return: Str of number of tasks
+        """
+        return self.config_manager.find(self.full_name, ConfigManager.MEMORY)
+
+    @property
     def config(self) -> dict:
         return self.config_manager.get(self.full_name)
 
@@ -115,7 +123,7 @@ class Task(BaseTask, ABC):
         if ConfigManager.TIME not in self.config.keys() or ConfigManager.TIME not in parent_info.keys():
             raise MissingDataError("SLURM section not properly formatted within %s" % self.full_name)
         # Generate command to launch SLURM job
-        return SLURMCaller(cmd, self.config_manager, self, time_override)
+        return SLURMCaller(cmd, self, time_override)
 
     @property
     def data(self) -> List[str]:

@@ -31,6 +31,7 @@ class SambambaSort(Task):
                     "sort",
                     "-t", self.threads,
                     "-o", sorted_bam_file,
+                    "-m", self.memory + "GB",
                     bam_file,
                     (*self.added_flags)
                 ]

@@ -27,7 +27,6 @@ class SLURMCaller:
 
     def __init__(self,
                  cmd: Union[LocalCommand, str, List[Union[LocalCommand, str]]],
-                 config_manager: ConfigManager,
                  task,
                  time_override: Optional[str] = None,
                  parallelize: bool = False
@@ -39,7 +38,7 @@ class SLURMCaller:
         self.task = task
         self.cmd = cmd
         self.parallelize = parallelize
-        self.config_manager = config_manager
+        self.config_manager = task.config_manager
         self.time_override = time_override
 
         # Generated job id

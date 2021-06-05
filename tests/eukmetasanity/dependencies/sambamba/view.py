@@ -26,6 +26,6 @@ class SambambaView(Task):
                     "-S", sam_file,
                     "-t", self.threads,
                     "-o", bam_file,
-                    (*self.added_flags)
+                    "-f", "bam"
                 ]
             )
