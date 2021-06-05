@@ -13,10 +13,14 @@ class CollectInput(AggregateTask):
 
     def deaggregate(self) -> dict:
         input_data = {}
-        for record_id, rnaseq_pair_list in CollectInput.get_rna_read_pairs(self.config["rnaseq"]).items():
-            input_data[record_id]["rnaseq_read_pairs"] = rnaseq_pair_list
-        for record_id, transcriptome_list in CollectInput.get_transcripts(self.config["transcriptomes"]).items():
-            input_data[record_id]["transcripts"] = transcriptome_list
+        for record_id, rnaseq_pair_list in CollectInput.get_rna_read_pairs(Path(self.config["rnaseq"])).items():
+            if record_id not in input_data.keys():
+                input_data[record_id] = {"rna_read_pairs": [], "transcripts": []}
+            input_data[record_id]["rna_read_pairs"].extend(rnaseq_pair_list)
+        for record_id, transcriptome_list in CollectInput.get_transcripts(Path(self.config["transcriptomes"])).items():
+            if record_id not in input_data.keys():
+                input_data[record_id] = {"rna_read_pairs": [], "transcripts": []}
+            input_data[record_id]["transcripts"].extend(transcriptome_list)
         return input_data
 
     @staticmethod

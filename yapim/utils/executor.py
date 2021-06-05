@@ -80,6 +80,8 @@ class Executor:
                     continue
                 if task_batch[0] == "Task":
                     for record_id, input_data in TaskChainDistributor.results.items():
+                        if record_id in self.task_blueprints.keys():
+                            continue
                         task_chain = TaskChainDistributor(record_id, task_batch[1], self.task_blueprints,
                                                           self.config_manager, self.path_manager, input_data,
                                                           self.results_base_dir, self.display_messages)

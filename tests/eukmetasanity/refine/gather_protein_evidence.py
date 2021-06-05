@@ -12,7 +12,7 @@ class GatherProteins(Task):
 
     @staticmethod
     def requires() -> List[Union[str, Type]]:
-        pass
+        return ["CollectInput"]
 
     @staticmethod
     def depends() -> List[DependencyInput]:

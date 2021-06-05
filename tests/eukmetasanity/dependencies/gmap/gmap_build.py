@@ -1,3 +1,4 @@
+import glob
 import os
 from typing import List, Union, Type
 
@@ -25,10 +26,10 @@ class GMAPBuild(Task):
         """
         _genome_dir = os.path.dirname(str(self.input["fasta"]))
         _genome_basename = os.path.basename(str(self.input["fasta"]))
-        self.single(
-            self.program[
-                "-d", str(self.output["db"]),
-                "-D", _genome_dir, _genome_basename
-            ],
-            "30:00"
-        )
+        if len(glob.glob(str(self.output["db"]) + "*")) == 0:
+            self.single(
+                self.program[
+                    "-d", str(self.output["db"]),
+                    "-D", _genome_dir, _genome_basename
+                ]
+            )

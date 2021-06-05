@@ -16,7 +16,7 @@ class Transcriptomes(Task):
 
     @staticmethod
     def depends() -> List[DependencyInput]:
-        return [DependencyInput("GMAP", {"root": {"mask-fna": "fasta"}})]
+        return [DependencyInput("GMAP", {"root": {"mask-fna": "fasta"}, "CollectInput": ["transcripts"]})]
 
     def run(self):
         pass

@@ -92,7 +92,7 @@ class TaskChainDistributor(dict):
                     updated_data = self._update_distributed_input(self.record_id,
                                                                   self.task_blueprints[top_level_node.name])
                 except KeyError as e:
-                    raise TaskExecutionError(f"Unable to load dependency data {e} for {task_identifier.get()}")
+                    raise TaskExecutionError(f"Unable to load dependency data {e} for {task_identifier.get()} on record {self.record_id}")
             self.path_manager.add_dirs(self.record_id, [wdir])
             task = task_blueprint(
                 self.record_id,

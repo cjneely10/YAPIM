@@ -15,7 +15,7 @@ class RunBraker(Task):
 
     @staticmethod
     def requires() -> List[Union[str, Type]]:
-        return ["MergeBams", "GatherProteins"]
+        return ["ProcessMapping", "GatherProteins"]
 
     @staticmethod
     def depends() -> List[DependencyInput]:
