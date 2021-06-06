@@ -185,16 +185,24 @@ class ConfigManager:
                                                     f"but {task_name} requests {memory}")
                 except ValueError:
                     raise ValueError(f"Section {task_name} memory is invalid!")
-            if "skip" in task_dict.keys() and task_dict["skip"] is True:
+            if ConfigManager.SKIP in task_dict.keys() and task_dict[ConfigManager.SKIP] is True:
                 continue
-            if "data" in task_dict.keys():
-                for _val in task_dict["data"].split(","):
+            if ConfigManager.DATA in task_dict.keys():
+                for _val in task_dict[ConfigManager.DATA].split(","):
                     if ":" in _val:
                         _val = _val.split(":")[1]
                     if not os.path.exists(str(Path(_val).resolve())):
                         raise MissingDataError("Data for task %s (provided: %s) does not exist!" % (
                             task_name, _val
                         ))
+            if ConfigManager.PROGRAM in task_dict.keys():
+                try:
+                    local.which(task_dict[ConfigManager.PROGRAM])
+                except CommandNotFound:
+                    # pylint: disable=raise-missing-from
+                    raise InvalidPathError(
+                        "Task %s (provided program path: %s) is not present in your system's path!" % (
+                            task_name, task_dict[ConfigManager.PROGRAM]))
             if "dependencies" in task_dict.keys():
                 ConfigManager._validate(task_dict["dependencies"], True, max_memory, max_threads)
                 ConfigManager._check_dependencies(task_dict)
@@ -210,13 +218,13 @@ class ConfigManager:
             # Provided as dict with program path and FLAGS
             if isinstance(prog_data, dict):
                 try:
-                    if "program" in prog_data.keys():
-                        local.which(prog_data["program"])
+                    if ConfigManager.PROGRAM in prog_data.keys():
+                        local.which(prog_data[ConfigManager.PROGRAM])
                 except CommandNotFound:
                     # pylint: disable=raise-missing-from
                     raise InvalidPathError(
-                        "Dependency %s (provided: %s) is not present in your system's path!" % (
-                            prog_name, prog_data["program"]))
+                        "Dependency %s (program path provided: %s) is not present in your system's path!" % (
+                            prog_name, prog_data[ConfigManager.PROGRAM]))
             else:
                 raise MissingDataError("Dependency section is improperly configured!")
 
@@ -227,7 +235,7 @@ class ConfigManager:
         """
         ignore_slurm_fields = {"USE_CLUSTER", "--nodes", "--ntasks", "--mem", "user-id"}
         slurm_section_data = {key: str(val)
-                              for key, val in self.config["SLURM"].items() if key not in ignore_slurm_fields}
+                              for key, val in self.config[ConfigManager.SLURM].items() if key not in ignore_slurm_fields}
         return sorted([(key, value) for key, value in slurm_section_data.items()], key=lambda v: v[0])
 
     def get_slurm_userid(self):

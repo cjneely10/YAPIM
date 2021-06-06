@@ -35,6 +35,7 @@ class YAPIM(cli.Application):
 pipeline_file = ".pipeline.pkl"
 
 
+# TODO: Generate package of tasks, dependencies, etc., that can be transferred between systems
 @YAPIM.subcommand("config")
 class YAPIMConfigCreator(cli.Application):
     """
