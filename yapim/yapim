@@ -6,7 +6,6 @@ from typing import Optional, List
 from plumbum import cli
 
 from yapim.utils.config_manager import ConfigManager
-from yapim.utils.config_manager_generator import ConfigManagerGenerator
 from yapim.utils.executor import Executor
 from yapim.utils.extension_loader import ExtensionLoader
 # TODO: Helper `clean` command for intermediary files for given commands
@@ -40,7 +39,6 @@ class YAPIMConfigCreator(cli.Application):
     loader: Optional[Path] = None
     dependencies_directories: Optional[List[Path]] = None
     config_path: Path
-    overwrite: bool = True
 
     @cli.switch(["-l", "--loader"], str)
     def set_loader(self, loader_name):
@@ -68,16 +66,7 @@ class YAPIMConfigCreator(cli.Application):
             dependencies[i] = Path(dependencies[i]).resolve()
         self.dependencies_directories = dependencies
 
-    @cli.switch(["-c", "--config"], str, mandatory=True)
-    def set_config_path(self, config):
-        """Path to configuration file"""
-        self.config_path = Path(config).resolve()
-        if self.config_path.exists():
-            self.overwrite = input("Overwrite existing configuration file? [Y/n]: ").upper() == "Y"
-
     def main(self):
-        if self.overwrite is True:
-            ConfigManagerGenerator(self.tasks_directory, self.dependencies_directories).write(self.config_path)
         PackageGenerator(self.tasks_directory, self.dependencies_directories, self.loader).create("pipeline")
 
 
