@@ -18,10 +18,6 @@ class TestConfigManager(unittest.TestCase):
         with self.assertRaises(InvalidPathError):
             ConfigManager(Path("config_files/bad_program-config.yaml"))
 
-    def test_missing_program(self):
-        with self.assertRaises(InvalidPathError):
-            ConfigManager(Path("config_files/missing_program-config.yaml"))
-
     def test_invalid_dependencies_section(self):
         with self.assertRaises(MissingDataError):
             ConfigManager(Path("config_files/invalid_dependency_section-config.yaml"))

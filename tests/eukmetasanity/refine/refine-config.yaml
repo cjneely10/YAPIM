@@ -96,7 +96,7 @@ ProcessMapping:
   # Number of threads task will use
   threads: 8
   # Amount of memory task will use (in GB)
-  memory: 8
+  memory: 60
   time: "4:00:00"
   dependencies:
     SambambaView:
@@ -107,9 +107,9 @@ ProcessMapping:
 
 RunBraker:
   # Number of threads task will use
-  threads: 8
+  threads: 4
   # Amount of memory task will use (in GB)
-  memory: 8
+  memory: 100
   time: "4:00:00"
   dependencies:
     Braker:

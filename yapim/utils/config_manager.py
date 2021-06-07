@@ -217,14 +217,17 @@ class ConfigManager:
         for prog_name, prog_data in task_dict["dependencies"].items():
             # Provided as dict with program path and FLAGS
             if isinstance(prog_data, dict):
+                provided_program = ""
                 try:
+                    provided_program = prog_data[ConfigManager.PROGRAM]
                     if ConfigManager.PROGRAM in prog_data.keys():
-                        local.which(prog_data[ConfigManager.PROGRAM])
+                        if not os.path.exists(provided_program):
+                            local.which(provided_program)
                 except CommandNotFound:
                     # pylint: disable=raise-missing-from
                     raise InvalidPathError(
                         "Dependency %s (program path provided: %s) is not present in your system's path!" % (
-                            prog_name, prog_data[ConfigManager.PROGRAM]))
+                            prog_name, provided_program))
             else:
                 raise MissingDataError("Dependency section is improperly configured!")
 
