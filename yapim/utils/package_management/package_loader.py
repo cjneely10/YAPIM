@@ -2,15 +2,15 @@ import pickle
 from pathlib import Path
 
 from yapim import InputLoader, ExtensionLoader
-from yapim.utils.package_manager import PackageManager
+from yapim.utils.package_management.package_manager import PackageManager
 
 
-class PipelineLoader(PackageManager):
+class PackageLoader(PackageManager):
     def __init__(self, pipeline_package_directory: Path):
         self._pipeline_directory = pipeline_package_directory
 
     def validate_pipeline_pkl(self) -> dict:
-        pipeline_pkl_path = self._pipeline_directory.joinpath(PipelineLoader.pipeline_file)
+        pipeline_pkl_path = self._pipeline_directory.joinpath(PackageLoader.pipeline_file)
         if not pipeline_pkl_path.exists():
             print("Unable to find pipeline .pkl file")
             exit(1)
@@ -35,7 +35,7 @@ class PipelineLoader(PackageManager):
         if loader_path is None:
             pipeline_data["loader"] = ExtensionLoader
         else:
-            loader = PipelineLoader._get_loader(pipeline_data["loader"])
+            loader = PackageLoader._get_loader(pipeline_data["loader"])
             if not issubclass(loader, InputLoader):
                 print(f"Unable to validate loader")
                 exit(1)

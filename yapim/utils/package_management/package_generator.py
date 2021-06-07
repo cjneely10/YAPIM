@@ -6,7 +6,7 @@ from typing import List, Optional
 
 from yapim import InputLoader
 from yapim.utils.config_manager_generator import ConfigManagerGenerator
-from yapim.utils.package_manager import PackageManager
+from yapim.utils.package_management.package_manager import PackageManager
 
 
 class PackageGenerator(PackageManager):

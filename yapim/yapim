@@ -10,9 +10,8 @@ from yapim.utils.executor import Executor
 from yapim.utils.extension_loader import ExtensionLoader
 # TODO: Helper `clean` command for intermediary files for given commands
 # TODO: Helper `remove` command for input ids
-from yapim.utils.package_generator import PackageGenerator
-from yapim.utils.package_manager import PackageManager
-from yapim.utils.package_loader import PipelineLoader
+from yapim.utils.package_management.package_generator import PackageGenerator
+from yapim.utils.package_management.package_loader import PackageLoader
 
 
 class YAPIM(cli.Application):
@@ -30,7 +29,7 @@ class YAPIM(cli.Application):
             exit(1)
 
 
-@YAPIM.subcommand("config")
+@YAPIM.subcommand("create")
 class YAPIMConfigCreator(cli.Application):
     """
     Create configuration file and pipeline path data
@@ -113,7 +112,7 @@ class YAPIMRunner(cli.Application):
         self.display_status = False
 
     def main(self, *args):
-        pipeline_data = PipelineLoader(self.pipeline_pkl_path).validate_pipeline_pkl()
+        pipeline_data = PackageLoader(self.pipeline_pkl_path).validate_pipeline_pkl()
         if pipeline_data["loader"].__name__ == ExtensionLoader.__name__:
             Executor(
                 pipeline_data["loader"](
