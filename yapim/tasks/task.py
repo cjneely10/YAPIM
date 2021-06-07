@@ -328,3 +328,8 @@ class Task(BaseTask, ABC):
         fp.close()
         self.local["chmod"]["+x", _path]()
         return self.local[_path]
+
+    @staticmethod
+    def finalize(obj_results: dict, class_results: dict, task: "Task", result: TaskResult):
+        class_results[result.record_id][result.task_name] = result
+        obj_results[result.task_name] = result

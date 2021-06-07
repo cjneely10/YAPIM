@@ -3,6 +3,7 @@ from typing import KeysView, ValuesView, ItemsView
 
 from yapim.tasks.task import Task
 from yapim.tasks.utils.input_dict import InputDict
+from yapim.tasks.utils.task_result import TaskResult
 from yapim.utils.config_manager import ConfigManager
 
 
@@ -48,3 +49,23 @@ class AggregateTask(Task, ABC):
         :return:
         :rtype:
         """
+
+    @staticmethod
+    def finalize(obj_results: dict, class_results: dict, task: "AggregateTask", result: TaskResult):
+        output = task.deaggregate()
+        if not isinstance(output, dict):
+            output = task.output
+        else:
+            output.update(result)
+        keys = set(output.keys())
+        for key, value in output.items():
+            if key in class_results.keys():
+                class_results[key][result.task_name] = value
+        to_remove = []
+        for key in class_results.keys():
+            if key not in keys:
+                to_remove.append(key)
+        for key in to_remove:
+            del class_results[key]
+        class_results[result.task_name] = result
+
