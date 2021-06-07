@@ -10,8 +10,12 @@ class PipelineLoader(PackageManager):
         self._pipeline_directory = pipeline_package_directory
 
     def validate_pipeline_pkl(self) -> dict:
+        pipeline_pkl_path = self._pipeline_directory.joinpath(PipelineLoader.pipeline_file)
+        if not pipeline_pkl_path.exists():
+            print("Unable to find pipeline .pkl file")
+            exit(1)
         pipeline_data: dict
-        with open(self._pipeline_directory.joinpath(PipelineLoader.pipeline_file), "rb") as provided_pipeline_file:
+        with open(pipeline_pkl_path, "rb") as provided_pipeline_file:
             pipeline_data = pickle.load(provided_pipeline_file)
         for key in ("tasks", "dependencies"):
             if key not in pipeline_data.keys() or \

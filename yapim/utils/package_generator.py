@@ -24,8 +24,8 @@ class PackageGenerator(PackageManager):
         else:
             self._dependencies_directories = []
 
-    def create(self, write_directory: str):
-        write_directory = Path(os.getcwd()).resolve().joinpath(write_directory)
+    def create(self):
+        write_directory = Path(os.getcwd()).resolve().joinpath(os.path.basename(self._tasks_directory) + "-pipeline")
         if not write_directory.exists():
             os.makedirs(write_directory)
         output_data = {
