@@ -13,7 +13,7 @@ from yapim.utils.extension_loader import ExtensionLoader
 # TODO: Helper `remove` command for input ids
 from yapim.utils.package_generator import PackageGenerator
 from yapim.utils.package_manager import PackageManager
-from yapim.utils.pipeline_loader import PipelineLoader
+from yapim.utils.package_loader import PipelineLoader
 
 
 class YAPIM(cli.Application):
@@ -78,7 +78,7 @@ class YAPIMConfigCreator(cli.Application):
     def main(self):
         if self.overwrite is True:
             ConfigManagerGenerator(self.tasks_directory, self.dependencies_directories).write(self.config_path)
-        PackageGenerator(self.tasks_directory, self.dependencies_directories, self.loader).create(Path(os.getcwd()))
+        PackageGenerator(self.tasks_directory, self.dependencies_directories, self.loader).create("pipeline")
 
 
 @YAPIM.subcommand("run")

@@ -15,10 +15,18 @@ class PipelineLoader(PackageManager):
             pipeline_data = pickle.load(provided_pipeline_file)
         for key in ("tasks", "dependencies"):
             if key not in pipeline_data.keys() or \
-                    (isinstance(pipeline_data[key], Path) and not pipeline_data[key].exists()):
+                    (isinstance(pipeline_data[key], Path)
+                     and not self._pipeline_directory.joinpath(pipeline_data[key]).exists()):
                 print(f"Unable to load {key} {pipeline_data[key]}")
                 print(f"Re-run yaml config to update pipeline")
                 exit(1)
+        # Load task/dependencies at directory level
+        pipeline_data["tasks"] = self._pipeline_directory.joinpath(pipeline_data["tasks"])
+        pipeline_data["dependencies"] = [
+            self._pipeline_directory.joinpath(dependency_directory)
+            for dependency_directory in pipeline_data["dependencies"]
+        ]
+        # Load and validate input loader
         loader_path = pipeline_data.get("loader")
         if loader_path is None:
             pipeline_data["loader"] = ExtensionLoader
