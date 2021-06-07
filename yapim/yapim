@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 import os
 import pickle
-from importlib import import_module
-from inspect import isclass
 from pathlib import Path
-from typing import Optional, List, Type
+from typing import Optional, List
 
 from plumbum import cli
 
@@ -17,6 +15,9 @@ from yapim.utils.input_loader import InputLoader
 
 # TODO: Helper `clean` command for intermediary files for given commands
 # TODO: Helper `remove` command for input ids
+from yapim.utils.package_generator import PackageGenerator
+
+
 class YAPIM(cli.Application):
     """
     Create and run Yet Another PIpeline (Manager)
@@ -42,7 +43,7 @@ class YAPIMConfigCreator(cli.Application):
     Create configuration file and pipeline path data
     """
     tasks_directory: Path
-    loader: Type[InputLoader] = ExtensionLoader
+    loader: Optional[Path] = None
     dependencies_directories: Optional[List[Path]] = None
     config_path: Path
     overwrite: bool = True
@@ -53,7 +54,7 @@ class YAPIMConfigCreator(cli.Application):
         if not os.path.exists(loader_name) or not os.path.isfile(loader_name):
             print("Unable to find loader")
             exit(1)
-        self.loader = _get_loader(loader_name)
+        self.loader = loader_name
 
     @cli.switch(["-t", "--tasks"], str, mandatory=True)
     def set_tasks_dir(self, tasks_dir):
@@ -83,29 +84,7 @@ class YAPIMConfigCreator(cli.Application):
     def main(self):
         if self.overwrite is True:
             ConfigManagerGenerator(self.tasks_directory, self.dependencies_directories).write(self.config_path)
-        pipeline_data = {
-            "loader": self.loader,
-            "tasks": self.tasks_directory,
-            "dependencies": self.dependencies_directories
-        }
-        out_file = self.tasks_directory.joinpath(pipeline_file)
-        if not out_file.exists() or input("Overwrite existing pipeline file? [Y/n]: ").upper() == "Y":
-            with open(out_file, "wb") as json_file:
-                pickle.dump(pipeline_data, json_file)
-
-
-def _get_loader(loader_name: str) -> Type[InputLoader]:
-    current_dir = os.getcwd()
-    os.chdir(os.path.dirname(loader_name))
-    module = import_module(os.path.basename(os.path.splitext(loader_name)[0]))
-    for attribute_name in dir(module):
-        attribute = getattr(module, attribute_name)
-        if isclass(attribute) and issubclass(attribute, InputLoader) and loader_name in attribute.__name__:
-            os.chdir(current_dir)
-            return attribute
-    os.chdir(current_dir)
-    print("Unable to import loader module")
-    exit(1)
+        PackageGenerator(self.tasks_directory, self.dependencies_directories, self.loader).create(Path(os.getcwd()))
 
 
 def _validate_pipeline_pkl(pipeline_path: Path) -> dict:
