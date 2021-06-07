@@ -16,6 +16,7 @@ from yapim.utils.input_loader import InputLoader
 # TODO: Helper `clean` command for intermediary files for given commands
 # TODO: Helper `remove` command for input ids
 from yapim.utils.package_generator import PackageGenerator
+from yapim.utils.pipeline_loader import PipelineLoader
 
 
 class YAPIM(cli.Application):
@@ -87,22 +88,6 @@ class YAPIMConfigCreator(cli.Application):
         PackageGenerator(self.tasks_directory, self.dependencies_directories, self.loader).create(Path(os.getcwd()))
 
 
-def _validate_pipeline_pkl(pipeline_path: Path) -> dict:
-    pipeline_data: dict
-    with open(pipeline_path, "rb") as provided_pipeline_file:
-        pipeline_data = pickle.load(provided_pipeline_file)
-    for key in ("tasks", "dependencies"):
-        if key not in pipeline_data.keys() or \
-                (isinstance(pipeline_data[key], Path) and not pipeline_data[key].exists()):
-            print(f"Unable to load {key} {pipeline_data[key]}")
-            print(f"Re-run yaml config to update pipeline")
-            exit(1)
-    if "loader" not in pipeline_data.keys() or not issubclass(pipeline_data["loader"], InputLoader):
-        print(f"Unable to validate loader")
-        exit(1)
-    return pipeline_data
-
-
 @YAPIM.subcommand("run")
 class YAPIMRunner(cli.Application):
     """
@@ -149,7 +134,7 @@ class YAPIMRunner(cli.Application):
         self.display_status = False
 
     def main(self, *args):
-        pipeline_data = _validate_pipeline_pkl(self.pipeline_pkl_path)
+        pipeline_data = PipelineLoader(self.pipeline_pkl_path).validate_pipeline_pkl()
         if pipeline_data["loader"].__name__ == ExtensionLoader.__name__:
             Executor(
                 pipeline_data["loader"](
