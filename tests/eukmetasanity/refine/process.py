@@ -16,7 +16,7 @@ class ProcessMapping(Task):
 
     @staticmethod
     def depends() -> List[DependencyInput]:
-        return [DependencyInput("SambambaSort", {"MergeSams": ["sams"]})]
+        return [DependencyInput("SambambaSort", {"MergeSams": {"sams": "alignment"}})]
 
     def run(self):
         pass

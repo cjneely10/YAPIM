@@ -14,7 +14,7 @@ class SambambaSort(Task):
         super().__init__(*args, **kwargs)
         self.output = {
             "sorted_bams": [self.wdir.joinpath(prefix(bam_file) + ".sorted.bam")
-                            for bam_file in self.input["SambambaView"]["bams"]]
+                            for bam_file in self.input["alignment"]]
         }
 
     @staticmethod

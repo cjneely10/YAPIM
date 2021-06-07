@@ -35,6 +35,8 @@ class GeneMarkProtHint(Task):
                     "--threads", self.threads,
                 ]
             )
+            touch(str(self.output["hints"]))
+            touch(str(self.output["evidence"]))
         except:
             touch(str(self.output["hints"]))
             touch(str(self.output["evidence"]))
