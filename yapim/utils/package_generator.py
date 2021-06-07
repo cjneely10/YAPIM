@@ -40,13 +40,13 @@ class PackageGenerator(PackageManager):
         if not write_directory.exists():
             os.makedirs(write_directory)
         # Copy pipeline contents to own directory
-        shutil.copytree(self._tasks_directory, output_data["tasks"])
+        shutil.copytree(self._tasks_directory, output_data["tasks"], symlinks=True)
         # Copy loader
         if self._loader is not None:
             shutil.copy(self._loader, write_directory)
         # Copy all dependency directories
         for pre, post in zip(self._dependencies_directories, output_data["dependencies"]):
-            shutil.copytree(pre, write_directory.joinpath(post))
+            shutil.copytree(pre, write_directory.joinpath(post), symlinks=True)
         # Save metadata file
         pipeline_file = write_directory.joinpath(PackageGenerator.pipeline_file)
         if not pipeline_file.exists() or input("Overwrite existing pipeline file? [Y/n]: ").upper() == "Y":
