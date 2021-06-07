@@ -8,7 +8,7 @@ from yapim import InputLoader
 
 
 class PackageManager(ABC):
-    pipeline_file = ".pipeline"
+    pipeline_file = ".pipeline.pkl"
 
     @staticmethod
     def _get_loader(loader_name: str) -> Type[InputLoader]:

@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import os
-import pickle
 from pathlib import Path
 from typing import Optional, List
 
@@ -10,12 +9,10 @@ from yapim.utils.config_manager import ConfigManager
 from yapim.utils.config_manager_generator import ConfigManagerGenerator
 from yapim.utils.executor import Executor
 from yapim.utils.extension_loader import ExtensionLoader
-from yapim.utils.input_loader import InputLoader
-
-
 # TODO: Helper `clean` command for intermediary files for given commands
 # TODO: Helper `remove` command for input ids
 from yapim.utils.package_generator import PackageGenerator
+from yapim.utils.package_manager import PackageManager
 from yapim.utils.pipeline_loader import PipelineLoader
 
 
@@ -34,10 +31,6 @@ class YAPIM(cli.Application):
             exit(1)
 
 
-pipeline_file = ".pipeline.pkl"
-
-
-# TODO: Generate package of tasks, dependencies, etc., that can be transferred between systems
 @YAPIM.subcommand("config")
 class YAPIMConfigCreator(cli.Application):
     """
@@ -118,7 +111,7 @@ class YAPIMRunner(cli.Application):
     @cli.switch(["-p", "--pipeline"], str, mandatory=True)
     def set_pipeline_path(self, pipeline):
         """Path to directory containing pipeline.pkl file"""
-        self.pipeline_pkl_path = Path(pipeline).resolve().joinpath(pipeline_file)
+        self.pipeline_pkl_path = Path(pipeline).resolve().joinpath(PackageManager.pipeline_file)
         if not self.pipeline_pkl_path.exists():
             print("Unable to find pipeline .pkl file")
             exit(1)
