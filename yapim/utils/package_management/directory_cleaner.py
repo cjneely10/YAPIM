@@ -30,7 +30,7 @@ class DirectoryCleaner:
             .sorted_graph_identifiers
 
     @staticmethod
-    def rm_glob(file_list: List[str]):
+    def _rm_glob(file_list: List[str]):
         for file in file_list:
             if os.path.exists(file):
                 shutil.rmtree(file)
@@ -50,5 +50,5 @@ class DirectoryCleaner:
             for record_id in record_ids:
                 if record_id in self.record_ids:
                     task_path = self.output_directory.joinpath(PathManager.WDIR).joinpath(record_id)
-                    futures.append(executor.submit(DirectoryCleaner.rm_glob, glob.glob(str(task_path))))
+                    futures.append(executor.submit(DirectoryCleaner._rm_glob, glob.glob(str(task_path))))
             wait(futures)

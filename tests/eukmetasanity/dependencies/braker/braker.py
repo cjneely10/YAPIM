@@ -31,15 +31,6 @@ class Braker(Task):
             _tax = ["--fungus"]
         _fasta_output = self.input["prots"]
         _added = []
-        # TODO: Handle loading existing genemark results data
-        # if "--skipGeneMark-ES" in self.added_flags:
-        #     # Output CDS and prot fasta
-        #     _gtf = os.path.join(self.wdir, self.record_id + ".gtf")
-        #     self.single(
-        #         self.local["gffread"][self.input["gff3"]] > _gtf,
-        #         "30:00"
-        #     )
-        #     _added = ["--geneMarkGtf=%s" % _gtf]
         if not os.path.exists(os.path.join(self.wdir, "GeneMark-ET", "genemark.gtf")) or \
                 not os.path.exists(os.path.join(self.wdir, "augustus.hints.gtf")):
             self.parallel(
