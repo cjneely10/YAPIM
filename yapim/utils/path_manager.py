@@ -10,6 +10,7 @@ from plumbum import local
 
 
 class PathManager:
+    WDIR = "wdir"
     """
     This class manages a set of working directories. Useful for keeping files organized
     """
@@ -20,7 +21,7 @@ class PathManager:
         :param base_path: Base path to use to generate root of directory tree
         :raises: AssertionError if base path is not string or is null-string
         """
-        self._wdir = "wdir"
+        self._wdir = PathManager.WDIR
         base_path = Path(base_path).resolve()
         if not base_path.exists():
             os.makedirs(base_path)

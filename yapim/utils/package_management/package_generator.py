@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from yapim import InputLoader
-from yapim.utils.config_manager_generator import ConfigManagerGenerator
+from yapim.utils.package_management.config_manager_generator import ConfigManagerGenerator
 from yapim.utils.package_management.package_manager import PackageManager
 
 

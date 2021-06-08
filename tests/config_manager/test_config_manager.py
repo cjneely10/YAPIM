@@ -1,7 +1,7 @@
 import unittest
 
 from yapim.utils.config_manager import *
-from yapim.utils.config_manager_generator import ConfigManagerGenerator
+from yapim.utils.package_management.config_manager_generator import ConfigManagerGenerator
 
 
 class TestConfigManager(unittest.TestCase):
