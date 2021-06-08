@@ -164,9 +164,13 @@ class TaskChainDistributor(dict):
                         )
                         copy(obj, _out)
                         with TaskChainDistributor.update_lock:
+                            if result.record_id not in TaskChainDistributor.output_data_to_pickle.keys():
+                                TaskChainDistributor.output_data_to_pickle[result.record_id] = {}
                             TaskChainDistributor.output_data_to_pickle[result.record_id][file_str] = _out
                     else:
                         with TaskChainDistributor.update_lock:
+                            if result.record_id not in TaskChainDistributor.output_data_to_pickle.keys():
+                                TaskChainDistributor.output_data_to_pickle[result.record_id] = {}
                             TaskChainDistributor.output_data_to_pickle[result.record_id][file_str] = obj
 
     @staticmethod

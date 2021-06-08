@@ -147,7 +147,7 @@ class Executor:
             pkl_file = Path(os.path.dirname(self.results_base_dir)) \
                 .joinpath(requested_pipeline_id).joinpath(requested_pipeline_id + ".pkl")
             pkl_data = InputLoader.load_pkl_data(pkl_file)
-            pkl_input_data = {key: {} for key in pkl_data.keys() if key in self.input_data_dict.keys()}
+            pkl_input_data = {key: {} for key in pkl_data.keys()}
             if isinstance(pipeline_input, dict):
                 for _to, _from in pipeline_input.items():
                     for record_id in pkl_input_data.keys():
