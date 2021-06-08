@@ -83,6 +83,22 @@ class E(Task):
         pass
 
 
+class F(Task):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    @staticmethod
+    def requires() -> List[str]:
+        return [C]
+
+    @staticmethod
+    def depends() -> List[DependencyInput]:
+        return [DependencyInput(C)]
+
+    def run(self):  # pragma: no cover
+        pass
+
+
 class AB(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

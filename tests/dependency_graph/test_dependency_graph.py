@@ -83,6 +83,28 @@ class TestDependencyGraph(unittest.TestCase):
         with self.assertRaises(DependencyGraphGenerationError):
             print(DependencyGraph(*generate_dg_input([BadSetup])).sorted_graph_identifiers)
 
+    def test_gather_affected_nodes(self):
+        self.assertEqual(
+            {"C", "F"},
+            DependencyGraph(*generate_dg_input([A, B, C, D, E, F])).get_affected_nodes("C")
+        )
+        self.assertEqual(
+            {"B", "C", "D", "E", "F"},
+            DependencyGraph(*generate_dg_input([A, B, C, D, E, F])).get_affected_nodes("B")
+        )
+        self.assertEqual(
+            {"A", "B", "C", "D", "E", "F"},
+            DependencyGraph(*generate_dg_input([A, B, C, D, E, F])).get_affected_nodes("A")
+        )
+        self.assertEqual(
+            {"D"},
+            DependencyGraph(*generate_dg_input([A, B, C, D, E, F])).get_affected_nodes("D")
+        )
+        self.assertEqual(
+            {"F"},
+            DependencyGraph(*generate_dg_input([A, B, C, D, E, F])).get_affected_nodes("F")
+        )
+
 
 if __name__ == '__main__':
     unittest.main()

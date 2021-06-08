@@ -154,7 +154,7 @@ class DependencyGraph:
         for i, task_list in enumerate(self.sorted_graph_identifiers):
             if task_list[-1].name == task_name:
                 if dependency_name is None:
-                    return i, len(task_list) - 1
+                    return i, -1
                 else:
                     for j, task in enumerate(task_list[:-1]):
                         if task.name == dependency_name:
@@ -168,7 +168,7 @@ class DependencyGraph:
         return task_names
 
     def _connecting_paths(self, task1: Node, task2: Node):
-        return nx.all_simple_paths(self._graph, task1, task2)
+        return list(nx.all_simple_paths(self._graph, task1, task2))
 
     def get_affected_nodes(self, task_name: str, dependency_name: Optional[str] = None) -> Set[str]:
         out_nodes = set()
@@ -182,5 +182,4 @@ class DependencyGraph:
         for i, task_list in enumerate(self.sorted_graph_identifiers[task_pos[0] + 1:]):
             connections = self._connecting_paths(self.sorted_graph_identifiers[task_pos[0]][-1], task_list[-1])
             if len(connections) > 0:
-                for node in connections:
-                    self._get_nodes_helper(out_nodes, node.name)
+                self._get_nodes_helper(out_nodes, task_list[-1].name)
