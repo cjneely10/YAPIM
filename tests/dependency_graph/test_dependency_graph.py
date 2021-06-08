@@ -85,7 +85,7 @@ class TestDependencyGraph(unittest.TestCase):
 
     def test_gather_affected_nodes(self):
         self.assertEqual(
-            {"C", "F"},
+            {"C", "F", "E"},
             DependencyGraph(*generate_dg_input([A, B, C, D, E, F])).get_affected_nodes("C")
         )
         self.assertEqual(
@@ -107,6 +107,10 @@ class TestDependencyGraph(unittest.TestCase):
         self.assertEqual(
             set(),
             DependencyGraph(*generate_dg_input([A, B, C, D, E, F])).get_affected_nodes("G")
+        )
+        self.assertEqual(
+            {"E.C", "E"},
+            DependencyGraph(*generate_dg_input([A, B, C, D, E, F])).get_affected_nodes("E", "C")
         )
 
 

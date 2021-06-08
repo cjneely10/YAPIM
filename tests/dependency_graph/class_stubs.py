@@ -73,7 +73,7 @@ class E(Task):
 
     @staticmethod
     def requires() -> List[str]:
-        return ["B"]
+        return ["B", "C"]
 
     @staticmethod
     def depends() -> List[DependencyInput]:
