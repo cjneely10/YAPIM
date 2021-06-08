@@ -1,7 +1,9 @@
 import pickle
 from pathlib import Path
+from typing import Dict, Type, Tuple, List, Optional
 
-from yapim import InputLoader, ExtensionLoader
+from yapim import InputLoader, ExtensionLoader, Task
+from yapim.tasks.utils.loader import get_modules
 from yapim.utils.package_management.package_manager import PackageManager
 
 
@@ -41,3 +43,18 @@ class PackageLoader(PackageManager):
                 exit(1)
             pipeline_data["loader"] = loader
         return pipeline_data
+
+    def load_from_package(self) -> Tuple[List[Type[Task]], Dict[str, Type[Task]]]:
+        pipeline_data = self.validate_pipeline_pkl()
+        return PackageLoader.load_from_directories(pipeline_data["tasks"], pipeline_data["dependencies"])
+
+    @staticmethod
+    def load_from_directories(
+            tasks_directory: Path,
+            dependencies_directories: Optional[List[Path]]) -> Tuple[List[Type[Task]], Dict[str, Type[Task]]]:
+        task_blueprints: Dict[str, Type[Task]] = get_modules(tasks_directory)
+        pipeline_tasks = list(task_blueprints.values())
+        if len(dependencies_directories) > 0:
+            for directory in dependencies_directories:
+                task_blueprints.update(get_modules(directory))
+        return pipeline_tasks, task_blueprints

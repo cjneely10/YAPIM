@@ -15,6 +15,7 @@ from yapim.tasks.utils.loader import get_modules
 from yapim.utils.config_manager import ConfigManager, ImproperInputSection
 from yapim.utils.dependency_graph import Node, DependencyGraph
 from yapim.utils.input_loader import InputLoader
+from yapim.utils.package_management.package_loader import PackageLoader
 from yapim.utils.path_manager import PathManager
 
 
@@ -27,11 +28,8 @@ class Executor:
                  dependencies_directories: Optional[List[Union[Path, str]]] = None,
                  display_status_messages: bool = True
                  ):
-        self.task_blueprints: Dict[str, Type[Task]] = get_modules(Path(pipeline_steps_directory))
-        pipeline_tasks = list(self.task_blueprints.values())
-        if dependencies_directories is not None:
-            for directory in dependencies_directories:
-                self.task_blueprints.update(get_modules(Path(directory)))
+        pipeline_tasks, self.task_blueprints = PackageLoader.load_from_directories(pipeline_steps_directory,
+                                                                                   dependencies_directories)
         self.task_list: List[List[Node]] = DependencyGraph(pipeline_tasks, self.task_blueprints) \
             .sorted_graph_identifiers
 

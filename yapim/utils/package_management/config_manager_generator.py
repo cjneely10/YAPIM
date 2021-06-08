@@ -7,13 +7,13 @@ from yapim.utils.dependency_graph import DependencyGraph, Node
 
 
 # TODO: Load existing file and write fields as present
+from yapim.utils.package_management.package_loader import PackageLoader
+
+
 class ConfigManagerGenerator:
     def __init__(self, pipeline_module_path: Path, dependencies_directories: Optional[List[Path]]):
-        self.task_blueprints: Dict[str, Type[Task]] = get_modules(pipeline_module_path)
-        pipeline_tasks = list(self.task_blueprints.values())
-        if dependencies_directories is not None:
-            for directory in dependencies_directories:
-                self.task_blueprints.update(get_modules(directory))
+        pipeline_tasks, self.task_blueprints = PackageLoader.load_from_directories(pipeline_module_path,
+                                                                                   dependencies_directories)
         self.task_list: List[List[Node]] = DependencyGraph(pipeline_tasks, self.task_blueprints) \
             .sorted_graph_identifiers
 
