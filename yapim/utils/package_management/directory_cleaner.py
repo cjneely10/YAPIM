@@ -24,13 +24,13 @@ class DirectoryCleaner:
             if os.path.exists(file):
                 shutil.rmtree(file)
 
-    def clean(self, pipeline_directory: Path, task_name: str, dependency_name: Optional[str] = None):
+    def clean(self, pipeline_directory: Path, task_name: str):
         pipeline_tasks, task_blueprints = PackageLoader(pipeline_directory).load_from_package()
-        task_names = DependencyGraph(pipeline_tasks, task_blueprints).get_affected_nodes(task_name, dependency_name)
+        task_names = DependencyGraph(pipeline_tasks, task_blueprints).get_affected_nodes(task_name)
         with ThreadPoolExecutor() as executor:
             futures = []
             for _task_name in task_names:
-                task_path = self.output_directory.joinpath(PathManager.WDIR).joinpath("*").joinpath(_task_name)
+                task_path = self.output_directory.joinpath(PathManager.WDIR).joinpath("*").joinpath(_task_name + "*")
                 futures.append(executor.submit(DirectoryCleaner._rm_glob, glob.glob(str(task_path))))
             wait(futures)
 

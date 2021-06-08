@@ -109,8 +109,8 @@ class TestDependencyGraph(unittest.TestCase):
             DependencyGraph(*generate_dg_input([A, B, C, D, E, F])).get_affected_nodes("G")
         )
         self.assertEqual(
-            {"E.C", "E"},
-            DependencyGraph(*generate_dg_input([A, B, C, D, E, F])).get_affected_nodes("E", "C")
+            {"E"},
+            DependencyGraph(*generate_dg_input([A, B, C, D, E, F])).get_affected_nodes("E")
         )
 
 
