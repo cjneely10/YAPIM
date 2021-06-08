@@ -2,7 +2,9 @@ import pickle
 from pathlib import Path
 from typing import Dict, Type, Tuple, List, Optional
 
-from yapim import InputLoader, ExtensionLoader, Task
+from yapim.utils.input_loader import InputLoader
+from yapim.utils.extension_loader import ExtensionLoader
+from yapim import Task
 from yapim.tasks.utils.loader import get_modules
 from yapim.utils.package_management.package_manager import PackageManager
 

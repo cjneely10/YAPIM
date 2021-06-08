@@ -168,7 +168,10 @@ class DependencyGraph:
         return task_names
 
     def _connecting_paths(self, task1: Node, task2: Node):
-        return list(nx.all_simple_paths(self._graph, task1, task2))
+        try:
+            return next(nx.all_simple_paths(self._graph, task1, task2))
+        except StopIteration:
+            return []
 
     def get_affected_nodes(self, task_name: str, dependency_name: Optional[str] = None) -> Set[str]:
         out_nodes = set()

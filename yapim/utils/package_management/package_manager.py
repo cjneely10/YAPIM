@@ -4,7 +4,7 @@ from importlib import import_module
 from inspect import isclass
 from typing import Type
 
-from yapim import InputLoader
+from yapim.utils.input_loader import InputLoader
 
 
 class PackageManager(ABC):
