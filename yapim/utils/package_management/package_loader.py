@@ -56,7 +56,7 @@ class PackageLoader(PackageManager):
             dependencies_directories: Optional[List[Path]]) -> Tuple[List[Type[Task]], Dict[str, Type[Task]]]:
         task_blueprints: Dict[str, Type[Task]] = get_modules(tasks_directory)
         pipeline_tasks = list(task_blueprints.values())
-        if len(dependencies_directories) > 0:
+        if dependencies_directories is not None and len(dependencies_directories) > 0:
             for directory in dependencies_directories:
                 task_blueprints.update(get_modules(directory))
         return pipeline_tasks, task_blueprints
