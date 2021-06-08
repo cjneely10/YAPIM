@@ -34,8 +34,8 @@ class TestDependencyGraph(unittest.TestCase):
         self.assertEqual([
             [Node(ConfigManager.ROOT, A.__name__)],
             [Node(ConfigManager.ROOT, B.__name__)],
-            [Node(E.__name__, C.__name__), Node(ConfigManager.ROOT, E.__name__)],
             [Node(ConfigManager.ROOT, C.__name__)],
+            [Node(E.__name__, C.__name__), Node(ConfigManager.ROOT, E.__name__)],
         ],
             DependencyGraph(*generate_dg_input([A, B, C, E])).sorted_graph_identifiers)
 
@@ -109,8 +109,8 @@ class TestDependencyGraph(unittest.TestCase):
             DependencyGraph(*generate_dg_input([A, B, C, D, E, F])).get_affected_nodes("G")
         )
         self.assertEqual(
-            {"E"},
-            DependencyGraph(*generate_dg_input([A, B, C, D, E, F])).get_affected_nodes("E")
+            {"E.C", "E"},
+            DependencyGraph(*generate_dg_input([A, B, C, D, E, F])).get_affected_nodes("E", "C")
         )
 
 

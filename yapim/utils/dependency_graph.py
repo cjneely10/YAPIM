@@ -150,10 +150,15 @@ class DependencyGraph:
     def sorted_graph_identifiers(self) -> List[List[Node]]:
         return self._sorted_graph
 
-    def _find_task_idx(self, task_name: str) -> Tuple[int, int]:
+    def _find_task_idx(self, task_name: str, dependency_name: Optional[str] = None) -> Tuple[int, int]:
         for i, task_list in enumerate(self.sorted_graph_identifiers):
             if task_list[-1].name == task_name:
-                return i, -1
+                if dependency_name is None:
+                    return i, -1
+                else:
+                    for j, task in enumerate(task_list[:-1]):
+                        if task.name == dependency_name:
+                            return i, j
         return -1, -1
 
     def _get_tasks_name_strings(self, task_idx: Tuple[int, int]) -> List[str]:
@@ -168,13 +173,14 @@ class DependencyGraph:
         except StopIteration:
             return []
 
-    def get_affected_nodes(self, task_name: str) -> Set[str]:
+    # TODO: Implement to remove by dependency as well
+    def get_affected_nodes(self, task_name: str, dependency_name: Optional[str] = None) -> Set[str]:
         out_nodes = set()
-        self._get_nodes_helper(out_nodes, task_name)
+        self._get_nodes_helper(out_nodes, task_name, dependency_name)
         return out_nodes
 
-    def _get_nodes_helper(self, out_nodes: Set[str], task_name: str):
-        task_pos = self._find_task_idx(task_name)
+    def _get_nodes_helper(self, out_nodes: Set[str], task_name: str, dependency_name: Optional[str] = None):
+        task_pos = self._find_task_idx(task_name, dependency_name)
         if task_pos == (-1, -1):
             return
         for task_name in self._get_tasks_name_strings(task_pos):
