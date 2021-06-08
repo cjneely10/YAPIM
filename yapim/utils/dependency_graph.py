@@ -1,5 +1,5 @@
 import inspect
-from typing import List, Dict, Tuple, Type, Iterable
+from typing import List, Dict, Tuple, Type, Iterable, Optional
 
 import networkx as nx
 from networkx import DiGraph, topological_sort, is_directed_acyclic_graph
@@ -143,3 +143,6 @@ class DependencyGraph:
             else:
                 out_steps.append([node])
         return out_steps
+
+    def get_affected_nodes(self, task_name: str, dependency_name: Optional[str] = None):
+        pass

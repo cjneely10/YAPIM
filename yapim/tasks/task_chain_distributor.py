@@ -145,7 +145,6 @@ class TaskChainDistributor(dict):
             type(task).finalize(self, TaskChainDistributor.results, task, result)
         if task.is_skip:
             return
-        # TODO: Zip non-finalized output for storage
         for result_key, result_data in result.items():
             if result_key == "final":
                 if not isinstance(result_data, list):
