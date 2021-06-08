@@ -51,11 +51,10 @@ class PackageGenerator(PackageManager):
             shutil.copytree(pre, write_directory.joinpath(post), symlinks=True, dirs_exist_ok=True)
         # Save metadata file
         pipeline_file = write_directory.joinpath(PackageGenerator.pipeline_file)
-        if not pipeline_file.exists() or input("Overwrite existing pipeline file? [Y/n]: ").upper() == "Y":
-            with open(pipeline_file, "wb") as file_ptr:
-                pickle.dump(output_data, file_ptr)
-        # Create config file
         self._create_config(write_directory)
+        with open(pipeline_file, "wb") as file_ptr:
+            pickle.dump(output_data, file_ptr)
+        # Create config file
 
     def _create_config(self, write_directory: Path):
         config_file_path = write_directory.joinpath(os.path.basename(self._tasks_directory) + "-config.yaml")

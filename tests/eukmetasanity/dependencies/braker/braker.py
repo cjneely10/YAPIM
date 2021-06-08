@@ -43,7 +43,7 @@ class Braker(Task):
                     (*_tax),
                     "--species=%s" % self.record_id,
                     (*self.added_flags),
-                    "--prg=exonerate",
+                    "--prg=spaln",
                     (*_added)
                 ]
             )

@@ -67,6 +67,7 @@ class YAPIMConfigCreator(cli.Application):
 
     def main(self):
         PackageGenerator(self.tasks_directory, self.dependencies_directories, self.loader).create()
+        print("Complete!")
 
 
 @YAPIM.subcommand("run")
