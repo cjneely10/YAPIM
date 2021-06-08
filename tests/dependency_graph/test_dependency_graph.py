@@ -104,6 +104,10 @@ class TestDependencyGraph(unittest.TestCase):
             {"F"},
             DependencyGraph(*generate_dg_input([A, B, C, D, E, F])).get_affected_nodes("F")
         )
+        self.assertEqual(
+            set(),
+            DependencyGraph(*generate_dg_input([A, B, C, D, E, F])).get_affected_nodes("G")
+        )
 
 
 if __name__ == '__main__':

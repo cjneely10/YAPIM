@@ -159,7 +159,7 @@ class DependencyGraph:
                     for j, task in enumerate(task_list[:-1]):
                         if task.name == dependency_name:
                             return i, j
-        raise AttributeError("Unable to locate task name!")
+        return -1, -1
 
     def _get_tasks_name_strings(self, task_idx: Tuple[int, int]) -> List[str]:
         task_names: list = [self.sorted_graph_identifiers[task_idx[0]][-1].name]
@@ -180,6 +180,8 @@ class DependencyGraph:
 
     def _get_nodes_helper(self, out_nodes: Set[str], task_name: str, dependency_name: Optional[str] = None):
         task_pos = self._find_task_idx(task_name, dependency_name)
+        if task_pos == (-1, -1):
+            return
         for task_name in self._get_tasks_name_strings(task_pos):
             out_nodes.add(task_name)
         for i, task_list in enumerate(self.sorted_graph_identifiers[task_pos[0] + 1:]):
