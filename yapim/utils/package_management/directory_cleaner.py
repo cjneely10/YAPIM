@@ -28,9 +28,9 @@ class DirectoryCleaner:
                 else:
                     os.remove(file)
 
-    def clean(self, pipeline_directory: Path, task_name: str, dependency_name: Optional[str] = None):
+    def clean(self, pipeline_directory: Path, task_name: str):
         pipeline_tasks, task_blueprints = PackageLoader(pipeline_directory).load_from_package()
-        task_names = DependencyGraph(pipeline_tasks, task_blueprints).get_affected_nodes(task_name, dependency_name)
+        task_names = DependencyGraph(pipeline_tasks, task_blueprints).get_affected_nodes(task_name)
         with ThreadPoolExecutor() as executor:
             futures = []
             for _task_name in task_names:
