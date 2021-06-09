@@ -20,8 +20,8 @@ class DirectoryCleaner:
         self.record_ids = set(os.listdir(self.output_directory.joinpath(PathManager.WDIR)))
 
     @staticmethod
-    def _rm_glob(file_list: List[str]):
-        for file in file_list:
+    def _rm_glob(file_path: Path):
+        for file in glob.glob(str(file_path)):
             if os.path.exists(file):
                 if os.path.isdir(file):
                     shutil.rmtree(file)
@@ -36,7 +36,7 @@ class DirectoryCleaner:
                 _task_names = DependencyGraph(pipeline_tasks, task_blueprints).get_affected_nodes(task_name)
                 for _task_name in _task_names:
                     task_path = self.output_directory.joinpath(PathManager.WDIR).joinpath("*").joinpath(_task_name)
-                    futures.append(executor.submit(DirectoryCleaner._rm_glob, glob.glob(str(task_path))))
+                    futures.append(executor.submit(DirectoryCleaner._rm_glob, task_path))
                 wait(futures)
 
     def remove(self, record_ids: List[str]):
@@ -47,11 +47,11 @@ class DirectoryCleaner:
                 if record_id in self.record_ids:
                     # Remove wdir contents
                     task_path = self.output_directory.joinpath(PathManager.WDIR).joinpath(record_id)
-                    futures.append(executor.submit(DirectoryCleaner._rm_glob, glob.glob(str(task_path))))
+                    futures.append(executor.submit(DirectoryCleaner._rm_glob, task_path))
                     # Remove results contents
                     task_path = self.output_directory.joinpath(PathManager.RESULTS).joinpath("*").joinpath(record_id)
-                    futures.append(executor.submit(DirectoryCleaner._rm_glob, glob.glob(str(task_path))))
+                    futures.append(executor.submit(DirectoryCleaner._rm_glob, task_path))
                     # Remove input file
                     task_path = self.output_directory.joinpath(ConfigManager.STORAGE_DIR).joinpath(record_id + "*")
-                    futures.append(executor.submit(DirectoryCleaner._rm_glob, glob.glob(str(task_path))))
+                    futures.append(executor.submit(DirectoryCleaner._rm_glob, task_path))
             wait(futures)
