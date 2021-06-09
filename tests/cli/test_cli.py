@@ -80,7 +80,7 @@ class TestCLI(unittest.TestCase):
         ).run()
         # Delete selected ids
         ids_to_delete = ["Align"]
-        DirectoryCleaner(out_dir).clean(top_pipeline_dir, "Align")
+        DirectoryCleaner(out_dir).clean(top_pipeline_dir, ["Align"])
         TestCLI.confirm_deleted_steps(out_dir, ids_to_delete)
 
 

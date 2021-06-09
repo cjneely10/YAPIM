@@ -5,11 +5,9 @@ from typing import Optional, List
 
 from plumbum import cli
 
-from yapim.utils.config_manager import ConfigManager
 from yapim.utils.executor import Executor
 from yapim.utils.extension_loader import ExtensionLoader
-# TODO: Helper `clean` command for intermediary files for given commands
-# TODO: Helper `remove` command for input ids
+from yapim.utils.package_management.directory_cleaner import DirectoryCleaner
 from yapim.utils.package_management.package_generator import PackageGenerator
 from yapim.utils.package_management.package_loader import PackageLoader
 
@@ -29,10 +27,67 @@ class YAPIM(cli.Application):
             exit(1)
 
 
+@YAPIM.subcommand("clean")
+class YAPIMClean(cli.Application):
+    """
+    Clean project working directory of specified Task contents and all affected downstream Tasks
+    """
+    output_directory: Path
+    pipeline_directory: Path
+    ids: List[str]
+
+    @cli.switch(["-o", "--output"], str, mandatory=True)
+    def set_output_directory(self, output):
+        """Pipeline output directory"""
+        output = Path(output).resolve()
+        if not output.exists() or not output.is_dir():
+            print("Output directory not found")
+        self.output_directory = output
+
+    @cli.switch(["-p", "--pipeline"], str, mandatory=True)
+    def set_pipeline_path(self, pipeline):
+        """Path to directory containing pipeline.pkl file"""
+        self.pipeline_directory = Path(pipeline).resolve()
+
+    @cli.switch(["-i", "--id"], str, mandatory=True, list=True)
+    def set_ids(self, ids):
+        """Task name to delete"""
+        self.ids = ids
+
+    def main(self, *args):
+        DirectoryCleaner(self.output_directory).clean(self.pipeline_directory, self.ids)
+        print("Complete!")
+
+
+@YAPIM.subcommand("remove")
+class YAPIMRemove(cli.Application):
+    """
+    Remove input ids from working directory, results, and input storage directory
+    """
+    output_directory: Path
+    ids: List[str]
+
+    @cli.switch(["-o", "--output"], str, mandatory=True)
+    def set_output_directory(self, output):
+        """Pipeline output directory"""
+        output = Path(output).resolve()
+        if not output.exists() or not output.is_dir():
+            print("Output directory not found")
+        self.output_directory = output
+
+    @cli.switch(["-i", "--id"], str, mandatory=True, list=True)
+    def set_ids(self, ids):
+        """Input ID to delete"""
+        self.ids = ids
+
+    def main(self, *args):
+        DirectoryCleaner(self.output_directory).remove(self.ids)
+
+
 @YAPIM.subcommand("create")
 class YAPIMConfigCreator(cli.Application):
     """
-    Create configuration file and pipeline path data
+    Create pipeline package
     """
     tasks_directory: Path
     loader: Optional[Path] = None
@@ -116,9 +171,7 @@ class YAPIMRunner(cli.Application):
         pipeline_data = PackageLoader(self.pipeline_pkl_path).validate_pipeline_pkl()
         if pipeline_data["loader"].__name__ == ExtensionLoader.__name__:
             Executor(
-                pipeline_data["loader"](
-                    self.input_directory, self.output_directory.joinpath(ConfigManager.STORAGE_DIR)
-                ),
+                pipeline_data["loader"](self.input_directory, self.output_directory),
                 self.config_path,
                 self.output_directory,
                 pipeline_data["tasks"],

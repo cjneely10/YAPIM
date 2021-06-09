@@ -3,7 +3,7 @@ import os
 import shutil
 from concurrent.futures import ThreadPoolExecutor, wait
 from pathlib import Path
-from typing import List, Optional
+from typing import List
 
 from yapim.utils.config_manager import ConfigManager
 from yapim.utils.dependency_graph import DependencyGraph
@@ -28,15 +28,16 @@ class DirectoryCleaner:
                 else:
                     os.remove(file)
 
-    def clean(self, pipeline_directory: Path, task_name: str):
+    def clean(self, pipeline_directory: Path, task_names: List[str]):
         pipeline_tasks, task_blueprints = PackageLoader(pipeline_directory).load_from_package()
-        task_names = DependencyGraph(pipeline_tasks, task_blueprints).get_affected_nodes(task_name)
         with ThreadPoolExecutor() as executor:
             futures = []
-            for _task_name in task_names:
-                task_path = self.output_directory.joinpath(PathManager.WDIR).joinpath("*").joinpath(_task_name)
-                futures.append(executor.submit(DirectoryCleaner._rm_glob, glob.glob(str(task_path))))
-            wait(futures)
+            for task_name in task_names:
+                _task_names = DependencyGraph(pipeline_tasks, task_blueprints).get_affected_nodes(task_name)
+                for _task_name in _task_names:
+                    task_path = self.output_directory.joinpath(PathManager.WDIR).joinpath("*").joinpath(_task_name)
+                    futures.append(executor.submit(DirectoryCleaner._rm_glob, glob.glob(str(task_path))))
+                wait(futures)
 
     def remove(self, record_ids: List[str]):
         with ThreadPoolExecutor() as executor:
