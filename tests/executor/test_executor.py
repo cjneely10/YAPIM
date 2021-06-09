@@ -37,7 +37,7 @@ class TestExecutor(unittest.TestCase):
         Executor(
             ExtensionLoader(  # Input loader
                 Path("../data").resolve(),
-                out_dir.joinpath("MAGs"),
+                out_dir,
             ),
             TestExecutor.file.joinpath("fasta/fasta-config.yaml"),  # Config file path
             out_dir,  # Base output dir path
@@ -50,7 +50,7 @@ class TestExecutor(unittest.TestCase):
         Executor(
             ExtensionLoader(  # Input loader
                 Path("../data").resolve(),
-                out_dir.joinpath("MAGs"),
+                out_dir,
             ),
             TestExecutor.file.joinpath("nested/nested-config.yaml"),  # Config file path
             out_dir,  # Base output dir path

@@ -33,7 +33,7 @@ class Executor:
 
         self.pipeline_name = os.path.basename(pipeline_steps_directory)
         self.path_manager = PathManager(base_output_dir)
-        self.results_base_dir = base_output_dir.joinpath("results").joinpath(self.pipeline_name)
+        self.results_base_dir = base_output_dir.joinpath(PathManager.RESULTS).joinpath(self.pipeline_name)
         if not self.results_base_dir.exists():
             os.makedirs(self.results_base_dir)
         print(colors.yellow & colors.bold | "Gathering files...")

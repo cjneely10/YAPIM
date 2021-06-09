@@ -11,6 +11,7 @@ from plumbum import local
 
 class PathManager:
     WDIR = "wdir"
+    RESULTS = "results"
     """
     This class manages a set of working directories. Useful for keeping files organized
     """
