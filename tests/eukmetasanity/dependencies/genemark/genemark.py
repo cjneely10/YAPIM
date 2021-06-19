@@ -28,6 +28,7 @@ class GeneMarkPETAP(Task):
         Run gmes.petap
         """
         ev_vals = ["--ES"]
+        print(self.input["taxonomy"])
         # For now default to 100 intron predictions minimum to use file
         if len(open(str(self.input["GeneMarkProtHint"]["hints"])).readlines()) > 100 and \
                 len(open(str(self.input["GeneMarkProtHint"]["evidence"])).readlines()) > 100:

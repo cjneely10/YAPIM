@@ -21,21 +21,17 @@ class MMSeqsTaxonomyParser:
     def new():
         out = {}
         for level in MMSeqsTaxonomyParser._tax_order:
-            out[level] = {
-                "taxid": None,
-                "value": None,
-                "score": None
-            }
+            out[level] = {}
         return out
 
     @staticmethod
     def assignment(result: dict, level: str) -> dict:
         idx = MMSeqsTaxonomyParser._tax_order.index(level)
-        _level = None
-        while idx >= 0 and _level is None:
+        _level = {}
+        while idx >= 0 and _level == {}:
             _level = result[MMSeqsTaxonomyParser._tax_order[idx]]
             idx -= 1
-        if _level is None:
+        if _level == {}:
             raise MMSeqsTaxonomyParser.TaxonomyAssignmentError("%s not identified!" % level)
         return _level
 
@@ -72,7 +68,7 @@ class MMSeqsTaxonomyParser:
         _tax_results_file.close()
         amended_dict = deepcopy(tax_assignment_out)
         for level in MMSeqsTaxonomyParser._tax_order:
-            if amended_dict[level] == {}:
+            if len(amended_dict[level]) == 0:
                 amended_dict[level] = MMSeqsTaxonomyParser.assignment(amended_dict, level)
 
         return tax_assignment_out, amended_dict
@@ -87,7 +83,7 @@ class MMSeqsTaxonomy(Task):
             "taxonomy-actual": {}
         }
         if os.path.exists(self.output["tax-report"]):
-            self.output["taxonomy"], self.output["taxonomy-actual"] = MMSeqsTaxonomyParser.get_taxonomy(
+            self.output["taxonomy-actual"], self.output["taxonomy"] = MMSeqsTaxonomyParser.get_taxonomy(
                 self.output["tax-report"], self.config["cutoff"]
             )
 
@@ -128,6 +124,6 @@ class MMSeqsTaxonomy(Task):
             ],
             "1:00:00"
         )
-        self.output["taxonomy"], self.output["taxonomy-actual"] = MMSeqsTaxonomyParser.get_taxonomy(
+        self.output["taxonomy-actual"], self.output["taxonomy"] = MMSeqsTaxonomyParser.get_taxonomy(
             self.output["tax-report"], self.config["cutoff"]
         )

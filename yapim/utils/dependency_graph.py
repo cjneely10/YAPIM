@@ -173,7 +173,6 @@ class DependencyGraph:
         except StopIteration:
             return []
 
-    # TODO: Implement to remove by dependency as well
     def get_affected_nodes(self, task_name: str, dependency_name: Optional[str] = None) -> Set[str]:
         out_nodes = set()
         self._get_nodes_helper(out_nodes, task_name, dependency_name)
