@@ -2,7 +2,7 @@ import os
 from copy import deepcopy
 from typing import List, Union, Type, Tuple
 
-from yapim import Task, DependencyInput
+from yapim import Task, DependencyInput, Result
 
 
 class MMSeqsTaxonomyParser:
@@ -80,7 +80,8 @@ class MMSeqsTaxonomy(Task):
         self.output = {
             "tax-report": os.path.join(self.wdir, "tax-report.txt"),
             "taxonomy": {},
-            "taxonomy-actual": {}
+            "taxonomy-actual": {},
+            "tax-db": Result(os.path.join(self.wdir, self.record_id + "-tax_db"))
         }
         if os.path.exists(self.output["tax-report"]):
             self.output["taxonomy-actual"], self.output["taxonomy"] = MMSeqsTaxonomyParser.get_taxonomy(
@@ -101,14 +102,13 @@ class MMSeqsTaxonomy(Task):
         """
         Run mmseqs.taxonomy
         """
-        tax_db = os.path.join(self.wdir, self.record_id + "-tax_db")
         # Search taxonomy db
         self.parallel(
             self.program[
                 "taxonomy",
                 self.input["MMSeqsCreateDB"]["db"],
                 self.data[0],
-                tax_db,
+                str(self.output["tax-db"]),
                 os.path.join(self.wdir, "tmp"),
                 (*self.added_flags),
                 "--threads", self.threads,
@@ -119,7 +119,7 @@ class MMSeqsTaxonomy(Task):
             self.program[
                 "taxonomyreport",
                 self.data[0],
-                tax_db,
+                str(self.output["tax-db"]),
                 self.output["tax-report"]
             ],
             "1:00:00"

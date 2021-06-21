@@ -1,0 +1,48 @@
+---  # document start
+
+###########################################
+## Pipeline input section
+INPUT:
+  root: all
+
+## Global settings
+GLOBAL:
+  # Maximum threads/cpus to use in analysis
+  MaxThreads: 20
+  # Maximum memory to use (in GB)
+  MaxMemory: 100
+
+###########################################
+
+SLURM:
+  ## Set to True if using SLURM
+  USE_CLUSTER: false
+  ## Pass any flags you wish below
+  ## DO NOT PASS the following:
+  ## --nodes, --ntasks, --mem, --cpus-per-task
+  --qos: unlim
+  --job-name: EukMS
+  user-id: uid
+
+IdentifyProteins:
+  # Number of threads task will use
+  threads: 1
+  # Amount of memory task will use (in GB)
+  memory: 2
+  time: "10:00"
+  program: prodigal
+  FLAGS:
+    -p single
+
+Cluster:
+  # Number of threads task will use
+  threads: 1
+  # Amount of memory task will use (in GB)
+  memory: 8
+  time: "4:00:00"
+  program: mmseqs
+  FLAGS:
+    --cov-mode 1
+    --min-seq-id 0.5
+
+...  # document end
