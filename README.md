@@ -13,34 +13,12 @@ parallelized to the user-provided cpus/threads/nodes and memory.
 
 
 ## Installation
-YAPIM is available for installation via `pip` or `conda`:
+YAPIM is available for installation via `pip`:
 
 ```shell
-pip install yapim
+pip install git+https://github.com/cjneely10/YAPIM.git 
 ```
 
-```shell
-conda install yapim
-```
-
-Alternatively, this repository can be cloned and then installed directly:
-
-```shell
-git clone https://github.com/cjneely10/YAPIM.git
-cd YAPIM
-```
-
-Then, run
-
-```shell
-pip install .
-```
-
-or
-
-```shell
-conda env create -f environment.yml
-```
 
 ## Quick usage
 
