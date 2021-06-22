@@ -92,7 +92,8 @@ class TaskChainDistributor(dict):
                     updated_data = self._update_distributed_input(self.record_id,
                                                                   self.task_blueprints[top_level_node.name])
                 except KeyError as e:
-                    raise TaskExecutionError(f"Unable to load dependency data {e} for {task_identifier.get()} on record {self.record_id}")
+                    raise TaskExecutionError(f"Unable to load dependency data {e} for {task_identifier.get()} "
+                                             f"on record {self.record_id}")
             self.path_manager.add_dirs(self.record_id, [wdir])
             task = task_blueprint(
                 self.record_id,
@@ -163,15 +164,11 @@ class TaskChainDistributor(dict):
                             _path[0] + "." + result.task_name + _path[1]
                         )
                         copy(obj, _out)
-                        with TaskChainDistributor.update_lock:
-                            if result.record_id not in TaskChainDistributor.output_data_to_pickle.keys():
-                                TaskChainDistributor.output_data_to_pickle[result.record_id] = {}
-                            TaskChainDistributor.output_data_to_pickle[result.record_id][file_str] = _out
-                    else:
-                        with TaskChainDistributor.update_lock:
-                            if result.record_id not in TaskChainDistributor.output_data_to_pickle.keys():
-                                TaskChainDistributor.output_data_to_pickle[result.record_id] = {}
-                            TaskChainDistributor.output_data_to_pickle[result.record_id][file_str] = obj
+                        obj = _out
+                    with TaskChainDistributor.update_lock:
+                        if result.record_id not in TaskChainDistributor.output_data_to_pickle.keys():
+                            TaskChainDistributor.output_data_to_pickle[result.record_id] = {}
+                        TaskChainDistributor.output_data_to_pickle[result.record_id][file_str] = obj
 
     @staticmethod
     def _update_distributed_input(record_id: str, requirement_node: Type[Task]) -> Dict:
