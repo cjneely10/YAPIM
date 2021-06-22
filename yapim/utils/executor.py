@@ -83,6 +83,8 @@ class Executor:
                                                           self.results_base_dir, self.display_messages)
                         futures.append(executor.submit(task_chain.run))
                 else:
+                    if len(TaskChainDistributor.results.keys()) == 0:
+                        continue
                     first_item = list(TaskChainDistributor.results.keys())[0]
                     task_chain = TaskChainDistributor(first_item, task_batch[1], self.task_blueprints,
                                                       self.config_manager, self.path_manager,
