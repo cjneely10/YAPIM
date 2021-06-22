@@ -10,8 +10,7 @@ class Cluster(AggregateTask):
         self.output = {
             "cluster_db": Result(str(self.wdir.joinpath("cluster_db"))),
             "cluster_msa_db": Result(str(self.wdir.joinpath("cluster_msa_db"))),
-            "cluster_fasta": str(self.wdir.joinpath("cluster.fasta")),
-            "final": ["cluster_msa_db", "cluster_fasta"]
+            "final": ["cluster_msa_db"]
         }
 
     def aggregate(self) -> dict:
