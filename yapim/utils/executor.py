@@ -67,6 +67,9 @@ class Executor:
             print(colors.yellow & colors.bold | _line)
 
     def run(self):
+        if len(self.input_data_dict) == 0:
+            print(colors.red & colors.bold | "No input was provided, exiting")
+            exit()
         tprint(self.pipeline_name, font="smslant")
         for task_batch in self.task_batch():
             workers = self._get_max_resources_in_batch(task_batch[1])
