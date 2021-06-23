@@ -34,15 +34,4 @@ IdentifyProteins:
   FLAGS:
     -p single
 
-Cluster:
-  # Number of threads task will use
-  threads: 16
-  # Amount of memory task will use (in GB)
-  memory: 100
-  time: "4:00:00"
-  program: mmseqs
-  FLAGS:
-    --cov-mode 0
-    --min-seq-id 0.5
-
 ...  # document end

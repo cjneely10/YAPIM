@@ -33,11 +33,6 @@ class TaskExecutionError(RuntimeError):
 class Task(BaseTask, ABC):
     print_lock = threading.Lock()
 
-    # TODO: Add version check tests
-    @staticmethod
-    def versions() -> List[Tuple[str, str]]:
-        return []
-
     def __init__(self,
                  record_id: Union[str, Hashable],
                  task_scope: str,
@@ -66,15 +61,6 @@ class Task(BaseTask, ABC):
             self.is_skip = False
         self.is_complete = False
         self.display_messages = display_messages
-        self._version_check()
-
-    def _version_check(self):
-        if ConfigManager.PROGRAM in self.config.keys():
-            for version_command, allowed_version in Task.versions():
-                version = self.program[version_command]
-                if allowed_version in version:
-                    return
-            raise TaskExecutionError(f"Program for {self.name} uses an invalid version!")
 
     def task_scope(self) -> str:
         return self._task_scope
