@@ -28,6 +28,7 @@ class Executor:
                  ):
         pipeline_tasks, self.task_blueprints = PackageLoader.load_from_directories(pipeline_steps_directory,
                                                                                    dependencies_directories)
+        print(self.task_blueprints)
         self.task_list: List[List[Node]] = DependencyGraph(pipeline_tasks, self.task_blueprints) \
             .sorted_graph_identifiers
 
@@ -73,6 +74,7 @@ class Executor:
         tprint(self.pipeline_name, font="smslant")
         for task_batch in self.task_batch():
             workers = self._get_max_resources_in_batch(task_batch[1])
+            # TODO: Refactor to asynchronous executor to minimize thread creation
             with ThreadPoolExecutor(workers) as executor:
                 futures = []
                 if len(task_batch[1]) == 0:
