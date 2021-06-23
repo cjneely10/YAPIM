@@ -143,10 +143,10 @@ class Task(BaseTask, ABC):
         """
         # Confirm valid SLURM section
         parent_info: dict = self.config_manager.parent_info(self.full_name)
-        if ConfigManager.MEMORY not in self.config.keys() or ConfigManager.MEMORY not in parent_info.keys():
-            raise MissingDataError("SLURM section not properly formatted within %s" % self.full_name)
-        if ConfigManager.TIME not in self.config.keys() or ConfigManager.TIME not in parent_info.keys():
-            raise MissingDataError("SLURM section not properly formatted within %s" % self.full_name)
+        if ConfigManager.MEMORY not in self.config.keys() and ConfigManager.MEMORY not in parent_info.keys():
+            raise MissingDataError("SLURM section not properly formatted within %s" % str(self.full_name))
+        if ConfigManager.TIME not in self.config.keys() and ConfigManager.TIME not in parent_info.keys():
+            raise MissingDataError("SLURM section not properly formatted within %s" % str(self.full_name))
         # Generate command to launch SLURM job
         return SLURMCaller(cmd, self, time_override)
 
