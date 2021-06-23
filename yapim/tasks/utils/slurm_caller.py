@@ -126,7 +126,7 @@ class SLURMCaller:
         )
         file_ptr.write(
             SLURMCaller._create_header_line("--mem",
-                                            self.config_manager.find(self.task.full_name, ConfigManager.MEMORY))
+                                            self.config_manager.find(self.task.full_name, ConfigManager.MEMORY) + "GB")
         )
         file_ptr.write(
             SLURMCaller._create_header_line("--time",
