@@ -11,6 +11,10 @@ class IdentifyProteins(Task):
         }
 
     @staticmethod
+    def versions() -> List[Tuple[str, str]]:
+        return [("-v", "V2.6.4")]
+
+    @staticmethod
     def requires() -> List[Union[str, Type]]:
         pass
 

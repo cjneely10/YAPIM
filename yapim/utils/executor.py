@@ -28,7 +28,6 @@ class Executor:
                  ):
         pipeline_tasks, self.task_blueprints = PackageLoader.load_from_directories(pipeline_steps_directory,
                                                                                    dependencies_directories)
-        print(self.task_blueprints)
         self.task_list: List[List[Node]] = DependencyGraph(pipeline_tasks, self.task_blueprints) \
             .sorted_graph_identifiers
 

@@ -1,4 +1,4 @@
-from typing import List, Union, Type
+from typing import List, Union, Type, Tuple
 
 from yapim import Task, DependencyInput
 
@@ -9,6 +9,10 @@ class IdentifyProteins(Task):
         self.output = {
             "proteins": str(self.wdir.joinpath(self.record_id + ".faa"))
         }
+
+    @staticmethod
+    def versions() -> List[Tuple[str, str]]:
+        return [("-v", "V2.6.4")]
 
     @staticmethod
     def requires() -> List[Union[str, Type]]:

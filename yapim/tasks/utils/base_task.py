@@ -5,6 +5,7 @@ from typing import List, Tuple, Union, Type
 from plumbum import colors
 
 from yapim.tasks.utils.dependency_input import DependencyInput
+from yapim.tasks.utils.version import Version
 
 
 class BaseTask(ABC):
@@ -51,6 +52,15 @@ class BaseTask(ABC):
 
         :return: List of Task child classes
         """
+
+    # @staticmethod
+    # @abstractmethod
+    # def versions() -> List[Version]:
+    #     """ List of (command, allowed_version) of program to run this task
+    #
+    #     :return:
+    #     :rtype:
+    #     """
 
     @abstractmethod
     def run(self):

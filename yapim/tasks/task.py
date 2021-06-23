@@ -62,6 +62,31 @@ class Task(BaseTask, ABC):
         self.is_complete = False
         self.display_messages = display_messages
 
+    # # TODO: Finalize - need to check for list of allowed versions, also refactor for running program using multiple versions of calling program
+    # def _version_check(self):
+    #     if ConfigManager.PROGRAM in self.config.keys():
+    #         versions = type(self).versions()
+    #         if versions is None or len(versions) == 0:
+    #             return
+    #         for (version_command, allowed_version) in versions:
+    #             version = str(self.program[version_command]).upper()
+    #             allowed_version = allowed_version.upper()
+    #             if allowed_version in version:
+    #                 return
+    #         raise TaskExecutionError(f"{self.name} was launched using a version that does not have a "
+    #                                  f"defined implementation")
+    #
+    # def get_version(self):
+    #     if ConfigManager.PROGRAM in self.config.keys():
+    #         versions = type(self).versions()
+    #         if versions is None or len(versions) == 0:
+    #             return
+    #         for (version_command, allowed_version) in versions:
+    #             version = str(self.program[version_command]).upper()
+    #             allowed_version = allowed_version.upper()
+    #             if allowed_version in version:
+    #                 return
+
     def task_scope(self) -> str:
         return self._task_scope
 
@@ -145,6 +170,7 @@ class Task(BaseTask, ABC):
             return TaskResult(self.record_id, self.name, self.output)
 
         if not self.is_complete:
+            # self._version_check()
             with Task.print_lock:
                 if self.display_messages:
                     print(colors.green & colors.bold | "\nRunning:\n  %s" % (
