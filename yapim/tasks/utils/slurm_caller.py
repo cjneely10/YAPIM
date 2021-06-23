@@ -34,11 +34,11 @@ class SLURMCaller:
         """ Generate SLURMCaller object using user metadata gathered from SLURM config section and
         the task's own metadata
         """
-        self.user_id = self.config_manager.get_slurm_userid()
         self.task = task
         self.cmd = cmd
         self.parallelize = parallelize
         self.config_manager = task.config_manager
+        self.user_id = self.config_manager.get_slurm_userid()
         self.time_override = time_override
 
         # Generated job id
