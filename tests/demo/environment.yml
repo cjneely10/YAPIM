@@ -1,0 +1,13 @@
+name: yapim-demo
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - trimmomatic=0.39
+  - prodigal=2.6.3
+  - minimap=2.20
+  - spades=3.15.2
+  - pip
+  - pip:
+    - git+https://github.com/cjneely10/YAPIM.git
+    - https://github.com/RasmussenLab/vamb/archive/3.0.2.zip
