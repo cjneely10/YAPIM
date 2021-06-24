@@ -1,6 +1,6 @@
 from yapim.tasks.aggregate_task import AggregateTask
 from yapim.tasks.task import Task
-from yapim.tasks.task import TaskExecutionError, TaskSetupError
+from yapim.tasks.task import TaskExecutionError
 from yapim.tasks.task import TaskSetupError
 from yapim.tasks.utils.dependency_input import DependencyInput
 from yapim.tasks.utils.result import Result
