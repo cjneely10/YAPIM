@@ -17,8 +17,8 @@ class ExtensionLoader(InputLoader):
                 (".fna", ".fa", ".fasta", ".faa"): ("fasta", ExtensionLoader.parse_fasta),
                 (".faa",): ("fasta", ExtensionLoader.parse_fasta),
                 (".fastq", ".fq"): ("fastq", ExtensionLoader.parse_fastq),
-                ("_1.fastq", "_1.fq", ".1.fq"): ("fastq_1", ExtensionLoader.parse_fastq),
-                ("_2.fastq", "_2.fq", ".2.fq"): ("fastq_2", ExtensionLoader.parse_fastq),
+                ("_1.fastq", "_1.fq", "_1.fastq", ".1.fq"): ("fastq_1", ExtensionLoader.parse_fastq),
+                ("_2.fastq", "_2.fq", "_2.fastq", ".2.fq"): ("fastq_2", ExtensionLoader.parse_fastq),
                 (".gff", ".gff3"): ("gff3", ExtensionLoader.copy_gff3),
             }
 
