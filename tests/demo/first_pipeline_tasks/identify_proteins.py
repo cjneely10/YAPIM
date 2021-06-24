@@ -12,7 +12,7 @@ class IdentifyProteins(Task):
 
     @staticmethod
     def requires() -> List[Union[str, Type]]:
-        pass
+        return ["Bin"]
 
     @staticmethod
     def depends() -> List[DependencyInput]:
