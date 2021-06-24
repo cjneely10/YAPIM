@@ -17,6 +17,8 @@ class ExtensionLoader(InputLoader):
                 (".fna", ".fa", ".fasta", ".faa"): ("fasta", ExtensionLoader.parse_fasta),
                 (".faa",): ("fasta", ExtensionLoader.parse_fasta),
                 (".fastq", ".fq"): ("fastq", ExtensionLoader.parse_fastq),
+                ("_1.fastq", "_1.fq", ".1.fq"): ("fastq_1", ExtensionLoader.parse_fastq),
+                ("_2.fastq", "_2.fq", ".2.fq"): ("fastq_2", ExtensionLoader.parse_fastq),
                 (".gff", ".gff3"): ("gff3", ExtensionLoader.copy_gff3),
             }
 
@@ -43,9 +45,9 @@ class ExtensionLoader(InputLoader):
         with ThreadPoolExecutor() as executor:
             futures = []
             for file in os.listdir(self.directory):
-                ext = os.path.splitext(file)[1]
-                if ext in self.extension_mapping.keys():
-                    futures.append(executor.submit(self._load_file, file, ext))
+                for key in self.extension_mapping.keys():
+                    if file.endswith(key):
+                        futures.append(executor.submit(self._load_file, file, key))
             for future in as_completed(futures):
                 result = future.result()
                 if result[0] not in out.keys():
@@ -56,8 +58,8 @@ class ExtensionLoader(InputLoader):
 
     def _load_file(self, file: str, ext: str) -> Tuple[str, dict]:
         file = os.path.join(self.directory, file)
-        basename = os.path.basename(os.path.splitext(file)[0])
-        new_file = os.path.join(self.write_directory, basename + ext)
+        basename = os.path.basename(file)
+        new_file = os.path.join(self.write_directory, basename)
         if not os.path.exists(new_file):
             if ext in self.extension_mapping.keys():
                 self.extension_mapping[ext][1](file, new_file)
