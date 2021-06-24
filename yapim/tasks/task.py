@@ -7,13 +7,14 @@ from abc import ABC
 from pathlib import Path
 from typing import Tuple, List, Union, Optional, Hashable
 
-from plumbum import local, colors
+from plumbum import local, colors, ProcessExecutionError
 from plumbum.machines import LocalMachine, LocalCommand
 
 from yapim.tasks.utils.base_task import BaseTask
 from yapim.tasks.utils.input_dict import InputDict
 from yapim.tasks.utils.slurm_caller import SLURMCaller
 from yapim.tasks.utils.task_result import TaskResult
+from yapim.tasks.utils.version_info import VersionInfo
 from yapim.utils.config_manager import ConfigManager, MissingDataError, MissingProgramSection
 
 
@@ -61,31 +62,37 @@ class Task(BaseTask, ABC):
             self.is_skip = False
         self.is_complete = False
         self.display_messages = display_messages
+        self._version = self.get_version()
 
-    # # TODO: Finalize - need to check for list of allowed versions, also refactor for running program using multiple versions of calling program
-    # def _version_check(self):
-    #     if ConfigManager.PROGRAM in self.config.keys():
-    #         versions = type(self).versions()
-    #         if versions is None or len(versions) == 0:
-    #             return
-    #         for (version_command, allowed_version) in versions:
-    #             version = str(self.program[version_command]).upper()
-    #             allowed_version = allowed_version.upper()
-    #             if allowed_version in version:
-    #                 return
-    #         raise TaskExecutionError(f"{self.name} was launched using a version that does not have a "
-    #                                  f"defined implementation")
-    #
-    # def get_version(self):
-    #     if ConfigManager.PROGRAM in self.config.keys():
-    #         versions = type(self).versions()
-    #         if versions is None or len(versions) == 0:
-    #             return
-    #         for (version_command, allowed_version) in versions:
-    #             version = str(self.program[version_command]).upper()
-    #             allowed_version = allowed_version.upper()
-    #             if allowed_version in version:
-    #                 return
+    def versions(self) -> List[VersionInfo]:
+        pass
+
+    def get_version(self) -> Optional[str]:
+        """ Get version of program that Task is currently running
+
+        :return:
+        :rtype:
+        """
+        versions = self.versions()
+        if ConfigManager.PROGRAM not in self.config.keys() or versions is None or len(versions) == 0:
+            return None
+        for version in versions:
+            try:
+                if isinstance(version, VersionInfo):
+                    response = self.program[version.calling_parameter]
+                    if version.version in response:
+                        return version.version
+                else:
+                    raise AttributeError("Versions must be of type VersionInfo")
+            except ProcessExecutionError:
+                continue
+        raise TaskExecutionError(
+            f"{self.name} was launched using a version that does not have a defined implementation"
+        )
+
+    @property
+    def version(self) -> Optional[str]:
+        return self._version
 
     def task_scope(self) -> str:
         return self._task_scope
@@ -297,8 +304,9 @@ class Task(BaseTask, ABC):
                 w.write(str(out) + "\n")
         if isinstance(cmd, SLURMCaller) and os.path.exists(cmd.slurm_log_file):
             with open(os.path.join(self.wdir, "task.log"), "a") as w:
-                w.write("------BEGIN SLURM LOG OUTPUT SECTION------")
+                w.write("------BEGIN SLURM LOG OUTPUT SECTION------\n")
                 w.write("".join(open(cmd.slurm_log_file, "r").readlines()))
+                w.write("------END SLURM LOG OUTPUT SECTION------\n")
         with open(os.path.join(self.wdir, "task.log"), "a") as w:
             w.write("\n")
 

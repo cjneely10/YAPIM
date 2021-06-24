@@ -8,7 +8,7 @@ INPUT:
 ## Global settings
 GLOBAL:
   # Maximum threads/cpus to use in analysis
-  MaxThreads: 20
+  MaxThreads: 10
   # Maximum memory to use (in GB)
   MaxMemory: 100
 
@@ -24,14 +24,12 @@ SLURM:
   --job-name: EukMS
   user-id: uid
 
-IdentifyProteins:
+VersionedTask:
   # Number of threads task will use
   threads: 1
   # Amount of memory task will use (in GB)
-  memory: 2
-  time: "10:00"
-  program: prodigal
-  FLAGS:
-    -p single
+  memory: 8
+  time: "4:00:00"
+  program: cat
 
 ...  # document end

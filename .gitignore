@@ -3,4 +3,5 @@ tests/out
 tests/*/out
 tests/*/*/out
 tests/*/*out
+*-pipeline/
 __pycache__

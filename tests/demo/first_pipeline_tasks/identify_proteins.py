@@ -1,4 +1,4 @@
-from typing import List, Union, Type, Tuple
+from typing import List, Union, Type
 
 from yapim import Task, DependencyInput
 

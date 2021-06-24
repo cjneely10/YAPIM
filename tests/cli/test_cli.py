@@ -1,5 +1,5 @@
-import os
 import glob
+import os
 import unittest
 from pathlib import Path
 from typing import Dict, List
