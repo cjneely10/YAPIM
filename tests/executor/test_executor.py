@@ -5,6 +5,7 @@ from typing import Dict
 
 from plumbum import CommandNotFound
 
+from yapim import TaskExecutionError
 from yapim.tasks.utils.base_task import BaseTask
 from yapim.utils.dependency_graph import DependencyGraphGenerationError
 from yapim.utils.executor import Executor
@@ -169,6 +170,15 @@ class TestExecutor(unittest.TestCase):
             TestExecutor.file.joinpath("versioned_data-out"),
             "versioned_data/tasks",
         ).run()
+
+    def test_improper_versioned_data(self):
+        with self.assertRaises(TaskExecutionError):
+            Executor(
+                TestExecutor.TestLoader(10),
+                TestExecutor.file.joinpath("improper_versioned_data/improper_versioned_data-config.yaml"),
+                TestExecutor.file.joinpath("improper_versioned_data-out"),
+                "improper_versioned_data/tasks",
+            ).run()
 
 
 if __name__ == '__main__':

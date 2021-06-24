@@ -79,7 +79,7 @@ class Task(BaseTask, ABC):
         for version in versions:
             try:
                 if isinstance(version, VersionInfo):
-                    response = self.program[version.calling_parameter]
+                    response = self.program[version.calling_parameter]()
                     if version.version in response:
                         return version.version
                 else:
