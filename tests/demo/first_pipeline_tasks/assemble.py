@@ -27,7 +27,7 @@ class Assemble(Task):
                 "--meta",
                 self.input["TrimReads"]["PE1"],
                 self.input["TrimReads"]["PE2"],
-                "-k", "21,29,39,59,79,99",
+                (*self.added_flags),
                 "-t", self.threads,
                 "-m", str(self.memory) + "gb",
                 "-o", self.wdir

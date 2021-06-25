@@ -67,19 +67,17 @@ class ExtensionLoader(InputLoader):
 
     @staticmethod
     def parse_fasta(file: str, new_file: str):
-        records = []
-        for record in SeqIO.parse(file, "fasta"):
-            record.description = ""
-            records.append(record)
-        SeqIO.write(records, new_file, "fasta")
+        SeqIO.write(ExtensionLoader._record_iter(file, "fasta"), new_file, "fasta")
 
     @staticmethod
     def parse_fastq(file: str, new_file: str):
-        records = []
-        for record in SeqIO.parse(file, "fastq"):
+        SeqIO.write(ExtensionLoader._record_iter(file, "fastq"), new_file, "fastq")
+
+    @staticmethod
+    def _record_iter(file: str, file_type: str):
+        for record in SeqIO.parse(file, file_type):
             record.description = ""
-            records.append(record)
-        SeqIO.write(records, new_file, "fastq")
+            yield record
 
     @staticmethod
     def copy_gff3(file: str, new_file: str):
