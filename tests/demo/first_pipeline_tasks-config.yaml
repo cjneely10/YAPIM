@@ -48,6 +48,7 @@ CatalogueReads:
   # Amount of memory task will use (in GB)
   memory: 8
   time: "4:00:00"
+  program: concatenate.py
 
 MapBackReads:
   # Number of threads task will use
@@ -55,6 +56,7 @@ MapBackReads:
   # Amount of memory task will use (in GB)
   memory: 24
   time: "4:00:00"
+  program: minimap2
   FLAGS:
     -N 50
 
@@ -64,6 +66,7 @@ Bin:
   # Amount of memory task will use (in GB)
   memory: 80
   time: "4:00:00"
+  program: vamb
   FLAGS:
     --minfasta 20000
 
@@ -74,5 +77,6 @@ IdentifyProteins:
   memory: 8
   skip: true
   time: "4:00:00"
+  program: prodigal
 
 ...  # document end
