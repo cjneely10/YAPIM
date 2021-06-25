@@ -28,7 +28,9 @@ class TrimReads(Task):
     def run(self):
         self.parallel(
             self.program[
+                "PE",
                 "-threads", self.threads,
+                "-phred33",
                 (*self.added_flags),
                 self.input["fastq_1"],
                 self.input["fastq_2"],
@@ -36,5 +38,10 @@ class TrimReads(Task):
                 self.output["SE1"],
                 self.output["PE2"],
                 self.output["SE2"],
+                "ILLUMINACLIP:TruSeq3-PE.fa:2:30:10",
+                "LEADING:3",
+                "TRAILING:3",
+                "SLIDINGWINDOW:4:15",
+                "MINLEN:36"
             ]
         )

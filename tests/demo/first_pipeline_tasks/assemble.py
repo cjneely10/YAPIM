@@ -25,11 +25,11 @@ class Assemble(Task):
         self.parallel(
             self.program[
                 "--meta",
-                self.input["TrimReads"]["PE1"],
-                self.input["TrimReads"]["PE2"],
+                "-1", self.input["TrimReads"]["PE1"],
+                "-2", self.input["TrimReads"]["PE2"],
                 (*self.added_flags),
                 "-t", self.threads,
-                "-m", str(self.memory) + "gb",
+                "-m", self.memory,
                 "-o", self.wdir
             ]
         )

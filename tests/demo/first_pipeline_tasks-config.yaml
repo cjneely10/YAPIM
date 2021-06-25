@@ -51,25 +51,25 @@ CatalogueReads:
 
 MapBackReads:
   # Number of threads task will use
-  threads: 1
+  threads: 16
   # Amount of memory task will use (in GB)
-  memory: 8
+  memory: 24
   time: "4:00:00"
   FLAGS:
     -N 50
 
 Bin:
   # Number of threads task will use
-  threads: 1
+  threads: 16
   # Amount of memory task will use (in GB)
-  memory: 8
+  memory: 80
   time: "4:00:00"
   FLAGS:
     --minfasta 20000
 
 IdentifyProteins:
   # Number of threads task will use
-  threads: 1
+  threads: 16
   # Amount of memory task will use (in GB)
   memory: 8
   skip: true
