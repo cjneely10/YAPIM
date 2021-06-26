@@ -5,10 +5,8 @@ channels:
 dependencies:
   - _libgcc_mutex=0.1=main
   - _openmp_mutex=4.5=1_gnu
-  - bzip2=1.0.8=h7b6447c_0
   - ca-certificates=2021.5.25=h06a4308_1
   - certifi=2021.5.30=py38h06a4308_0
-  - gawk=5.1.0=h7b6447c_0
   - k8=0.2.5=h9a82719_1
   - ld_impl_linux-64=2.35.1=h7274673_9
   - libffi=3.3=he6710b0_2
@@ -17,7 +15,6 @@ dependencies:
   - libstdcxx-ng=9.3.0=hd4cf53a_17
   - megahit=1.2.9=h2e03b76_1
   - minimap2=2.20=h5bf99c6_0
-  - mmseqs2=13.45111=h95f258a_1
   - ncurses=6.2=he6710b0_1
   - openjdk=8.0.152=h7b6447c_3
   - openssl=1.1.1k=h27cfd23_0
@@ -30,7 +27,6 @@ dependencies:
   - sqlite=3.36.0=hc218d9a_0
   - tk=8.6.10=hbc83047_0
   - trimmomatic=0.39=hdfd78af_2
-  - wget=1.20.1=h20c2e04_0
   - wheel=0.36.2=pyhd3eb1b0_0
   - xz=5.2.5=h7b6447c_0
   - zlib=1.2.11=h7b6447c_3
