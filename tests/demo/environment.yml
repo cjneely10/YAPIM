@@ -15,6 +15,7 @@ dependencies:
   - libgcc-ng=9.3.0=h5101ec6_17
   - libgomp=9.3.0=h5101ec6_17
   - libstdcxx-ng=9.3.0=hd4cf53a_17
+  - megahit=1.2.9=h2e03b76_1
   - minimap2=2.20=h5bf99c6_0
   - mmseqs2=13.45111=h95f258a_1
   - ncurses=6.2=he6710b0_1
@@ -26,8 +27,7 @@ dependencies:
   - readline=8.1=h27cfd23_0
   - sambamba=0.6.6=2
   - setuptools=52.0.0=py38h06a4308_0
-  - spades=3.13.0=0
-  - sqlite=3.35.4=hdfb4753_0
+  - sqlite=3.36.0=hc218d9a_0
   - tk=8.6.10=hbc83047_0
   - trimmomatic=0.39=hdfd78af_2
   - wget=1.20.1=h20c2e04_0
@@ -49,15 +49,22 @@ dependencies:
     - networkx==2.2
     - numpy==1.21.0
     - packaging==20.9
+    - pillow==8.2.0
     - pluggy==0.13.1
     - plumbum==1.6.6
     - py==1.10.0
     - pylint==2.6.0
     - pyparsing==2.4.7
+    - pysam==0.16.0.1
     - pytest==6.2.1
     - pytest-cov==2.10.1
     - pyyaml==5.3.1
     - six==1.16.0
     - toml==0.10.2
+    - torch==1.9.0
+    - torchvision==0.10.0
+    - typing-extensions==3.10.0.0
+    - vamb==3.0.2
     - wrapt==1.12.1
     - yapim==0.1.0
+prefix: /home/user/miniconda3/envs/yapim-demo

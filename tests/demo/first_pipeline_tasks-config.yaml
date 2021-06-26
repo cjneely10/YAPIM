@@ -38,9 +38,7 @@ Assemble:
   # Amount of memory task will use (in GB)
   memory: 80
   time: "4:00:00"
-  program: spades.py
-  FLAGS:
-    -k 21,29,39,59,79,99
+  program: megahit
 
 CatalogueReads:
   # Number of threads task will use
@@ -68,15 +66,16 @@ Bin:
   time: "4:00:00"
   program: vamb
   FLAGS:
-    --minfasta 20000
+    --minfasta 1000
 
 IdentifyProteins:
   # Number of threads task will use
-  threads: 16
+  threads: 1
   # Amount of memory task will use (in GB)
   memory: 8
-  skip: true
   time: "4:00:00"
   program: prodigal
+  FLAGS:
+    -p meta
 
 ...  # document end

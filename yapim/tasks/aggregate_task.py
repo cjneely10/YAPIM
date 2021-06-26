@@ -8,8 +8,6 @@ from yapim.utils.config_manager import ConfigManager
 
 
 class AggregateTask(Task, ABC):
-    is_running = False
-
     def __init__(self,
                  record_id: str,
                  task_scope: str,
@@ -17,10 +15,10 @@ class AggregateTask(Task, ABC):
                  input_data: dict,
                  wdir: str,
                  display_messages: bool):
-        AggregateTask.is_running = True
         super().__init__(record_id, task_scope, config_manager, input_data, {}, wdir, display_messages)
         self.input = InputDict(input_data)
         result = self.aggregate()
+        self.remap_results = False
         if isinstance(result, dict):
             result.update(self.input)
             self.input = InputDict(result)
@@ -33,6 +31,9 @@ class AggregateTask(Task, ABC):
 
     def input_items(self) -> ItemsView:
         return self.input.items()
+
+    def remap(self):
+        self.remap_results = True
 
     @abstractmethod
     def aggregate(self) -> dict:
@@ -53,6 +54,9 @@ class AggregateTask(Task, ABC):
     @staticmethod
     def finalize(obj_results: dict, class_results: dict, task: "AggregateTask", result: TaskResult):
         output = task.deaggregate()
+        if task.remap_results:
+            class_results.update(output)
+            return
         if not isinstance(output, dict):
             output = task.output
         else:

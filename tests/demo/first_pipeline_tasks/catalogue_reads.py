@@ -13,18 +13,19 @@ class CatalogueReads(AggregateTask):
     def aggregate(self) -> dict:
         return {
             "fasta_files": [
-                contigs_file
-                for key in self.input.keys()
-                for contigs_file in self.input[key]["fasta"]
+                self.input[key]["Assemble"]["fasta"]
+                for key in self.input_ids()
             ]
         }
 
     def deaggregate(self) -> dict:
         return {
             key: {
-                "catalogue": self.output["fasta_catalogue"]
+                "CatalogueReads": {
+                    "catalogue": self.output["fasta_catalogue"]
+                }
             }
-            for key in self.input.keys()
+            for key in self.input_ids()
         }
 
     @staticmethod

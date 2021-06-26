@@ -1,41 +1,54 @@
+import os
+import shutil
 from typing import List, Union, Type
 
-from yapim import AggregateTask, DependencyInput
+from yapim import AggregateTask, DependencyInput, prefix
 
 
 class Bin(AggregateTask):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {
-
+            "bins": self.wdir.joinpath("tmp").joinpath("bins")
         }
 
     def aggregate(self) -> dict:
         return {
             "bams": [
-                self.input[key]["bams"]
-                for key in self.input.keys()
+                self.input[key]["MapBackReads"]["bam"]
+                for key in self.input_ids()
+                if "MapBackReads" in self.input[key].keys()
             ]
         }
 
     def deaggregate(self) -> dict:
-        pass
+        bins_dir = self.wdir.joinpath("tmp").joinpath("bins")
+        self.remap()
+        return {
+            prefix(file): {
+                "fasta": bins_dir.joinpath(file)
+            }
+            for file in os.listdir(bins_dir)
+        }
 
     @staticmethod
     def requires() -> List[Union[str, Type]]:
-        return ["MapBackReads"]
+        return ["MapBackReads", "CatalogueReads"]
 
     @staticmethod
     def depends() -> List[DependencyInput]:
         pass
 
     def run(self):
+        out_dir = self.wdir.joinpath("tmp")
+        if out_dir.exists():
+            shutil.rmtree(out_dir)
         self.parallel(
             self.program[
-                "--outdir", self.wdir,
-                "--fasta", self.input["catalogue"],
+                "--outdir", out_dir,
+                "--fasta", self.input["CatalogueReads"]["fasta_catalogue"],
                 "--bamfiles", (*self.input["bams"]),
-                "-o", "C",
+                "-o", "_",
                 (*self.added_flags)
             ]
         )

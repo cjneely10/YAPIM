@@ -27,7 +27,7 @@ class MapBackReads(Task):
         self.single(
             self.program[
                 "-d", index_file,
-                self.input["catalogue"]
+                self.input["CatalogueReads"]["catalogue"]
             ]
         )
         # Map to input BAM files

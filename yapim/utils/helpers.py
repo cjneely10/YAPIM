@@ -4,6 +4,8 @@ General functions
 """
 
 import os
+from pathlib import Path
+from typing import Union
 
 
 def touch(_path: str):
@@ -14,7 +16,7 @@ def touch(_path: str):
     open(_path, "a").close()
 
 
-def prefix(_path: str) -> str:
+def prefix(_path: Union[str, Path]) -> str:
     """ Extract prefix from file path
 
     :param _path: Path-like string
