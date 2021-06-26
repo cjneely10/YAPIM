@@ -83,7 +83,7 @@ class Task(BaseTask, ABC):
                     if version.config_param is None:
                         response = self.program[version.calling_parameter]()
                     else:
-                        response = self.config[version.config_param][version.calling_parameter]()
+                        response = self.local[self.config[version.config_param]][version.calling_parameter]()
                     if version.version in response:
                         out_versions.append(version.version)
                 else:

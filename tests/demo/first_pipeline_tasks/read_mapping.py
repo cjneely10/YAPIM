@@ -11,7 +11,7 @@ class MapBackReads(Task):
         }
 
     def versions(self) -> List[VersionInfo]:
-        return [VersionInfo("2.20-r1061", "--version"), VersionInfo("0.6.6", "-v", "aligner")]
+        return [VersionInfo("2.20-r1061", "--version"), VersionInfo("0.6.6", "-v", "converter")]
 
     @staticmethod
     def requires() -> List[Union[str, Type]]:
@@ -27,7 +27,7 @@ class MapBackReads(Task):
         self.single(
             self.program[
                 "-d", index_file,
-                self.input["catalogue"]
+                self.input["CatalogueReads"]["catalogue"]
             ]
         )
         # Map to input BAM files
@@ -40,7 +40,7 @@ class MapBackReads(Task):
                 index_file,
                 self.input["TrimReads"]["PE1"],
                 self.input["TrimReads"]["PE2"],
-            ] | self.config["converter"]["view"][
+            ] | self.local[self.config["converter"]]["view"][
                 "-S", "/dev/stdin",
                 "-t", half_threads,
                 "-o", self.output["bam"],
