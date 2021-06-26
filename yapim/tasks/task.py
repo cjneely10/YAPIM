@@ -364,6 +364,7 @@ class Task(BaseTask, ABC):
         return self.local[_path]
 
     @staticmethod
-    def finalize(obj_results: dict, class_results: dict, task: "Task", result: TaskResult):
+    def finalize(obj_results: dict, class_results: dict, task: "Task", result: TaskResult) -> dict:
         class_results[result.record_id][result.task_name] = result
         obj_results[result.task_name] = result
+        return class_results

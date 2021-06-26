@@ -40,11 +40,10 @@ class AggregateTask(Task, ABC):
         """
 
     @staticmethod
-    def finalize(obj_results: dict, class_results: dict, task: "AggregateTask", result: TaskResult):
+    def finalize(obj_results: dict, class_results: dict, task: "AggregateTask", result: TaskResult) -> dict:
         output = task.deaggregate()
         if task.remap_results:
-            class_results.update(output)
-            return
+            return output
         if not isinstance(output, dict):
             output = task.output
         else:
@@ -60,3 +59,4 @@ class AggregateTask(Task, ABC):
         for key in to_remove:
             del class_results[key]
         class_results[result.task_name] = result
+        return class_results

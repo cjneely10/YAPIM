@@ -7,7 +7,9 @@ class IdentifyProteins(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {
-            "proteins": str(self.wdir.joinpath(self.record_id + ".faa"))
+            "proteins": str(self.wdir.joinpath(self.record_id + ".faa")),
+            "fasta": self.input["fasta"],
+            "final": ["proteins", "fasta"]
         }
 
     @staticmethod

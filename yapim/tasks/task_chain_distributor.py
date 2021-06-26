@@ -142,8 +142,11 @@ class TaskChainDistributor(dict):
             if result.record_id not in TaskChainDistributor.results.keys():
                 TaskChainDistributor.results[result.record_id] = {}
                 TaskChainDistributor.output_data_to_pickle[result.record_id] = {}
-        with TaskChainDistributor.update_lock:
-            type(task).finalize(self, TaskChainDistributor.results, task, result)
+        if not isinstance(task, AggregateTask):
+            with TaskChainDistributor.update_lock:
+                TaskChainDistributor.results = type(task).finalize(self, TaskChainDistributor.results, task, result)
+        else:
+            TaskChainDistributor.results = type(task).finalize(self, TaskChainDistributor.results, task, result)
         if task.is_skip:
             return
         for result_key, result_data in result.items():
