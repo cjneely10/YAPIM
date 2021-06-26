@@ -55,6 +55,7 @@ MapBackReads:
   memory: 24
   time: "4:00:00"
   program: minimap2
+  converter: sambamba
   FLAGS:
     -N 50
 

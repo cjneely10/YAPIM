@@ -40,7 +40,7 @@ class MapBackReads(Task):
                 index_file,
                 self.input["TrimReads"]["PE1"],
                 self.input["TrimReads"]["PE2"],
-            ] | self.local["sambamba"]["view"][
+            ] | self.config["converter"]["view"][
                 "-S", "/dev/stdin",
                 "-t", half_threads,
                 "-o", self.output["bam"],

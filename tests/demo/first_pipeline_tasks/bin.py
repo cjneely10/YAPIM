@@ -6,12 +6,6 @@ from yapim import AggregateTask, DependencyInput, prefix
 
 
 class Bin(AggregateTask):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.output = {
-            "bins": self.wdir.joinpath("tmp").joinpath("bins")
-        }
-
     def deaggregate(self) -> dict:
         bins_dir = self.wdir.joinpath("tmp").joinpath("bins")
         self.remap()

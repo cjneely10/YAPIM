@@ -42,11 +42,11 @@ class SampleTask(Task):
     
     @staticmethod
     def requires() -> List[str]:
-        return []
+        pass
 
     @staticmethod
     def depends() -> List[DependencyInput]:
-        return []
+        pass
 
     def run(self):
         pass
@@ -61,16 +61,17 @@ class SampleAggregateTask(AggregateTask):
 
     @staticmethod
     def requires() -> List[str]:
-        return []
+        pass
+    
+    @staticmethod
+    def depends() -> List[DependencyInput]:
+        pass
 
     def run(self):
         pass
 
-    def aggregate(self) -> dict:
-        return {}
-
     def deaggregate(self) -> dict:
-        return {}
+        pass
 ```
 
 Ordering of tasks is accomplished by providing the name or class object of tasks that must be completed prior to run.

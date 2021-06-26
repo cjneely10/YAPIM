@@ -67,4 +67,3 @@ dependencies:
     - vamb==3.0.2
     - wrapt==1.12.1
     - yapim==0.1.0
-prefix: /home/user/miniconda3/envs/yapim-demo
