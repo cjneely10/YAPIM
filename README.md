@@ -7,7 +7,7 @@
 YAPIM is a pipeline-generation tool for easily creating and running data analysis pipelines.
 YAPIM supports workstation/server usage and High Performance Computing systems that use SLURM.
 
-YAPM creates its pipelines by generating dependency graphs for a set of python classes that implement the provided
+YAPIM creates its pipelines by generating dependency graphs for a set of python classes that implement the provided
 `Task` or `AggregateTask` abstract base classes. For a given input set, tasks are topologically sorted and automatically 
 parallelized to the user-provided cpus/threads/nodes and memory.
 
@@ -24,64 +24,14 @@ pip install git+https://github.com/cjneely10/YAPIM.git
 
 ### Creating a pipeline
 
-YAPIM pipelines consist of a set of classes that inherit from either `Task` or `AggregateTask`, which differ in their 
-ability to run a task on a single input item or the entire collection, respectively.
+See the documentation (pending).
 
-```python
-from typing import List
+### Running a pipeline
 
-from yapim import Task, AggregateTask, DependencyInput
+Below are simple instructions for running a YAPIM pipeline that is generated using typical methodologies:
 
-
-class SampleTask(Task):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.output = {
-            
-        }
-    
-    @staticmethod
-    def requires() -> List[str]:
-        pass
-
-    @staticmethod
-    def depends() -> List[DependencyInput]:
-        pass
-
-    def run(self):
-        pass
-
-
-class SampleAggregateTask(AggregateTask):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.output = {
-            
-        }
-
-    @staticmethod
-    def requires() -> List[str]:
-        pass
-    
-    @staticmethod
-    def depends() -> List[DependencyInput]:
-        pass
-
-    def run(self):
-        pass
-
-    def deaggregate(self) -> dict:
-        pass
+```shell
+conda env create -f environment.yml
+conda activate "<environment-name>"
+yapim run -p /path/to/pipeline-directory -c /path/to/config-file.yml -i /path/to/input-directory
 ```
-
-Ordering of tasks is accomplished by providing the name or class object of tasks that must be completed prior to run.
-
-
-
-### Generating configuration data
-
-### Run a pipeline - command line
-
-### Run a pipeline - API
-
-#### InputLoader
