@@ -12,15 +12,6 @@ class Bin(AggregateTask):
             "bins": self.wdir.joinpath("tmp").joinpath("bins")
         }
 
-    def aggregate(self) -> dict:
-        return {
-            "bams": [
-                self.input[key]["MapBackReads"]["bam"]
-                for key in self.input_ids()
-                if "MapBackReads" in self.input[key].keys()
-            ]
-        }
-
     def deaggregate(self) -> dict:
         bins_dir = self.wdir.joinpath("tmp").joinpath("bins")
         self.remap()
@@ -43,11 +34,16 @@ class Bin(AggregateTask):
         out_dir = self.wdir.joinpath("tmp")
         if out_dir.exists():
             shutil.rmtree(out_dir)
+        bams = [
+            self.input[key]["MapBackReads"]["bam"]
+            for key in self.input_ids()
+            if "MapBackReads" in self.input[key].keys()
+        ]
         self.parallel(
             self.program[
                 "--outdir", out_dir,
                 "--fasta", self.input["CatalogueReads"]["fasta_catalogue"],
-                "--bamfiles", (*self.input["bams"]),
+                "--bamfiles", (*bams),
                 "-o", "_",
                 (*self.added_flags)
             ]

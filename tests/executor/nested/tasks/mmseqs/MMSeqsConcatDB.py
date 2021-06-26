@@ -1,6 +1,6 @@
 from typing import List
 
-from yapim import AggregateTask
+from yapim import AggregateTask, DependencyInput
 
 
 class MMSeqsConcatDB(AggregateTask):
@@ -11,10 +11,8 @@ class MMSeqsConcatDB(AggregateTask):
             "final": ["out"]
         }
 
-    def aggregate(self) -> dict:
-        return {
-            "dbs": [str(self.input[record_id]["MMSeqsCreateDB"]["db"]) for record_id in self.input.keys()]
-        }
+    def aggregate(self):
+        return [str(self.input[record_id]["MMSeqsCreateDB"]["db"]) for record_id in self.input.keys()]
 
     def deaggregate(self) -> dict:
         return {
@@ -24,13 +22,18 @@ class MMSeqsConcatDB(AggregateTask):
         }
 
     @staticmethod
+    def depends() -> List[DependencyInput]:
+        pass
+
+    @staticmethod
     def requires() -> List[str]:
         return ["MMSeqsCreateDB"]
 
     def run(self):
+        dbs = self.aggregate()
         self.single(
             self.program[
                 "mergedbs",
-                self.input["dbs"][0], self.output["out"], (*self.input["dbs"][1:])
+                dbs[0], self.output["out"], (*dbs[1:])
             ]
         )

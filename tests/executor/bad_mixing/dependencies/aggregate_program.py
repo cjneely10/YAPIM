@@ -14,9 +14,6 @@ class AggregateProgram(AggregateTask):
 
         }
 
-    def aggregate(self) -> dict:
-        return self.input
-
     def deaggregate(self) -> dict:
         return self.input
 

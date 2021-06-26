@@ -4,11 +4,6 @@ from yapim import AggregateTask, DependencyInput, Result
 
 
 class Program(AggregateTask):
-    def aggregate(self) -> dict:
-        return {
-            "data": self.input_ids()
-        }
-
     def deaggregate(self) -> dict:
         return self.input
 
@@ -29,6 +24,6 @@ class Program(AggregateTask):
 
     def run(self):
         fp = open(str(self.output["result_file"]), "a")
-        fp.write(str(self.input["data"]))
+        fp.write(str(self.input_ids()))
         fp.write("\n")
         fp.close()

@@ -10,21 +10,9 @@ class CatalogueReads(AggregateTask):
             "fasta_catalogue": self.wdir.joinpath("catalogue.fna.gz")
         }
 
-    def aggregate(self) -> dict:
-        return {
-            "fasta_files": [
-                self.input[key]["Assemble"]["fasta"]
-                for key in self.input_ids()
-            ]
-        }
-
     def deaggregate(self) -> dict:
         return {
-            key: {
-                "CatalogueReads": {
-                    "catalogue": self.output["fasta_catalogue"]
-                }
-            }
+            key: {"catalogue": self.output["fasta_catalogue"]}
             for key in self.input_ids()
         }
 
@@ -37,9 +25,13 @@ class CatalogueReads(AggregateTask):
         pass
 
     def run(self):
+        fasta_files = [
+            self.input[key]["Assemble"]["fasta"]
+            for key in self.input_ids()
+        ]
         self.single(
             self.program[
                 self.output["fasta_catalogue"],
-                (*self.input["fasta_files"])
+                (*fasta_files)
             ]
         )

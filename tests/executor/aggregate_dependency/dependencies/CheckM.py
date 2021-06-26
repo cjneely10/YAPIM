@@ -17,12 +17,6 @@ class CheckM(AggregateTask):
     def run(self):
         open(self.output["CheckMResult"], "a").close()
 
-    def aggregate(self) -> dict:
-        return {
-            record_id: {"CheckM": {}}
-            for record_id in self.input.keys()
-        }
-
     def deaggregate(self) -> dict:
         return {"CheckM": {}}
 

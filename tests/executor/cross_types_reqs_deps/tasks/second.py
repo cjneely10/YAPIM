@@ -4,8 +4,6 @@ from yapim import DependencyInput, touch, AggregateTask
 
 
 class Second(AggregateTask):
-    def aggregate(self) -> dict:
-        pass
 
     def deaggregate(self) -> dict:
         pass

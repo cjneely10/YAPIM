@@ -11,9 +11,6 @@ class Quality(AggregateTask):
             "final": ["result"]
         }
 
-    def aggregate(self) -> dict:
-        return {}
-
     def deaggregate(self) -> dict:
         return self.input
 

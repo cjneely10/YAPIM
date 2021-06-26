@@ -17,14 +17,14 @@ class Merge(AggregateTask):
             "final": ["file"]
         }
 
-    def aggregate(self) -> dict:
+    def aggregate(self):
         file_path = os.path.join(self.wdir, "aggregate-file.txt")
         paths_file = open(file_path, "w")
         for record_id in self.input.keys():
             paths_file.write("\t".join([record_id, str(self.input[record_id]["Write"]["result"])]))
             paths_file.write("\n")
         paths_file.close()
-        return {"file": Path(file_path).resolve()}
+        return Path(file_path).resolve()
 
     def deaggregate(self) -> dict:
         fp = open(self.output["file"], "r")
@@ -36,6 +36,6 @@ class Merge(AggregateTask):
         return out
 
     def run(self):
-        fp = open(self.input["file"], "r")
+        fp = open(self.aggregate(), "r")
         print(fp.readlines())
         fp.close()

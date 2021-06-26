@@ -8,9 +8,6 @@ class CollectInput(AggregateTask):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def aggregate(self) -> dict:
-        pass
-
     def deaggregate(self) -> dict:
         input_data = {}
         for record_id, rnaseq_pair_list in CollectInput.get_rna_read_pairs(Path(self.config["rnaseq"])).items():

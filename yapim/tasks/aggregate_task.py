@@ -17,11 +17,7 @@ class AggregateTask(Task, ABC):
                  display_messages: bool):
         super().__init__(record_id, task_scope, config_manager, input_data, {}, wdir, display_messages)
         self.input = InputDict(input_data)
-        result = self.aggregate()
         self.remap_results = False
-        if isinstance(result, dict):
-            result.update(self.input)
-            self.input = InputDict(result)
 
     def input_ids(self) -> KeysView:
         return self.input.keys()
@@ -34,14 +30,6 @@ class AggregateTask(Task, ABC):
 
     def remap(self):
         self.remap_results = True
-
-    @abstractmethod
-    def aggregate(self) -> dict:
-        """
-
-        :return:
-        :rtype:
-        """
 
     @abstractmethod
     def deaggregate(self) -> dict:
@@ -72,4 +60,3 @@ class AggregateTask(Task, ABC):
         for key in to_remove:
             del class_results[key]
         class_results[result.task_name] = result
-
