@@ -62,12 +62,12 @@ class Task(BaseTask, ABC):
             self.is_skip = False
         self.is_complete = False
         self.display_messages = display_messages
-        self._version = self.get_version()
+        self._versions = self.get_versions()
 
     def versions(self) -> List[VersionInfo]:
         pass
 
-    def get_version(self) -> Optional[str]:
+    def get_versions(self) -> Optional[List[str]]:
         """ Get version of program that Task is currently running
 
         :return:
@@ -76,23 +76,29 @@ class Task(BaseTask, ABC):
         versions = self.versions()
         if ConfigManager.PROGRAM not in self.config.keys() or versions is None or len(versions) == 0:
             return None
+        out_versions = []
         for version in versions:
             try:
                 if isinstance(version, VersionInfo):
-                    response = self.program[version.calling_parameter]()
+                    if version.config_param is None:
+                        response = self.program[version.calling_parameter]()
+                    else:
+                        response = self.config[version.config_param][version.calling_parameter]()
                     if version.version in response:
-                        return version.version
+                        out_versions.append(version.version)
                 else:
                     raise AttributeError("Versions must be of type VersionInfo")
             except ProcessExecutionError:
                 continue
+        if len(out_versions) != 0:
+            return out_versions
         raise TaskExecutionError(
             f"{self.name} was launched using a version that does not have a defined implementation"
         )
 
     @property
     def version(self) -> Optional[str]:
-        return self._version
+        return self._versions
 
     def task_scope(self) -> str:
         return self._task_scope

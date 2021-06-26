@@ -12,7 +12,7 @@ class CatalogueReads(AggregateTask):
 
     def deaggregate(self) -> dict:
         return {
-            key: {"catalogue": self.output["fasta_catalogue"]}
+            key: self.output["fasta_catalogue"]
             for key in self.input_ids()
         }
 
