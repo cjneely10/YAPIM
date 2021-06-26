@@ -73,7 +73,6 @@ class Executor:
         tprint(self.pipeline_name, font="smslant")
         for task_batch in self.task_batch():
             workers = self._get_max_resources_in_batch(task_batch[1])
-            # TODO: Refactor to asynchronous executor to minimize thread creation
             with ThreadPoolExecutor(workers) as executor:
                 futures = []
                 if len(task_batch[1]) == 0:
