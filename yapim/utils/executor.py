@@ -38,7 +38,7 @@ class Executor:
             os.makedirs(self.results_base_dir)
         print(colors.yellow & colors.bold | "Gathering files...")
         print(colors.yellow & colors.bold | "------------------")
-        self.input_data_dict = input_data.load()
+        self.input_data_dict = Executor._load_input_data(input_data)
         self.config_manager = None
         self.display_messages = display_status_messages
         try:
@@ -55,6 +55,14 @@ class Executor:
         self.input_data_dict.update(existing_data)
         TaskChainDistributor.results.update(existing_data)
         self.begin_logging(base_output_dir)
+
+    @staticmethod
+    def _load_input_data(input_data: InputLoader):
+        input_data_dict = input_data.load()
+        for key in input_data_dict.keys():
+            if not hasattr(key, "__str__"):
+                raise AttributeError("Valid input keys must define __str__")
+        return input_data_dict
 
     def begin_logging(self, base_output_dir: Path):
         log_file = os.path.join(base_output_dir, "%s-eukmetasanity.log" % self.pipeline_name)
