@@ -60,7 +60,7 @@ class Executor:
     def _load_input_data(input_data: InputLoader):
         input_data_dict = input_data.load()
         for key in input_data_dict.keys():
-            if not hasattr(key, "__str__"):
+            if "object at" in str(key):
                 raise AttributeError("Valid input keys must define __str__")
         return input_data_dict
 
