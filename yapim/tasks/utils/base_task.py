@@ -52,15 +52,6 @@ class BaseTask(ABC):
         :return: List of Task child classes
         """
 
-    # @staticmethod
-    # @abstractmethod
-    # def versions() -> List[Version]:
-    #     """ List of (command, allowed_version) of program to run this task
-    #
-    #     :return:
-    #     :rtype:
-    #     """
-
     @abstractmethod
     def run(self):
         """

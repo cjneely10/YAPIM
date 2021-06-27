@@ -67,6 +67,12 @@ class Task(BaseTask, ABC):
     def versions(self) -> List[VersionInfo]:
         pass
 
+    def condition(self) -> bool:
+        pass
+
+    def has_run(self, task_name: str, record_id: Optional[str] = None):
+        return task_name in self.input.keys()
+
     def get_versions(self) -> Optional[List[str]]:
         """ Get version of program that Task is currently running
 
@@ -179,11 +185,16 @@ class Task(BaseTask, ABC):
 
         :return:
         """
+        # Conditional run - either undefined (in which case self.skip defined by config presence/definition)
+        # Or defined by result of evaluating condition
+        condition = self.condition()
+        if condition is not None:
+            if condition is False:
+                self.is_skip = True
         if self.is_skip:
             return TaskResult(self.record_id, self.name, self.output)
 
         if not self.is_complete:
-            # self._version_check()
             with Task.print_lock:
                 if self.display_messages:
                     print(colors.green & colors.bold | "\nRunning:\n  %s" % (

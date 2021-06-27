@@ -8,7 +8,7 @@ class VersionedTask(Task):
         super().__init__(*args, **kwargs)
 
     def versions(self) -> List[VersionInfo]:
-        return [VersionInfo("1.30", "--version", "cat")]
+        return [VersionInfo("1.30", "--version")]
 
     @staticmethod
     def requires() -> List[Union[str, Type]]:

@@ -26,7 +26,7 @@ SLURM:
 
 TrimReads:
   # Number of threads task will use
-  threads: 16
+  threads: 8
   # Amount of memory task will use (in GB)
   memory: 16
   time: "4:00:00"
@@ -34,9 +34,9 @@ TrimReads:
 
 Assemble:
   # Number of threads task will use
-  threads: 16
+  threads: 8
   # Amount of memory task will use (in GB)
-  memory: 80
+  memory: 16
   time: "4:00:00"
   program: megahit
 
@@ -50,7 +50,7 @@ CatalogueReads:
 
 MapBackReads:
   # Number of threads task will use
-  threads: 16
+  threads: 8
   # Amount of memory task will use (in GB)
   memory: 24
   time: "4:00:00"
@@ -61,9 +61,9 @@ MapBackReads:
 
 Bin:
   # Number of threads task will use
-  threads: 16
+  threads: 6
   # Amount of memory task will use (in GB)
-  memory: 80
+  memory: 16
   time: "4:00:00"
   program: vamb
   FLAGS:
@@ -73,7 +73,7 @@ IdentifyProteins:
   # Number of threads task will use
   threads: 1
   # Amount of memory task will use (in GB)
-  memory: 8
+  memory: 4
   time: "4:00:00"
   program: prodigal
   FLAGS:

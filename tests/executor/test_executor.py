@@ -180,6 +180,14 @@ class TestExecutor(unittest.TestCase):
                 "improper_versioned_data/tasks",
             ).run()
 
+    def test_conditional_run(self):
+        Executor(
+            TestExecutor.TestLoader(10),
+            TestExecutor.file.joinpath("conditional_task/tasks-config.yaml"),
+            TestExecutor.file.joinpath("conditional_task-out"),
+            "conditional_task/tasks"
+        ).run()
+
 
 if __name__ == '__main__':
     unittest.main()

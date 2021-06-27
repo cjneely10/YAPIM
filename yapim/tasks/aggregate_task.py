@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import KeysView, ValuesView, ItemsView
+from typing import KeysView, ValuesView, ItemsView, Optional
 
 from yapim.tasks.task import Task
 from yapim.tasks.utils.input_dict import InputDict
@@ -60,3 +60,12 @@ class AggregateTask(Task, ABC):
             del class_results[key]
         class_results[result.task_name] = result
         return class_results
+
+    def has_run(self, task_name: str, record_id: Optional[str] = None) -> bool:
+        """ Check whether a task was run for a record_id
+
+        :return: Boolean result
+        """
+        if record_id is None:
+            return False
+        return task_name in self.input[record_id].keys()

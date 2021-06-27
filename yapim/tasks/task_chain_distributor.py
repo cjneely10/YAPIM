@@ -106,6 +106,7 @@ class TaskChainDistributor(dict):
             )
         task.set_is_complete()
 
+        # TODO: This may be problematic...
         projected_memory = int(self.config_manager.find(task.full_name, ConfigManager.MEMORY))
         projected_threads = int(self.config_manager.find(task.full_name, ConfigManager.THREADS))
         with TaskChainDistributor.update_lock:
