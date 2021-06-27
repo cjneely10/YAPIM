@@ -58,10 +58,10 @@ class Executor:
 
     @staticmethod
     def _load_input_data(input_data: InputLoader):
-        input_data_dict = input_data.load()
+        input_data_dict: dict = input_data.load()
         for key in input_data_dict.keys():
             if "object at" in str(key):
-                raise AttributeError("Valid input keys must define __str__")
+                raise AttributeError("Valid input key types must implement .__str__(self) that returns unique ids!")
         return input_data_dict
 
     def begin_logging(self, base_output_dir: Path):
