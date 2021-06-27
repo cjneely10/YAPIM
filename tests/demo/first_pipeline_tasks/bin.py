@@ -6,14 +6,19 @@ from yapim import AggregateTask, DependencyInput, prefix
 
 
 class Bin(AggregateTask):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.output = {
+            "bins": self.wdir.joinpath("tmp").joinpath("bins")
+        }
+
     def deaggregate(self) -> dict:
-        bins_dir = self.wdir.joinpath("tmp").joinpath("bins")
         self.remap()
         return {
             prefix(file): {
-                "fasta": bins_dir.joinpath(file)
+                "fasta": self.output["bins"].joinpath(file)
             }
-            for file in os.listdir(bins_dir)
+            for file in os.listdir(self.output["bins"])
         }
 
     @staticmethod
@@ -31,7 +36,7 @@ class Bin(AggregateTask):
         bams = [
             self.input[key]["MapBackReads"]["bam"]
             for key in self.input_ids()
-            if "MapBackReads" in self.input[key].keys()
+            if self.has_run("MapBackReads", key)
         ]
         self.parallel(
             self.program[

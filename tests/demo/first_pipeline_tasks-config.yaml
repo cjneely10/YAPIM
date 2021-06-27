@@ -69,6 +69,14 @@ Bin:
   FLAGS:
     --minfasta 1000
 
+QualityCheck:
+  # Number of threads task will use
+  threads: 16
+  # Amount of memory task will use (in GB)
+  memory: 60
+  time: "4:00:00"
+  program: checkm
+
 IdentifyProteins:
   # Number of threads task will use
   threads: 1

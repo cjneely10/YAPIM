@@ -4,8 +4,11 @@ from yapim import AggregateTask, DependencyInput
 
 
 class QualityCheck(AggregateTask):
-    def output(self) -> dict:
-        pass
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.output = {
+            "outdir": self.wdir.joinpath("out")
+        }
 
     def deaggregate(self) -> dict:
         pass
@@ -19,4 +22,12 @@ class QualityCheck(AggregateTask):
         pass
 
     def run(self):
-        pass
+        self.parallel(
+            self.program[
+                "lineage_wf",
+                "-t", self.threads,
+                "-x", "fna",
+                self.input["Bin"]["bins"],
+                self.output["outdir"]
+            ]
+        )
