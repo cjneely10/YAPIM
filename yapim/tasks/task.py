@@ -5,7 +5,7 @@ import time
 import traceback
 from abc import ABC
 from pathlib import Path
-from typing import Tuple, List, Union, Optional, Hashable
+from typing import Tuple, List, Union, Optional
 
 from plumbum import local, colors, ProcessExecutionError
 from plumbum.machines import LocalMachine, LocalCommand
@@ -35,14 +35,14 @@ class Task(BaseTask, ABC):
     print_lock = threading.Lock()
 
     def __init__(self,
-                 record_id: Union[str, Hashable],
+                 record_id: str,
                  task_scope: str,
                  config_manager: ConfigManager,
                  input_data: dict,
                  added_data: dict,
                  wdir: str,
                  display_messages: bool):
-        self.record_id: str = str(record_id)
+        self._record_id = record_id
         self._task_scope = str(task_scope)
         # input_data.update(added_data)
         # self.input = input_data
@@ -63,6 +63,10 @@ class Task(BaseTask, ABC):
         self.is_complete = False
         self.display_messages = display_messages
         self._versions = self.get_versions()
+
+    @property
+    def record_id(self) -> str:
+        return self._record_id
 
     def versions(self) -> List[VersionInfo]:
         pass
@@ -101,10 +105,6 @@ class Task(BaseTask, ABC):
         raise TaskExecutionError(
             f"{self.name} was launched using a version that does not have a defined implementation"
         )
-
-    @property
-    def version(self) -> Optional[str]:
-        return self._versions
 
     def task_scope(self) -> str:
         return self._task_scope
@@ -201,7 +201,7 @@ class Task(BaseTask, ABC):
                             (self.task_scope() + " " if self.task_scope() != ConfigManager.ROOT else "")
                             + (self.name if self.task_scope() == ConfigManager.ROOT else f"(using {self.name})")
                     ))
-                _str = "In progress:  {}".format(self.record_id)
+                _str = "In progress:  {}".format(str(self.record_id))
                 logging.info(_str)
                 if self.display_messages:
                     print(colors.blue & colors.bold | _str)
@@ -209,7 +209,8 @@ class Task(BaseTask, ABC):
             self.try_run()
             end_time = time.time()
             with Task.print_lock:
-                _str = "Is complete:  {} ({:.3f}{})".format(self.record_id, *Task._parse_time(end_time - start_time))
+                _str = "Is complete:  {} ({:.3f}{})".format(str(self.record_id),
+                                                            *Task._parse_time(end_time - start_time))
                 logging.info(_str)
                 if self.display_messages:
                     print(colors.blue & colors.bold | _str)
@@ -233,7 +234,7 @@ class Task(BaseTask, ABC):
         return self.local[program]
 
     def __str__(self):  # pragma: no cover
-        return f"<Task name: {self.name}, scope: {self.task_scope()}, input_id: {self.record_id}, " \
+        return f"<Task name: {self.name}, scope: {self.task_scope()}, input_id: {str(self.record_id)}, " \
                f"requirements: {self.requires()}, dependencies: {self.depends()}>"
 
     def __repr__(self):  # pragma: no cover

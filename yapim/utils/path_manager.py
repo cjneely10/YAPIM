@@ -66,7 +66,6 @@ class PathManager:
         :param _subdirs: List of subdirectories to add to a directory within self.wdir
         :raises: AssertionError for improper types
         """
-        assert isinstance(record_id, str) and len(record_id) > 0
         # Record base dir
         local["mkdir"]["-p", os.path.join(self.wdir, str(record_id))]()
         # Additional dirs, if needed

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import KeysView, ValuesView, ItemsView, Optional
+from typing import KeysView, ValuesView, ItemsView, Optional, Dict
 
 from yapim.tasks.task import Task
 from yapim.tasks.utils.input_dict import InputDict
@@ -32,7 +32,7 @@ class AggregateTask(Task, ABC):
         self.remap_results = True
 
     @abstractmethod
-    def deaggregate(self) -> dict:
+    def deaggregate(self) -> Dict[str, Dict]:
         """
 
         :return:

@@ -154,7 +154,7 @@ class TaskChainDistributor(dict):
             if result_key == "final":
                 if not isinstance(result_data, list):
                     raise TaskSetupError("'final' section of output should be a list of keys")
-                _sub_out = os.path.join(self.results_dir, result.record_id)
+                _sub_out = os.path.join(self.results_dir, str(result.record_id))
                 if not os.path.exists(_sub_out):
                     os.makedirs(_sub_out)
                 for file_str in result_data:
