@@ -9,27 +9,12 @@ from typing import List, Union, Optional
 
 from plumbum.machines.local import LocalCommand, local
 
+from yapim.tasks.utils.slurm_status import SlurmStatus
 from yapim.utils.config_manager import ConfigManager
 
 
 class SlurmRunError(Exception):
     pass
-
-
-class Status:
-    def __init__(self, user_id: str):
-        self._user_id = user_id
-        self._get_status()
-
-    def _get_status(self):
-        self._status = str(local["squeue"]["-u", self._user_id]())
-        self._time = datetime.datetime.now()
-
-    def check_status(self, job_id: str) -> bool:
-        current_time = datetime.datetime.now()
-        if current_time - self._time > datetime.timedelta(minutes=2):
-            self._get_status()
-        return job_id in self._status
 
 
 class SLURMCaller:
@@ -59,7 +44,7 @@ class SLURMCaller:
         self.user_id = self.config_manager.get_slurm_userid()
         self.time_override = time_override
         if SLURMCaller.status is None:
-            SLURMCaller.status = Status(self.user_id)
+            SLURMCaller.status = SlurmStatus(self.user_id, 1)
 
         # Generated job id
         self.job_id: str = SLURMCaller.FAILED_ID
