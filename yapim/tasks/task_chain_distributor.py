@@ -109,17 +109,6 @@ class TaskChainDistributor(dict):
         # TODO: This may be problematic...
         projected_memory = int(self.config_manager.find(task.full_name, ConfigManager.MEMORY))
         projected_threads = int(self.config_manager.find(task.full_name, ConfigManager.THREADS))
-        TaskChainDistributor._acquire_resources(projected_memory, projected_threads)
-
-        try:
-            self._finalize_output(task, task.run_task())
-            TaskChainDistributor._release_resources(projected_threads, projected_memory)
-        except BaseException as err:
-            TaskChainDistributor._release_resources(projected_threads, projected_memory)
-            raise err
-
-    @staticmethod
-    def _acquire_resources(projected_memory: int, projected_threads: int):
         with TaskChainDistributor.update_lock:
             total_memory = projected_memory + TaskChainDistributor.current_gb_memory_in_use_count
             total_threads = projected_threads + TaskChainDistributor.current_threads_in_use_count
@@ -133,6 +122,13 @@ class TaskChainDistributor(dict):
         with TaskChainDistributor.update_lock:
             TaskChainDistributor.current_threads_in_use_count = total_threads
             TaskChainDistributor.current_gb_memory_in_use_count = total_memory
+
+        try:
+            self._finalize_output(task, task.run_task())
+            TaskChainDistributor._release_resources(projected_threads, projected_memory)
+        except BaseException as err:
+            TaskChainDistributor._release_resources(projected_threads, projected_memory)
+            raise err
 
     @staticmethod
     def _release_resources(projected_threads: int, projected_memory: int):
