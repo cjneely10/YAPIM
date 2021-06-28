@@ -3,6 +3,7 @@ Module holds logic for running a dask distributed task within a SLURM job
 """
 
 import os
+from pathlib import Path
 from time import sleep
 from typing import List, Union, Optional
 
@@ -182,6 +183,8 @@ class SLURMCaller:
         self._launch_script()
         while self._is_running():
             sleep(60)  # Wait 1 minute in between checking if still running
-        _file = "\n".join(open("slurm-%s.out" % self.job_id, "r").readlines())
-        if "ERROR" in _file and "TIME" in _file:
-            raise SlurmRunError("Timeout found in SLURM job")
+        slurm_file = Path("slurm-%s.out" % self.job_id)
+        if slurm_file.exists():
+            _file = "\n".join(open(slurm_file, "r").readlines())
+            if "ERROR" in _file and "TIME" in _file:
+                raise SlurmRunError("Timeout found in SLURM job")
