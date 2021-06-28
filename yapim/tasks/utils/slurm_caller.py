@@ -1,7 +1,7 @@
 """
 Module holds logic for running a dask distributed task within a SLURM job
 """
-
+import datetime
 import os
 from pathlib import Path
 from time import sleep
@@ -16,6 +16,22 @@ class SlurmRunError(Exception):
     pass
 
 
+class Status:
+    def __init__(self, user_id: str):
+        self._user_id = user_id
+        self._get_status()
+
+    def _get_status(self):
+        self._status = str(local["squeue"]["-u", self._user_id]())
+        self._time = datetime.datetime.now()
+
+    def check_status(self, job_id: str) -> bool:
+        current_time = datetime.datetime.now()
+        if current_time - self._time > datetime.timedelta(minutes=2):
+            self._get_status()
+        return job_id in self._status
+
+
 class SLURMCaller:
     """ SLURMCaller handles running a program on a SLURM cluster
 
@@ -25,6 +41,7 @@ class SLURMCaller:
     """
     OUTPUT_SCRIPTS = "slurm-runner.sh"
     FAILED_ID = "failed-job-id"
+    status = None
 
     def __init__(self,
                  cmd: Union[LocalCommand, str, List[Union[LocalCommand, str]]],
@@ -41,6 +58,8 @@ class SLURMCaller:
         self.config_manager = task.config_manager
         self.user_id = self.config_manager.get_slurm_userid()
         self.time_override = time_override
+        if SLURMCaller.status is None:
+            SLURMCaller.status = Status(self.user_id)
 
         # Generated job id
         self.job_id: str = SLURMCaller.FAILED_ID
@@ -85,7 +104,7 @@ class SLURMCaller:
 
         :return: Task still running (true) or has completed/failed to start (false)
         """
-        return self.running and self.job_id in str(local["squeue"]["-u", self.user_id]())
+        return self.running and SLURMCaller.status.check_status(self.job_id)
 
     def _has_launched(self, log_line: str) -> bool:
         """ Parse output from sbatch to see if job id was adequately created
