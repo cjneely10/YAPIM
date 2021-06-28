@@ -13,19 +13,18 @@ class SlurmStatus:
         self._time_interval = time_interval_in_minutes
 
     def _set_status(self):
-        self._time_last_checked = datetime.now()
-        self._status_message = str(local["squeue"]["-u", self._user_id]())
+        with self.lock:
+            self._time_last_checked = datetime.now()
+            self._status_message = str(local["squeue"]["-u", self._user_id]())
 
     def update(self):
-        with self.lock:
-            self._set_status()
+        self._set_status()
 
     def check_status(self, job_id: str) -> bool:
-        with self.lock:
-            if self._status_message is None:
+        if self._status_message is None:
+            self._set_status()
+        else:
+            current_time = datetime.now()
+            if current_time - self._time_last_checked > timedelta(minutes=self._time_interval):
                 self._set_status()
-            else:
-                current_time = datetime.now()
-                if current_time - self._time_last_checked > timedelta(minutes=self._time_interval):
-                    self._set_status()
-            return job_id in self._status_message
+        return job_id in self._status_message

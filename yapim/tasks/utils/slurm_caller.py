@@ -185,10 +185,8 @@ class SLURMCaller:
         :param kwargs: Any kwargs passed
         """
         self._launch_script()
-        print("Job started")
         while self._is_running():
             sleep(60)  # Wait 1 minute in between checking if still running
-        print("Job completed")
         slurm_file = Path("slurm-%s.out" % self.job_id)
         if slurm_file.exists():
             _file = "\n".join(open(slurm_file, "r").readlines())
