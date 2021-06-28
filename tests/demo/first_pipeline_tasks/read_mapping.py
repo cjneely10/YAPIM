@@ -31,7 +31,7 @@ class MapBackReads(Task):
             ]
         )
         # Map to input BAM files
-        half_threads = str(int(self.threads) // 2)
+        half_threads = int(self.threads) // 2
         self.parallel(
             self.program[
                 "-t", half_threads,

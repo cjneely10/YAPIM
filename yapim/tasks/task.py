@@ -137,7 +137,16 @@ class Task(BaseTask, ABC):
 
         :return: List of arguments to pass to calling program
         """
-        flags = self.config_manager.find(self.full_name, ConfigManager.FLAGS)
+        return self.flags_to_list(ConfigManager.FLAGS)
+
+    def flags_to_list(self, config_param: str):
+        """ Get additional flags from given section, parsed to list
+
+        Example: self.local["ls"][(*self.added_flags("ls"))]
+
+        :return: List of arguments to pass to calling program
+        """
+        flags = self.config_manager.find(self.full_name, config_param)
         if flags is not None:
             out = flags.split(" ")
             while "" in out:

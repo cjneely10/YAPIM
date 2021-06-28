@@ -32,7 +32,7 @@ class Assemble(Task):
                 "-2", self.input["TrimReads"]["PE2"],
                 (*self.added_flags),
                 "-t", self.threads,
-                "-m", str(round(int(self.memory) * 1E9)),
+                "-m", round(int(self.memory) * 1E9),
                 "-o", out_dir
             ]
         )
