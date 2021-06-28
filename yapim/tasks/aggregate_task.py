@@ -49,11 +49,11 @@ class AggregateTask(Task, ABC):
             output = task.output
         else:
             output.update(result)
-        keys = set(output.keys())
         for key, value in output.items():
             if key in class_results.keys():
                 class_results[key][result.task_name] = value
         if output is not None:
+            keys = set(output.keys())
             to_remove = []
             for key in class_results.keys():
                 if key not in keys:
