@@ -1,6 +1,6 @@
 from typing import List, Union, Type
 
-from yapim import Task, DependencyInput
+from yapim import Task, DependencyInput, VersionInfo
 
 
 class IdentifyProteins(Task):
@@ -12,9 +12,13 @@ class IdentifyProteins(Task):
             "final": ["proteins", "fasta"]
         }
 
+    # Error: prodigal has first line as empty, stdout not catching subsequent version info
+    # def versions(self) -> List[VersionInfo]:
+    #     return [VersionInfo(calling_parameter="-v", version="2.6.3")]
+
     @staticmethod
     def requires() -> List[Union[str, Type]]:
-        return ["Bin"]
+        return ["QualityCheck"]
 
     @staticmethod
     def depends() -> List[DependencyInput]:

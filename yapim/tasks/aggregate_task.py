@@ -43,6 +43,7 @@ class AggregateTask(Task, ABC):
     def finalize(obj_results: dict, class_results: dict, task: "AggregateTask", result: TaskResult) -> dict:
         output = task.deaggregate()
         if task.remap_results:
+            output[result.task_name] = task.output
             return output
         if not isinstance(output, dict):
             output = task.output
