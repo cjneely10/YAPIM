@@ -15,6 +15,7 @@ class SlurmStatus:
         print("Updating SLURM status")
         self._time_last_checked = datetime.now()
         self._status_message = str(local["squeue"]["-u", self._user_id]())
+        print(self._status_message)
 
     def check_status(self, job_id: str) -> bool:
         with self.lock:
