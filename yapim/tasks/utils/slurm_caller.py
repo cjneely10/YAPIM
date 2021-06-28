@@ -25,7 +25,7 @@ class SLURMCaller:
     """
     OUTPUT_SCRIPTS = "slurm-runner.sh"
     FAILED_ID = "failed-job-id"
-    status = None
+    status: Optional[SlurmStatus] = None
 
     def __init__(self,
                  cmd: Union[LocalCommand, str, List[Union[LocalCommand, str]]],
@@ -98,6 +98,7 @@ class SLURMCaller:
         """
         try:
             self.job_id = str(int(log_line))
+            SLURMCaller.status.update()
         except ValueError:
             return False
         return True
