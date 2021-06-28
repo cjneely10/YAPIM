@@ -130,9 +130,9 @@ class TaskChainDistributor(dict):
                 with TaskChainDistributor.update_lock:
                     total_memory = projected_memory + TaskChainDistributor.current_gb_memory_in_use_count
                     total_threads = projected_threads + TaskChainDistributor.current_threads_in_use_count
-            with TaskChainDistributor.update_lock:
-                TaskChainDistributor.current_threads_in_use_count = total_threads
-                TaskChainDistributor.current_gb_memory_in_use_count = total_memory
+        with TaskChainDistributor.update_lock:
+            TaskChainDistributor.current_threads_in_use_count = total_threads
+            TaskChainDistributor.current_gb_memory_in_use_count = total_memory
 
     @staticmethod
     def _release_resources(projected_threads: int, projected_memory: int):
