@@ -16,6 +16,10 @@ class SlurmStatus:
         self._time_last_checked = datetime.now()
         self._status_message = str(local["squeue"]["-u", self._user_id]())
 
+    def update(self):
+        with self.lock:
+            self._set_status()
+
     def check_status(self, job_id: str) -> bool:
         with self.lock:
             if self._status_message is None:

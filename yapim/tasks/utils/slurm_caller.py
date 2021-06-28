@@ -1,7 +1,6 @@
 """
 Module holds logic for running a dask distributed task within a SLURM job
 """
-import datetime
 import os
 from pathlib import Path
 from time import sleep
