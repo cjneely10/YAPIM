@@ -35,11 +35,7 @@ TrimReads:
   time: "4:00:00"
   program: trimmomatic
   TRIM_FLAGS:
-    "ILLUMINACLIP:TruSeq3-PE.fa:2:30:10"
-    "LEADING:3"
-    "TRAILING:3"
-    "SLIDINGWINDOW:4:15"
-    "MINLEN:36"
+    "ILLUMINACLIP:TruSeq3-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36"
 
 Assemble:
   # Number of threads task will use
