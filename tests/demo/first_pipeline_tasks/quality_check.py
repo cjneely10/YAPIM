@@ -20,6 +20,7 @@ class QualityCheck(AggregateTask):
         }
 
     def filter_results(self):
+        min_quality = float(self.config["min_quality"])
         with open(self.wdir.joinpath("task.log")) as log_file_ptr:
             line = next(log_file_ptr)
             while "Bin Id" not in line:
@@ -28,7 +29,7 @@ class QualityCheck(AggregateTask):
             for line in log_file_ptr:
                 line = line.split()
                 completeness = float(line[-3])
-                if completeness < 5.0:
+                if completeness < min_quality:
                     return
                 yield line[0]
 

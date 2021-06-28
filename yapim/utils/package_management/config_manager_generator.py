@@ -18,10 +18,6 @@ class ConfigManagerGenerator:
             file_ptr.write("""---  # document start
 
 ###########################################
-## Pipeline input section
-INPUT:
-  root: all
-
 ## Global settings
 GLOBAL:
   # Maximum threads/cpus to use in analysis
@@ -30,7 +26,7 @@ GLOBAL:
   MaxMemory: 100
 
 ###########################################
-
+## SLURM run settings
 SLURM:
   ## Set to True if using SLURM
   USE_CLUSTER: false
@@ -40,6 +36,13 @@ SLURM:
   --qos: unlim
   --job-name: EukMS
   user-id: uid
+
+###########################################
+## Pipeline input section
+INPUT:
+  root: all
+
+###########################################
 
 """)
             task_node: Node
