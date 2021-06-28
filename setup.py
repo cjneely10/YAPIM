@@ -13,7 +13,7 @@ setup(
     install_requires=[
         "bcbio-gff>=0.6.6",
         "biopython>=1.76",
-        "plumbum>=1.6.6",
+        "plumbum==1.6.6",
         "networkx==2.2",
         "pyyaml>=5.3.1",
         "art>=5.1",

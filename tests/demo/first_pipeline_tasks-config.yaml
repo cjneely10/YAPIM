@@ -73,6 +73,8 @@ Bin:
   program: vamb
   FLAGS:
     --minfasta 1000
+    -z 0.95
+    -s 30
 
 QualityCheck:
   # Number of threads task will use
