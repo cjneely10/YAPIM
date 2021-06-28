@@ -184,11 +184,14 @@ class SLURMCaller:
         :param args: Any args passed
         :param kwargs: Any kwargs passed
         """
+        # Launch and acquire job id
         self._launch_script()
-        sleep(47 + random.randint(1, 11))  # Wait 1 minute in between checking if still running
+        # First wait
+        sleep(17 + random.randint(1, 11))  # Wait 1 minute in between checking if still running
+        # Check for running status
         while self._is_running():
             print(f"{self.task.name} waiting for {self.task.record_id}")
-            sleep(47 + random.randint(1, 11))  # Wait 1 minute in between checking if still running
+            sleep(17 + random.randint(1, 11))  # Wait 1 minute in between checking if still running
         slurm_file = Path("slurm-%s.out" % self.job_id)
         if slurm_file.exists():
             _file = "\n".join(open(slurm_file, "r").readlines())
