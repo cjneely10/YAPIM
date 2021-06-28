@@ -76,7 +76,7 @@ class SLURMCaller:
         """
         # Call script using sbatch
         log_line = str(local["sbatch"][self.script]()).split()
-        print(log_line)
+        print("resp", log_line)
         # If no output to stdout/err, return
         if len(log_line) == 0:
             return
