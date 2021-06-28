@@ -5,12 +5,11 @@ from plumbum import local
 
 
 class SlurmStatus:
-    def __init__(self, user_id: str, time_interval_in_minutes: int):
+    def __init__(self, user_id: str):
         self.lock = threading.Lock()
         self._user_id = user_id
         self._time_last_checked = None
         self._status_message = None
-        self._time_interval = time_interval_in_minutes
 
     def _set_status(self):
         with self.lock:
@@ -25,6 +24,6 @@ class SlurmStatus:
             self._set_status()
         else:
             current_time = datetime.now()
-            if current_time - self._time_last_checked > timedelta(minutes=self._time_interval):
+            if current_time - self._time_last_checked > timedelta(minutes=1):
                 self._set_status()
         return job_id in self._status_message
