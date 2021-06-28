@@ -13,6 +13,7 @@ class SlurmStatus:
 
     def _set_status(self):
         with self.lock:
+            print("Updating SLURM status")
             self._time_last_checked = datetime.now()
             self._status_message = str(local["squeue"]["-u", self._user_id]())
 

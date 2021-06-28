@@ -186,6 +186,7 @@ class SLURMCaller:
         """
         self._launch_script()
         while self._is_running():
+            print(f"{self.task.name} waiting")
             sleep(47)  # Wait 1 minute in between checking if still running
         slurm_file = Path("slurm-%s.out" % self.job_id)
         if slurm_file.exists():
