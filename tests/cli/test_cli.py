@@ -31,7 +31,7 @@ class TestCLI(unittest.TestCase):
         for record_id in os.listdir(results_location):
             if record_id in deleted_ids:
                 raise ValueError(f"Deleted id {record_id} is still present!")
-        storage_location = output_directory.joinpath(ConfigManager.STORAGE_DIR)
+        storage_location = output_directory.joinpath(PathManager.STORAGE_DIR)
         for record_id in deleted_ids:
             if len(glob.glob(str(storage_location.joinpath(record_id)) + "*")) > 0:
                 raise ValueError(f"Deleted id {record_id} is still present!")

@@ -75,7 +75,6 @@ class ConfigManager:
     """ ConfigManager handles parsing user-passed config file
 
     """
-    EXPECTED_RESULTS_DIR = "results"
     ROOT = "root"
     SLURM = "SLURM"
     SBATCH = "SBATCH"
@@ -87,18 +86,15 @@ class ConfigManager:
     WORKERS = "workers"
     MEMORY = "memory"
     TIME = "time"
-    PROTOCOL = "protocol"
     USE_CLUSTER = "USE_CLUSTER"
     DEPENDENCIES = "dependencies"
     PROGRAM = "program"
     FLAGS = "FLAGS"
     DATA = "data"
-    BASE = "base"
     SKIP = "skip"
     MAX_THREADS = "MaxThreads"
     MAX_MEMORY = "MaxMemory"
     GLOBAL = "GLOBAL"
-    STORAGE_DIR = "input"
 
     def __init__(self, config_path: Path):
         """ Create ConfigManager object

@@ -54,6 +54,6 @@ class DirectoryCleaner:
                     task_path = self.output_directory.joinpath(PathManager.RESULTS).joinpath("*").joinpath(record_id)
                     futures.append(executor.submit(DirectoryCleaner._rm_glob, task_path))
                     # Remove input file
-                    task_path = self.output_directory.joinpath(ConfigManager.STORAGE_DIR).joinpath(record_id + "*")
+                    task_path = self.output_directory.joinpath(PathManager.STORAGE_DIR).joinpath(record_id + "*")
                     futures.append(executor.submit(DirectoryCleaner._rm_glob, task_path))
             wait(futures)

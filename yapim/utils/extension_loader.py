@@ -5,8 +5,8 @@ from typing import Dict, Tuple, Optional, Callable
 
 from Bio import SeqIO
 
-from yapim.utils.config_manager import ConfigManager
 from yapim.utils.input_loader import InputLoader
+from yapim.utils.path_manager import PathManager
 
 
 class ExtensionLoader(InputLoader):
@@ -26,7 +26,7 @@ class ExtensionLoader(InputLoader):
         self.extension_mapping = {}
         self._expand_convenience_mapping(mapping)
         self.directory = directory
-        self.write_directory = write_dir.joinpath(ConfigManager.STORAGE_DIR)
+        self.write_directory = write_dir.joinpath(PathManager.STORAGE_DIR)
         if not self.write_directory.exists():
             os.makedirs(self.write_directory)
 
