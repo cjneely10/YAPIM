@@ -43,7 +43,7 @@ class SLURMCaller:
         self.user_id = self.config_manager.get_slurm_userid()
         self.time_override = time_override
         if SLURMCaller.status is None:
-            SLURMCaller.status = SlurmStatus(self.user_id, 1)
+            SLURMCaller.status = SlurmStatus(self.user_id)
 
         # Generated job id
         self.job_id: str = SLURMCaller.FAILED_ID
