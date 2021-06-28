@@ -24,22 +24,35 @@ class ComplexInputType:
         return f"{sum(self.data)}"
 
 
+class ImproperComplexInputType:
+    def __init__(self, i: int):
+        self.data = []
+        for _ in range(i):
+            self.data.append(1)
+
+
 class TestExecutor(unittest.TestCase):
     file = Path(os.path.dirname(__file__)).resolve()
 
-    class SimpleLoader(InputLoader):
-        def __init__(self, n: int):
+    class Loader(InputLoader):
+        def __init__(self, creation_type: type, n: int):
             self.n = n
+            self.type = creation_type
 
         def load(self) -> Dict[str, Dict]:
-            return {str(i): {} for i in range(self.n)}
+            return {self.type(i): {} for i in range(self.n)}
 
-    class ComplexLoader(InputLoader):
+    class SimpleLoader(Loader):
         def __init__(self, n: int):
-            self.n = n
+            super().__init__(str, n)
 
-        def load(self) -> Dict[str, Dict]:
-            return {ComplexInputType(i): {} for i in range(self.n)}
+    class ComplexLoader(Loader):
+        def __init__(self, n: int):
+            super().__init__(ComplexInputType, n)
+
+    class ImproperComplexLoader(Loader):
+        def __init__(self, n: int):
+            super().__init__(ImproperComplexInputType, n)
 
     def test_simple(self):
         Executor(
@@ -63,6 +76,17 @@ class TestExecutor(unittest.TestCase):
             [Path("simple/sample_dependencies")],  # List of relative paths to dependency directories,
             # display_status_messages=False  # Silence status messages
         ).run()
+
+    def test_improper_complex_type(self):
+        with self.assertRaises(AttributeError):
+            Executor(
+                TestExecutor.ImproperComplexLoader(10),  # Input loader
+                TestExecutor.file.joinpath("simple/sample-config.yaml"),  # Config file path
+                TestExecutor.file.joinpath("simple-out"),  # Base output dir path
+                Path("simple/sample_tasks1"),  # Relative path to pipeline directory
+                [Path("simple/sample_dependencies")],  # List of relative paths to dependency directories,
+                # display_status_messages=False  # Silence status messages
+            ).run()
 
     def test_fasta(self):
         out_dir = TestExecutor.file.joinpath("fasta-out")
