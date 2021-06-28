@@ -25,6 +25,6 @@ class SlurmStatus:
             self._set_status()
         else:
             current_time = datetime.now()
-            if current_time - self._time_last_checked > timedelta(minutes=1):
+            if current_time - self._time_last_checked > timedelta(seconds=30):
                 self._set_status()
         return job_id in self._status_message

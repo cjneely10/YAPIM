@@ -99,7 +99,6 @@ class SLURMCaller:
         """
         try:
             self.job_id = str(int(log_line))
-            SLURMCaller.status.update()
         except ValueError:
             return False
         return True
