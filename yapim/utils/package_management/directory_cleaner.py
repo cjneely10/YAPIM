@@ -5,7 +5,6 @@ from concurrent.futures import ThreadPoolExecutor, wait
 from pathlib import Path
 from typing import List
 
-from yapim.utils.config_manager import ConfigManager
 from yapim.utils.dependency_graph import DependencyGraph
 from yapim.utils.package_management.package_loader import PackageLoader
 from yapim.utils.path_manager import PathManager
