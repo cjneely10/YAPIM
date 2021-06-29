@@ -109,19 +109,19 @@ class TaskChainDistributor(dict):
         # TODO: This may be problematic...
         projected_memory = int(self.config_manager.find(task.full_name, ConfigManager.MEMORY))
         projected_threads = int(self.config_manager.find(task.full_name, ConfigManager.THREADS))
-        with TaskChainDistributor.update_lock:
-            total_memory = projected_memory + TaskChainDistributor.current_gb_memory_in_use_count
-            total_threads = projected_threads + TaskChainDistributor.current_threads_in_use_count
         with TaskChainDistributor.awaiting_resources:
+            with TaskChainDistributor.update_lock:
+                total_memory = projected_memory + TaskChainDistributor.current_gb_memory_in_use_count
+                total_threads = projected_threads + TaskChainDistributor.current_threads_in_use_count
             while total_threads > TaskChainDistributor.maximum_threads or \
                     total_memory > TaskChainDistributor.maximum_gb_memory:
                 TaskChainDistributor.awaiting_resources.wait()
                 with TaskChainDistributor.update_lock:
                     total_memory = projected_memory + TaskChainDistributor.current_gb_memory_in_use_count
                     total_threads = projected_threads + TaskChainDistributor.current_threads_in_use_count
-        with TaskChainDistributor.update_lock:
-            TaskChainDistributor.current_threads_in_use_count = total_threads
-            TaskChainDistributor.current_gb_memory_in_use_count = total_memory
+            with TaskChainDistributor.update_lock:
+                TaskChainDistributor.current_threads_in_use_count = total_threads
+                TaskChainDistributor.current_gb_memory_in_use_count = total_memory
 
         try:
             self._finalize_output(task, task.run_task())
@@ -142,6 +142,7 @@ class TaskChainDistributor(dict):
         with TaskChainDistributor.update_lock:
             if result.record_id not in TaskChainDistributor.results.keys():
                 TaskChainDistributor.results[result.record_id] = {}
+                # TODO: Manage memory better (write tasks as they complete, reload for AggregateTasks)
                 TaskChainDistributor.output_data_to_pickle[result.record_id] = {}
         if not isinstance(task, AggregateTask):
             with TaskChainDistributor.update_lock:

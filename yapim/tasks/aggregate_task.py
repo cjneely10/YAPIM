@@ -19,13 +19,13 @@ class AggregateTask(Task, ABC):
         self.input = InputDict(input_data)
         self._remap_results = False
 
-    def input_ids(self) -> KeysView:
+    def input_ids(self) -> KeysView:  # pragma: no cover
         return self.input.keys()
 
-    def input_values(self) -> ValuesView:
+    def input_values(self) -> ValuesView:  # pragma: no cover
         return self.input.values()
 
-    def input_items(self) -> ItemsView:
+    def input_items(self) -> ItemsView:  # pragma: no cover
         return self.input.items()
 
     def remap(self):

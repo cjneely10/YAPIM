@@ -36,7 +36,7 @@ class DirectoryCleaner:
                 _task_names = DependencyGraph(pipeline_tasks, task_blueprints).get_affected_nodes(task_name)
                 for _task_name in _task_names:
                     print(f"Removing {_task_name}")
-                    task_path = self.output_directory.joinpath(PathManager.WDIR).joinpath("*").joinpath(_task_name)
+                    task_path = self.output_directory.joinpath(PathManager.WDIR).joinpath("*").joinpath(_task_name + "*")
                     futures.append(executor.submit(DirectoryCleaner._rm_glob, task_path))
                 wait(futures)
 
