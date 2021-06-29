@@ -76,7 +76,6 @@ class SLURMCaller:
         """
         # Call script using sbatch
         log_line = str(local["sbatch"][self.script]()).split()
-        print("resp", log_line)
         # If no output to stdout/err, return
         if len(log_line) == 0:
             return
@@ -187,12 +186,10 @@ class SLURMCaller:
         """
         # Launch and acquire job id
         self._launch_script()
-        # First wait
-        sleep(17 + random.randint(1, 11))  # Wait 1 minute in between checking if still running
+        SLURMCaller.status.update()
         # Check for running status
         while self._is_running():
-            print(f"{self.task.name} waiting for {self.task.record_id}")
-            sleep(17 + random.randint(1, 11))  # Wait 1 minute in between checking if still running
+            sleep(47 + random.randint(1, 11))  # Wait 1 minute in between checking if still running
         slurm_file = Path("slurm-%s.out" % self.job_id)
         if slurm_file.exists():
             _file = "\n".join(open(slurm_file, "r").readlines())

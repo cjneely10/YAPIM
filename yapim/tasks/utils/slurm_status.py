@@ -12,10 +12,12 @@ class SlurmStatus:
         self._status_message = None
 
     def _set_status(self):
-        print("Updating SLURM status")
         self._time_last_checked = datetime.now()
         self._status_message = str(local["squeue"]["-u", self._user_id]())
-        print(self._status_message)
+
+    def update(self):
+        with self.lock:
+            self._set_status()
 
     def check_status(self, job_id: str) -> bool:
         with self.lock:
@@ -23,6 +25,6 @@ class SlurmStatus:
                 self._set_status()
             else:
                 current_time = datetime.now()
-                if current_time - self._time_last_checked > timedelta(seconds=10):
+                if current_time - self._time_last_checked > timedelta(seconds=45):
                     self._set_status()
             return job_id in self._status_message
