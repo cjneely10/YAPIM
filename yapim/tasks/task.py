@@ -31,6 +31,7 @@ class TaskExecutionError(RuntimeError):
     """
 
 
+# TODO: Parser to identify illegal self.input accesses and prevent pipeline launch at start time
 class Task(BaseTask, ABC):
     print_lock = threading.Lock()
 
