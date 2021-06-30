@@ -143,6 +143,7 @@ class TaskChainDistributor(dict):
             if result.record_id not in TaskChainDistributor.results.keys():
                 TaskChainDistributor.results[result.record_id] = {}
                 # TODO: Manage memory better (write tasks as they complete, reload for AggregateTasks)
+                # TODO: https://docs.h5py.org/en/stable/index.html
                 TaskChainDistributor.output_data_to_pickle[result.record_id] = {}
         if not isinstance(task, AggregateTask):
             with TaskChainDistributor.update_lock:

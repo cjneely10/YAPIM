@@ -32,6 +32,7 @@ class TaskExecutionError(RuntimeError):
 
 
 # TODO: Parser to identify illegal self.input accesses and prevent pipeline launch at start time
+# TODO: https://stackoverflow.com/questions/43166571/getting-all-the-nodes-from-python-ast-that-correspond-to-a-particular-variable-w
 class Task(BaseTask, ABC):
     print_lock = threading.Lock()
 

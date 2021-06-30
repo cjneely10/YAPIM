@@ -40,6 +40,5 @@ class RMaskRMOut(Task):
         self.single(
             (self.program[
                  self.input["RMaskProcessRepeats"]["rmout"]
-             ] > str(self.output["mask-gff3"])),
-            "1:00:00"
+             ] > str(self.output["mask-gff3"]))
         )
