@@ -7,7 +7,8 @@ class MMSeqs(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {
-            "results": self.input["MMSeqsConvertAlis"]["results_files"][0],
+            **{"results": self.input["MMSeqsConvertAlis"]["results_files"][i]
+               for i in range(len(self.input["MMSeqsConvertAlis"]["results_files"]))},
             "final": ["results"]
         }
 
