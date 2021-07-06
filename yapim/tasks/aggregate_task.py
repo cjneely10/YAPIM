@@ -41,26 +41,34 @@ class AggregateTask(Task, ABC):
 
     @staticmethod
     def finalize(obj_results: dict, class_results: dict, task: "AggregateTask", result: TaskResult) -> dict:
+        # Rule: If deaggregate is not defined, simply collect AggTask result into class_results
+        # Rule: If defined and remap results, update deagg results with AggTask results and return
+        # Rule: If defined and not remap, update all input items as class_results[record_id][aggtask.name] = deagg(),
+        #       and remove any ids that are not present
         output = task.deaggregate()
+        if output is None:
+            class_results[result.task_name] = result
+            return class_results
         if task._remap_results:
             output[result.task_name] = task.output
             return output
-        if not isinstance(output, dict):
-            output = task.output
-        else:
-            output.update(result)
-        for key, value in output.items():
-            if key in class_results.keys():
-                class_results[key][result.task_name] = value
-        if output is not None:
-            keys = set(output.keys())
-            to_remove = []
-            for key in class_results.keys():
-                if key not in keys:
-                    to_remove.append(key)
-            for key in to_remove:
-                del class_results[key]
+        # if not isinstance(output, dict):
+        #     output = task.output
+        # else:
+        #     output.update(result)
         class_results[result.task_name] = result
+        for key, value in output.items():
+            # if key in class_results.keys():
+            class_results[key][result.task_name] = value
+        # if output is not None:
+        keys = set(output.keys())
+        to_remove = []
+        for key in class_results.keys():
+            if key not in keys:
+                to_remove.append(key)
+        for key in to_remove:
+            del class_results[key]
+        # class_results[result.task_name] = result
         return class_results
 
     def has_run(self, task_name: str, record_id: Optional[str] = None) -> bool:

@@ -184,7 +184,7 @@ class ConfigManager:
             if ConfigManager.SKIP in task_dict.keys() and task_dict[ConfigManager.SKIP] is True:
                 continue
             if ConfigManager.DATA in task_dict.keys():
-                for _val in task_dict[ConfigManager.DATA].split(","):
+                for _val in ConfigManager._parse_flags(task_dict[ConfigManager.DATA]):
                     if ":" in _val:
                         _val = _val.split(":")[1]
                     if not os.path.exists(str(Path(_val).resolve())):
@@ -247,3 +247,23 @@ class ConfigManager:
         if "user-id" not in self.config["SLURM"].keys():
             raise MissingDataError("SLURM section missing required user data")
         return self.config["SLURM"]["user-id"]
+
+    @staticmethod
+    def flags_to_list(cfg_manager: "ConfigManager", task, config_param: str):
+        """ Get additional flags from given section, parsed to list
+
+        Example: self.local["ls"][(*self.added_flags("ls"))]
+
+        :return: List of arguments to pass to calling program
+        """
+        flags = cfg_manager.find(task.full_name, config_param)
+        return ConfigManager._parse_flags(flags)
+
+    @staticmethod
+    def _parse_flags(flags):
+        if flags is not None:
+            out = flags.split(" ")
+            while "" in out:
+                out.remove("")
+            return out
+        return []

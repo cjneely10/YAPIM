@@ -148,13 +148,7 @@ class Task(BaseTask, ABC):
 
         :return: List of arguments to pass to calling program
         """
-        flags = self.config_manager.find(self.full_name, config_param)
-        if flags is not None:
-            out = flags.split(" ")
-            while "" in out:
-                out.remove("")
-            return out
-        return []
+        return ConfigManager.flags_to_list(self.config_manager, self, config_param)
 
     @property
     def is_slurm(self) -> bool:
