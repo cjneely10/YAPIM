@@ -10,6 +10,8 @@ from typing import List, Tuple, Dict, Optional
 import yaml
 from plumbum import local, CommandNotFound
 
+from yapim import InputLoader
+
 
 class InvalidResourcesError(AttributeError):
     """ When a task requests more resources than are globally available
@@ -96,7 +98,7 @@ class ConfigManager:
     MAX_MEMORY = "MaxMemory"
     GLOBAL = "GLOBAL"
 
-    def __init__(self, config_path: Path):
+    def __init__(self, config_path: Path, input_loader: InputLoader):
         """ Create ConfigManager object
 
         :param config_path: Path to .yaml config file
@@ -105,6 +107,7 @@ class ConfigManager:
             self.config = yaml.load(fp, Loader=yaml.FullLoader)
             # Confirm all paths in file are valid
             self._validate_global()
+        self.storage_directory = input_loader.storage_directory()
 
     def get(self, task_data: Tuple[str, str]) -> dict:
         """ Get (scope, name) data from config file

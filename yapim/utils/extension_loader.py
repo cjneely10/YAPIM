@@ -30,6 +30,9 @@ class ExtensionLoader(InputLoader):
         if not self.write_directory.exists():
             os.makedirs(self.write_directory)
 
+    def storage_directory(self):
+        return self.write_directory
+
     def _expand_convenience_mapping(self, mapping: Dict):
         for key_tuple, value_tuple in mapping.items():
             for key in key_tuple:

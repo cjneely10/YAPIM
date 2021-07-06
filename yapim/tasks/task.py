@@ -6,7 +6,7 @@ import time
 import traceback
 from abc import ABC
 from pathlib import Path
-from typing import Tuple, List, Union, Optional
+from typing import Tuple, List, Union, Optional, Callable
 
 from plumbum import local, colors, ProcessExecutionError
 from plumbum.machines import LocalMachine, LocalCommand
@@ -33,11 +33,14 @@ class TaskExecutionError(RuntimeError):
 
 
 def clean(directory: Union[Path, str]):
-    def fxn(self):
-        out_dir = self.wdir.joinpath(directory)
-        if out_dir.exists():
-            shutil.rmtree(out_dir)
-    return fxn
+    def method(func: Callable):
+        def fxn(self):
+            out_dir = self.wdir.joinpath(directory)
+            if out_dir.exists():
+                shutil.rmtree(out_dir)
+            func(self)
+        return fxn
+    return method
 
 
 # TODO: Parser to identify illegal self.input accesses and prevent pipeline launch at start time
@@ -119,6 +122,10 @@ class Task(BaseTask, ABC):
 
     def task_scope(self) -> str:
         return self._task_scope
+
+    @property
+    def storage_directory(self) -> Path:
+        return self.config_manager.storage_directory
 
     @property
     def threads(self) -> str:

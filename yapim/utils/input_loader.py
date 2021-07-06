@@ -13,6 +13,14 @@ class InputLoader(ABC):
         :rtype:
         """
 
+    @abstractmethod
+    def storage_directory(self):
+        """
+
+        :return:
+        :rtype:
+        """
+
     @staticmethod
     def load_pkl_data(pkl_file: Path) -> Dict[str, Dict]:
         """ Load a pkl result file into a dictionary. Useful for when populating input from completed pipelines

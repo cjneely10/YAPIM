@@ -1,4 +1,4 @@
-name: yapim-demo
+name: yapim-intermediate-demo
 channels:
   - bioconda
   - defaults
