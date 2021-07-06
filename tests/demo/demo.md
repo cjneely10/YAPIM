@@ -259,6 +259,30 @@ IdentifyProteins:
 ...  # document end
 ```
 
-This file represents the primary interface for users to modify calling parameters to your pipeline.
+This file represents the primary interface for users to modify calling parameters to your pipeline. For example, in the `GLOBAL` section, a user can set the maximum allowable threads and memory that this pipeline can use. Users may also set their `SLURM` user and partition settings, and can adjust the input to this pipeline.
+
+Let's fill in the section related to the class we just wrote:
+
+```yaml
+...
+IdentifyProteins:
+  # Number of threads task will use
+  threads: 1
+  # Amount of memory task will use (in GB)
+  memory: 8
+  time: "4:00:00"
+  program: prodigal
+  FLAGS:
+    -p single
+...
+```
+
+Here, we define the item `program` (which we had used in our implementation above), and we create a field to allow users to pass flags to this program.
 
 ------
+
+## Step 2: Perform quality analysis on each assembly
+
+------
+
+## Step 3: Annotate assemblies that passed quality filter
