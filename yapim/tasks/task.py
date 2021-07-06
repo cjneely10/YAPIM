@@ -32,14 +32,17 @@ class TaskExecutionError(RuntimeError):
     """
 
 
-def clean(directory: Union[Path, str]):
+def clean(*directories: Union[Path, str]):
     def method(func: Callable):
         def fxn(self):
-            out_dir = self.wdir.joinpath(directory)
-            if out_dir.exists():
-                shutil.rmtree(out_dir)
-            func(self)
+            for directory in directories:
+                out_dir = self.wdir.joinpath(directory)
+                if out_dir.exists():
+                    shutil.rmtree(out_dir)
+                func(self)
+
         return fxn
+
     return method
 
 

@@ -38,15 +38,20 @@ class QualityCheck(AggregateTask):
     def depends() -> List[DependencyInput]:
         pass
 
-    @clean("out")
+    @clean("tmp", "out")
     def run(self):
+        combined_dir = str(self.wdir.joinpath("tmp"))
+        self.local["mkdir"][combined_dir]()
+        for record_data in self.input_values():
+            self.local["cp"][record_data["IdentifyProteins"]["proteins"], combined_dir + "/"]()
         self.parallel(
             self.program[
                 "lineage_wf",
                 "-t", self.threads,
                 "-x", "faa",
                 "--genes",
-                self.storage_directory,
+                combined_dir,
                 self.output["outdir"]
             ]
         )
+        self.local["rm"]["-r", combined_dir]()
