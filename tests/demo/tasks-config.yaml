@@ -48,14 +48,17 @@ QualityCheck:
 
 Annotate:
   # Number of threads task will use
-  threads: 10
+  threads: 5
   # Amount of memory task will use (in GB)
-  memory: 90
+  memory: 30
   time: "4:00:00"
   program: mmseqs
+  data:
+    /media/user/2TB/Data/mmseqs/pfam_db
   FLAGS:
     --cov-mode 0
     -s 5
     -c 0.3
+    --split-memory-limit 20G
 
 ...  # document end

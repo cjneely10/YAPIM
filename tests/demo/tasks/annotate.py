@@ -22,12 +22,12 @@ class Annotate(Task):
         self.parallel(
             self.program[
                 "easy-search",
-                self.input["IdentifyProteins"]["prot"],
+                self.input["IdentifyProteins"]["proteins"],
                 self.data[0],
                 self.output["result"],
                 self.wdir.joinpath("tmp"),
                 "--remove-tmp-files",
-                "-t", self.threads,
+                "--threads", self.threads,
                 (*self.added_flags),
             ]
         )

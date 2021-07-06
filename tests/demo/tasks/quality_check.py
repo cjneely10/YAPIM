@@ -24,6 +24,8 @@ class QualityCheck(AggregateTask):
                 line = next(log_file_ptr)
             next(log_file_ptr)
             for line in log_file_ptr:
+                if line.startswith("-"):
+                    return
                 line = line.split()
                 completeness = float(line[-3])
                 if completeness < min_quality:
@@ -44,6 +46,7 @@ class QualityCheck(AggregateTask):
         self.local["mkdir"][combined_dir]()
         for record_data in self.input_values():
             self.local["cp"][record_data["IdentifyProteins"]["proteins"], combined_dir + "/"]()
+
         self.parallel(
             self.program[
                 "lineage_wf",
@@ -54,4 +57,5 @@ class QualityCheck(AggregateTask):
                 self.output["outdir"]
             ]
         )
+
         self.local["rm"]["-r", combined_dir]()
