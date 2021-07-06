@@ -6,10 +6,14 @@ from yapim import Task, DependencyInput
 class MMSeqs(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        final = []
+        output = {}
+        for i in range(len(self.input["MMSeqsConvertAlis"]["results_files"])):
+            final.append(f"results{i}")
+            output[f"results{i}"] = self.input["MMSeqsConvertAlis"]["results_files"][i]
         self.output = {
-            **{"results": self.input["MMSeqsConvertAlis"]["results_files"][i]
-               for i in range(len(self.input["MMSeqsConvertAlis"]["results_files"]))},
-            "final": ["results"]
+            **output,
+            "final": final
         }
 
     @staticmethod
