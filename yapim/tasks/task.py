@@ -39,7 +39,7 @@ def clean(*directories: Union[Path, str]):
                 out_dir = self.wdir.joinpath(directory)
                 if out_dir.exists():
                     shutil.rmtree(out_dir)
-                func(self)
+            func(self)
 
         return fxn
 

@@ -38,7 +38,7 @@ class QualityCheck(AggregateTask):
     def depends() -> List[DependencyInput]:
         pass
 
-    @clean("tmp", "out")
+    @clean("tmp")
     def run(self):
         combined_dir = str(self.wdir.joinpath("tmp"))
         self.local["mkdir"][combined_dir]()
