@@ -44,7 +44,7 @@ QualityCheck:
   memory: 90
   time: "4:00:00"
   program: checkm
-  min_quality: 5.0
+  min_quality: 99.0
 
 Annotate:
   # Number of threads task will use

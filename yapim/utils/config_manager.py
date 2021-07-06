@@ -10,8 +10,6 @@ from typing import List, Tuple, Dict, Optional
 import yaml
 from plumbum import local, CommandNotFound
 
-from yapim import InputLoader
-
 
 class InvalidResourcesError(AttributeError):
     """ When a task requests more resources than are globally available
@@ -98,7 +96,7 @@ class ConfigManager:
     MAX_MEMORY = "MaxMemory"
     GLOBAL = "GLOBAL"
 
-    def __init__(self, config_path: Path, input_loader: InputLoader):
+    def __init__(self, config_path: Path, storage_directory: Path):
         """ Create ConfigManager object
 
         :param config_path: Path to .yaml config file
@@ -107,7 +105,7 @@ class ConfigManager:
             self.config = yaml.load(fp, Loader=yaml.FullLoader)
             # Confirm all paths in file are valid
             self._validate_global()
-        self.storage_directory = input_loader.storage_directory()
+        self.storage_directory = storage_directory
 
     def get(self, task_data: Tuple[str, str]) -> dict:
         """ Get (scope, name) data from config file
@@ -237,7 +235,8 @@ class ConfigManager:
         """
         ignore_slurm_fields = {"USE_CLUSTER", "--nodes", "--ntasks", "--mem", "user-id"}
         slurm_section_data = {key: str(val)
-                              for key, val in self.config[ConfigManager.SLURM].items() if key not in ignore_slurm_fields}
+                              for key, val in self.config[ConfigManager.SLURM].items()
+                              if key not in ignore_slurm_fields}
         return sorted([(key, value) for key, value in slurm_section_data.items()], key=lambda v: v[0])
 
     def get_slurm_userid(self):

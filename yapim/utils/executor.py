@@ -42,7 +42,7 @@ class Executor:
         self.config_manager = None
         self.display_messages = display_status_messages
         try:
-            self.config_manager = ConfigManager(config_path)
+            self.config_manager = ConfigManager(config_path, input_data.storage_directory())
         # pylint: disable=broad-except
         except BaseException as e:
             print(e)
