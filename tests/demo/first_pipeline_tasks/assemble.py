@@ -1,7 +1,6 @@
-import shutil
 from typing import List, Union, Type
 
-from yapim import Task, DependencyInput, VersionInfo
+from yapim import Task, DependencyInput, VersionInfo, clean
 
 
 class Assemble(Task):
@@ -22,10 +21,8 @@ class Assemble(Task):
     def depends() -> List[DependencyInput]:
         pass
 
+    @clean("tmp")
     def run(self):
-        out_dir = self.wdir.joinpath("tmp")
-        if out_dir.exists():
-            shutil.rmtree(out_dir)
         self.parallel(
             self.program[
                 "-1", self.input["TrimReads"]["PE1"],
@@ -33,6 +30,6 @@ class Assemble(Task):
                 (*self.added_flags),
                 "-t", self.threads,
                 "-m", round(int(self.memory) * 1E9),
-                "-o", out_dir
+                "-o", self.wdir.joinpath("tmp")
             ]
         )

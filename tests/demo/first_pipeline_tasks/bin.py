@@ -1,8 +1,7 @@
 import os
-import shutil
 from typing import List, Union, Type
 
-from yapim import AggregateTask, DependencyInput, prefix
+from yapim import AggregateTask, DependencyInput, prefix, clean
 
 
 class Bin(AggregateTask):
@@ -29,10 +28,8 @@ class Bin(AggregateTask):
     def depends() -> List[DependencyInput]:
         pass
 
+    @clean("tmp")
     def run(self):
-        out_dir = self.wdir.joinpath("tmp")
-        if out_dir.exists():
-            shutil.rmtree(out_dir)
         bams = [
             self.input[key]["MapBackReads"]["bam"]
             for key in self.input_ids()
@@ -40,7 +37,7 @@ class Bin(AggregateTask):
         ]
         self.parallel(
             self.program[
-                "--outdir", out_dir,
+                "--outdir", self.wdir.joinpath("tmp"),
                 "--fasta", self.input["CatalogueReads"]["fasta_catalogue"],
                 "--bamfiles", (*bams),
                 "-o", "_",

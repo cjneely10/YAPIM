@@ -1,6 +1,6 @@
 from typing import List, Union, Type
 
-from yapim import Task, DependencyInput, VersionInfo
+from yapim import Task, DependencyInput
 
 
 class IdentifyProteins(Task):

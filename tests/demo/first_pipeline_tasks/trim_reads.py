@@ -1,7 +1,7 @@
 from typing import List, Union, Type
 
-from yapim import Task, VersionInfo
 from yapim import DependencyInput
+from yapim import Task, VersionInfo
 
 
 class TrimReads(Task):

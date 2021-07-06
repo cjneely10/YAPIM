@@ -44,7 +44,7 @@ class AggregateTask(Task, ABC):
         # Rule: If deaggregate is not defined, simply collect AggTask result into class_results
         # Rule: If defined and remap results, update deagg results with AggTask results and return
         # Rule: If defined and not remap, update all input items as class_results[record_id][aggtask.name] = deagg(),
-        #       and remove any ids that are not present
+        #       remove any ids that are not present, and add any ids that were not originally there
         output = task.deaggregate()
         if output is None:
             class_results[result.task_name] = result
@@ -58,7 +58,8 @@ class AggregateTask(Task, ABC):
         #     output.update(result)
         class_results[result.task_name] = result
         for key, value in output.items():
-            # if key in class_results.keys():
+            if key not in class_results.keys():
+                class_results[key] = {}
             class_results[key][result.task_name] = value
         # if output is not None:
         keys = set(output.keys())
