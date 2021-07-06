@@ -61,7 +61,10 @@ class Augustus(Task):
     def _finalize_output(self, out_gff: str):
         self._handle_config_output()
         # Rename final file
-        os.replace(out_gff, str(self.output["ab-gff3"]))
+        self.single(
+            self.local["gffread"][out_gff, "-o", str(self.output["ab-gff3"]), "-G"],
+            "5:00"
+        )
         touch(str(self.output["prot"]))
         self.single(
             self.local["gffread"][str(self.output["ab-gff3"]), "-y", self.output["prot"], "-g", self.input["fasta"]],
