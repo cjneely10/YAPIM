@@ -283,6 +283,8 @@ IdentifyProteins:
 
 This file represents the primary interface for users to modify calling parameters to your pipeline. For example, in the `GLOBAL` section, a user can set the maximum allowable threads and memory that this pipeline can use. Users may also set their `SLURM` user and partition settings, and can adjust the input to this pipeline.
 
+Users may also list the number of threads and amount of memory to provide to a particular `Task`. When running, YAPIM will automatically schedule its jobs to match resource limitations that are listed using `threads` and `memory`, so be sure these are accurate. This info is also used to launch SLURM jobs, if set.
+
 Let's fill in the section related to the class we just wrote:
 
 ```yaml
@@ -319,6 +321,20 @@ program: self.program  # Local program object
 ```
 
 In the final case, `self.program` returns to actual program to call, not just the string value (e.g. it returns `self.local[self.config["program"]]`).
+
+### Running the pipeline
+
+We may now run our pipeline on a set of genomes. For this demo, we have provided a set of genomes in the `data` folder enclosed in this demo's directory.
+
+Edit the top of the configuration file to provide settings that match your system. Set the `USE_CLUSTER` flag in the `SLURM` section if running on an HPC. 
+
+Run a YAPIM pipeline using the command:
+
+```shell
+yapim run -p tasks-pipeline -c tasks-pipeline/tasks-config.yaml -i ../data
+```
+
+This command will run our pipeline and, by default, generate output in the `out` directory.
 
 ------
 
@@ -615,3 +631,155 @@ class Annotate(Task):
         )
 ```
 
+------
+
+## Step 4: Running and testing our pipeline
+
+At this point, our project directory structure should resemble:
+
+```
+|--demo
+  |--tasks
+    |--annotate.py
+    |--quality_check.py
+    |--identify_proteins.py
+  |--tasks-pipeline
+```
+
+Let's regenerate our `tasks-pipeline` output:
+
+```shell
+yapim create -t tasks
+```
+
+If prompted, select `y` to overwrite the existing configuration file.
+
+This should re-create our pipeline package and regenerate a configuration file in the `tasks-pipeline` directory, which should resemble:
+
+
+```yaml
+---  # document start
+
+###########################################
+## Global settings
+GLOBAL:
+  # Maximum threads/cpus to use in analysis
+  MaxThreads: 10
+  # Maximum memory to use (in GB)
+  MaxMemory: 100
+
+###########################################
+## SLURM run settings
+SLURM:
+  ## Set to True if using SLURM
+  USE_CLUSTER: false
+  ## Pass any flags you wish below
+  ## DO NOT PASS the following:
+  ## --nodes, --ntasks, --mem, --cpus-per-task
+  --qos: unlim
+  --job-name: EukMS
+  user-id: uid
+
+###########################################
+## Pipeline input section
+INPUT:
+  root: all
+
+###########################################
+
+IdentifyProteins:
+  # Number of threads task will use
+  threads: 1
+  # Amount of memory task will use (in GB)
+  memory: 8
+  time: "4:00:00"
+
+QualityCheck:
+  # Number of threads task will use
+  threads: 1
+  # Amount of memory task will use (in GB)
+  memory: 8
+  time: "4:00:00"
+
+Annotate:
+  # Number of threads task will use
+  threads: 1
+  # Amount of memory task will use (in GB)
+  memory: 8
+  time: "4:00:00"
+
+...  # document end
+```
+
+Let's fill in the configuration file, making sure to provide `program`, `data`, and any other definitions we used in our pipeline:
+
+```yaml
+---  # document start
+
+###########################################
+## Global settings
+GLOBAL:
+  # Maximum threads/cpus to use in analysis
+  MaxThreads: 10
+  # Maximum memory to use (in GB)
+  MaxMemory: 100
+
+###########################################
+## SLURM run settings
+SLURM:
+  ## Set to True if using SLURM
+  USE_CLUSTER: false
+  ## Pass any flags you wish below
+  ## DO NOT PASS the following:
+  ## --nodes, --ntasks, --mem, --cpus-per-task
+  --qos: unlim
+  --job-name: EukMS
+  user-id: uid
+
+###########################################
+## Pipeline input section
+INPUT:
+  root: all
+
+###########################################
+
+IdentifyProteins:
+  # Number of threads task will use
+  threads: 1
+  # Amount of memory task will use (in GB)
+  memory: 8
+  time: "4:00:00"
+  program: prodigal
+  FLAGS:
+    -p meta
+
+QualityCheck:
+  # Number of threads task will use
+  threads: 8
+  # Amount of memory task will use (in GB)
+  memory: 45
+  time: "4:00:00"
+  program: checkm
+  min_quality: 5.0
+
+Annotate:
+  # Number of threads task will use
+  threads: 1
+  # Amount of memory task will use (in GB)
+  memory: 16
+  time: "4:00:00"
+  program: mmseqs
+  FLAGS:
+    --cov-mode 0
+    -s 5
+    -c 0.3
+    --split-memory-limit 10G
+
+...  # document end
+```
+
+Now, we can run our pipeline:
+
+```shell
+yapim run -p tasks-pipeline -c tasks-pipeline/tasks-config.yaml -i ../data
+```
