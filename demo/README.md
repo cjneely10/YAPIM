@@ -821,7 +821,7 @@ QualityCheck:
   memory: 45
   time: "4:00:00"
   program: checkm
-  min_quality: 5.0
+  min_quality: 60.0
 
 Annotate:
   # Number of threads task will use
@@ -846,3 +846,5 @@ yapim run -p tasks-pipeline -c tasks-pipeline/tasks-config.yaml -i ../data
 ```
 
 After it is complete, all results should be present in the `out/results` directory. There will be an enclosed subdirectory for each YAPIM pipeline that has been run on this input set.
+
+Given our default filter criteria, we should see 6 of the 10 genomes pass, and the proteins and annotation results should be packaged accordingly. 
