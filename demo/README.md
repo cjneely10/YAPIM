@@ -16,13 +16,7 @@ conda activate yapim-demo
 pip install git+https://github.com/cjneely10/YAPIM.git
 ``` 
 
-As we develop our pipeline and add programs, using conda will make ensuring portability painless!  
-
-Also, conda has a handy “export” command to capture our current environment in a format that will allow us to install it on a separate computer, if needed. 
-
-```shell
-conda env export > environment.yml
-```
+As we develop our pipeline and add programs, using conda will make ensuring portability painless!
 
 With our environment set up, we can now set up our project directory. Create a working directory named “demo” and create an enclosed pipeline package named “tasks,” as shown below: 
 
@@ -847,4 +841,14 @@ yapim run -p tasks-pipeline -c tasks-pipeline/tasks-config.yaml -i ../data
 
 After it is complete, all results should be present in the `out/results` directory. There will be an enclosed subdirectory for each YAPIM pipeline that has been run on this input set.
 
-Given our default filter criteria, we should see 6 of the 10 genomes pass, and the proteins and annotation results should be packaged accordingly. 
+Given our default filter criteria, we should see 6 of the 10 genomes pass, and the proteins and annotation results should be packaged accordingly.
+
+### Packaging for export
+
+Our pipeline is working, and we have a build environment in which it can run.
+
+Let's use `conda`'s export feature to save this information:
+
+`conda export | grep -v prefix > tasks-pipeline/environment.yml`
+
+Our final directory contents in the `tasks-pipeline` directory contain the runnable pipeline, it's default editable configuration file, and the script to generate the environment to run it. We can now share this pipeline with others.
