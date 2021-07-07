@@ -279,6 +279,25 @@ IdentifyProteins:
 
 Here, we define the item `program` (which we had used in our implementation above), and we create a field to allow users to pass flags to this program.
 
+### Configuration reserved keywords
+
+We can access any value within our `Task`'s configuration section using `self.config[name]`.
+
+You may have noticed that several keywords in the `IdentifyProteins` configuration section were automatically available as class attributes. 
+
+These keywords have shortcuts:
+
+```shell
+threads: self.threads  # Number of threads as string
+memory: self.memory  # Memory as string
+FLAGS: self.added_flags  # FLAGS parsed to list
+data: self.data  # Data section parsed to list
+skip: self.is_skip  # Boolean if task is set to skip
+program: self.program  # Local program object
+```
+
+In the final case, `self.program` returns to actual program to call, not just the string value (e.g. it returns `self.local[self.config["program"]]`).
+
 ------
 
 ## Step 2: Perform quality analysis on each assembly
