@@ -34,7 +34,6 @@ class YAPIMClean(cli.Application):
     """
     output_directory: Path
     pipeline_directory: Path
-    ids: List[str]
 
     @cli.switch(["-o", "--output"], str, mandatory=True)
     def set_output_directory(self, output):
@@ -49,13 +48,8 @@ class YAPIMClean(cli.Application):
         """Path to directory containing pipeline.pkl file"""
         self.pipeline_directory = Path(pipeline).resolve()
 
-    @cli.switch(["-i", "--id"], str, mandatory=True, list=True)
-    def set_ids(self, ids):
-        """Task name to delete"""
-        self.ids = ids
-
-    def main(self, *args):
-        DirectoryCleaner(self.output_directory).clean(self.pipeline_directory, self.ids)
+    def main(self, *ids):
+        DirectoryCleaner(self.output_directory).clean(self.pipeline_directory, list(ids))
         print("Complete!")
 
 
@@ -65,7 +59,6 @@ class YAPIMRemove(cli.Application):
     Remove input ids from working directory, results, and input storage directory
     """
     output_directory: Path
-    ids: List[str]
 
     @cli.switch(["-o", "--output"], str, mandatory=True)
     def set_output_directory(self, output):
@@ -75,13 +68,8 @@ class YAPIMRemove(cli.Application):
             print("Output directory not found")
         self.output_directory = output
 
-    @cli.switch(["-i", "--id"], str, mandatory=True, list=True)
-    def set_ids(self, ids):
-        """Input ID to delete"""
-        self.ids = ids
-
-    def main(self, *args):
-        DirectoryCleaner(self.output_directory).remove(self.ids)
+    def main(self, *ids):
+        DirectoryCleaner(self.output_directory).remove(list(ids))
 
 
 @YAPIM.subcommand("create")

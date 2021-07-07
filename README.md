@@ -33,3 +33,21 @@ conda env create -f environment.yml
 conda activate "<environment-name>"
 yapim run -p /path/to/pipeline-directory -c /path/to/config-file.yml -i /path/to/input-directory
 ```
+
+### Pipeline utils
+
+#### Clean
+
+Delete task by id and clean downstream affected downstream tasks.
+
+```shell
+yapim clean -p /path/to/pipeline-directory id1 id2 ...
+```
+
+#### Remove
+
+Remove input by id
+
+```shell
+yapim remove -p /path/to/pipeline-directory id1 id2 ...
+```
