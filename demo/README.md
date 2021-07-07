@@ -2,6 +2,8 @@
 
 The following demo will provide an introduction to the features available within the YAPIM API. We will be developing a very simple pipeline to find proteins in bacterial genomes/metagenome-assembled-genomes and to provide functional annotation of genomes that pass a quality check step. This three-part tutorial is succeeded by a larger 7-part tutorial for more intermediate users who may wish to learn about the more complex features available.
 
+The complete code generated in this tutorial is available in this directory (i.e. the `tasks` directory and `tasks-config.yaml` file).
+
 ### Step 0: Prepare working environment 
 
 While not directly required, we highly suggest building your pipeline within its own environment. Not only will this prevent dependency-related bugs from occurring during the development process, but this will also make your pipeline system-independent (at least mostly). 

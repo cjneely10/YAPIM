@@ -22,7 +22,7 @@ pip install git+https://github.com/cjneely10/YAPIM.git
 
 ### Creating a pipeline
 
-See the documentation (pending).
+See the [tutorial](https://github.com/cjneely10/YAPIM/tree/main/demo).
 
 ### Running a pipeline
 
