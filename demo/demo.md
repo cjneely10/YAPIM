@@ -47,6 +47,8 @@ Let's plan our data pipeline and consider tools we can use to accomplish these s
 3. Annotate proteins with PFam
     1. We will use `mmseqs` here:
         1. `conda install -c bioconda mmseqs2`
+    2. The PFam database can be downloaded directly:
+        1. `mmseqs databases --remove-tmp-files --threads 16 Pfam-A.full pfam_db tmp`
 
 ## Step 1: Identify proteins in each input genome
 
@@ -423,9 +425,9 @@ def deaggregate(self) -> dict:
     return self.filter(self.checkm_results_iter())
 ```
 
-In our `filter_results()` method, we first collect a minimum allowable quality that we will define in our configuration file. Then, we open the results file that was saved to this `Task`'s log file, and begin reading.
+In our `checkm_results_iter()` method, we first collect a minimum allowable quality that we will define in our configuration file. Then, we open the results file that was saved to this `Task`'s log file, and begin reading.
 
-In the `deaggregate()` method, we use the helper `self.filter()` method to return the input keys that are in our filter.
+In the `deaggregate()` method, we use the helper `self.filter(iterable)` method to return the input keys that are in our filter.
 
 The complete `AggregateTask` file should resemble the following:
 
@@ -488,4 +490,128 @@ class QualityCheck(AggregateTask):
 
 ## Step 3: Annotate assemblies that passed quality filter
 
+We will wrap up this demo by performing a functional annotation of the dataset using `MMseqs2`.
+
+Let's create a new file named `annotate.py` within our `tasks` directory and provide definitions as before. Since this will run on each input individually, we will use the `Task` class to write our definition.
+
+```python
+from typing import List, Union, Type
+
+from yapim import Task, DependencyInput
+
+
+class Annotate(Task):
+    @staticmethod
+    def requires() -> List[Union[str, Type]]:
+        pass
+
+    @staticmethod
+    def depends() -> List[DependencyInput]:
+        pass
+
+    def run(self):
+        pass
+```
+
+This `Task` will require the output of `IdentifyProteins` to complete its annotation, but it also will require that `QualityCheck` runs first to filter out low-quality genomes. We can provide this information in the `run()` method.
+
+We will define output for this Task to be the results of the search. 
+
+Finally, we will write the command that calls `mmseqs easy-search`. From its documentation, we must provide the input protein file, the database path, the output path, and a temporary working directory as command-line arguments.
+
+```python
+from typing import List, Union, Type
+
+from yapim import Task, DependencyInput
+
+
+class Annotate(Task):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.output = {
+            "result": self.wdir.joinpath("result.m8")
+        }
+
+    @staticmethod
+    def requires() -> List[Union[str, Type]]:
+        return ["IdentifyProteins", "QualityCheck"]
+
+    @staticmethod
+    def depends() -> List[DependencyInput]:
+        pass
+
+    def run(self):
+        self.parallel(
+            self.program[
+                "easy-search",
+                self.input["IdentifyProteins"]["proteins"],
+                self.data[0],
+                self.output["result"],
+                self.wdir.joinpath("tmp"),
+                "--remove-tmp-files",
+                "--threads", self.threads,
+                (*self.added_flags),
+            ]
+        )
+```
+
+Since we have defined that this `Task` requires the `IdentifyProteins` task to have completed, we can directly access its output via the input to this class.
+
+We reference `self.data[0]`, so we will need to be sure to define `data` in our configuration file.
+
+The very last thing we want to do is define a set of final output from this pipeline. This step allows YAPIM to package selected output, which can make easy transferring and separating results from intermediate files.
+
+We do that in the class initializer:
+
+```python
+def __init__(self, *args, **kwargs):
+    super().__init__(*args, **kwargs)
+    self.output = {
+        "result": self.wdir.joinpath("result.m8"),
+        "proteins": self.input["IdentifyProteins"]["proteins"],
+        "final": ["result", "proteins"]
+    }
+```
+
+Any key that we provide in the list of `final` output will be validated and copied to a final output directory named `results`. Notice that we can only provide keys that are available within this `Task`, so we must "save" the results of `IdentifyProteins` prior to listing it for final storage.
+
+The final complete code is here:
+
+```python
+from typing import List, Union, Type
+
+from yapim import Task, DependencyInput
+
+
+class Annotate(Task):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.output = {
+            "result": self.wdir.joinpath("result.m8"),
+            "proteins": self.input["IdentifyProteins"]["proteins"],
+            "final": ["result", "proteins"]
+        }
+
+    @staticmethod
+    def requires() -> List[Union[str, Type]]:
+        return ["IdentifyProteins", "QualityCheck"]
+
+    @staticmethod
+    def depends() -> List[DependencyInput]:
+        pass
+
+    def run(self):
+        self.parallel(
+            self.program[
+                "easy-search",
+                self.input["IdentifyProteins"]["proteins"],
+                self.data[0],
+                self.output["result"],
+                self.wdir.joinpath("tmp"),
+                "--remove-tmp-files",
+                "--threads", self.threads,
+                (*self.added_flags),
+            ]
+        )
+```
 

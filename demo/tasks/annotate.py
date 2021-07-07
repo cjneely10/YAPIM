@@ -7,7 +7,9 @@ class Annotate(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {
-            "result": self.wdir.joinpath("result.m8")
+            "result": self.wdir.joinpath("result.m8"),
+            "proteins": self.input["IdentifyProteins"]["proteins"],
+            "final": ["result", "proteins"]
         }
 
     @staticmethod
