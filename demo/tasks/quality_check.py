@@ -4,12 +4,18 @@ from yapim import AggregateTask, DependencyInput, clean
 
 
 class QualityCheck(AggregateTask):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.output = {
+            "results": self.wdir.joinpath("task.log")
+        }
+
     def deaggregate(self) -> dict:
         return self.filter(self.checkm_results_iter())
 
     def checkm_results_iter(self):
         min_quality = float(self.config["min_quality"])
-        with open(self.wdir.joinpath("task.log")) as log_file_ptr:
+        with open(self.output["results"]) as log_file_ptr:
             line = next(log_file_ptr)
             while "Bin Id" not in line:
                 line = next(log_file_ptr)
