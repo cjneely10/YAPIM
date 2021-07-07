@@ -1,7 +1,5 @@
 # Yet Another PIpeline (Manager)
 
-(This repository is in development and is not ready for general usage)
-
 ## About
 
 YAPIM is a pipeline-generation tool for easily creating and running data analysis pipelines.
