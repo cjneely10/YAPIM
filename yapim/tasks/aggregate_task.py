@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import KeysView, ValuesView, ItemsView, Optional, Dict, Iterable
+from typing import KeysView, ValuesView, ItemsView, Optional, Dict, Iterable, Callable, Union
 
 from yapim.tasks.task import Task
 from yapim.tasks.utils.input_dict import InputDict
@@ -76,9 +76,16 @@ class AggregateTask(Task, ABC):
             return False
         return task_name in self.input[record_id].keys()
 
-    def filter(self, filter_values: Iterable) -> Dict[str, Dict]:
-        return {
-            record_id: self.input[record_id]
-            for record_id in filter_values
-            if record_id in self.input_ids()
-        }
+    def filter(self, filter_values: Union[Iterable, Callable[[str], bool]]) -> Dict[str, Dict]:
+        if isinstance(filter_values, Iterable):
+            return {
+                record_id: self.input[record_id]
+                for record_id in filter_values
+                if record_id in self.input_ids()
+            }
+        else:
+            return {
+                record_id: self.input[record_id]
+                for record_id in self.input_ids()
+                if filter_values(record_id)
+            }

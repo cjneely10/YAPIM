@@ -168,7 +168,7 @@ class IdentifyProteins(Task):
 
     @staticmethod
     def requires() -> List[Union[str, Type]]:
-        return []
+        pass
 
     @staticmethod
     def depends() -> List[DependencyInput]:
@@ -500,6 +500,53 @@ class QualityCheck(AggregateTask):
         )
 
         self.local["rm"]["-r", combined_dir]()
+```
+
+### deaggregate()
+
+Note that `AggregateTask` has helper methods available for deaggregating output of an `AggregateTask`:
+
+```shell
+self.input_ids: self.input.keys()
+self.input_values: self.input.values()
+self.input_items: self.input.items()
+```
+
+We can also create new input items using the `self.remap()` method: 
+```python
+import os
+
+from yapim import prefix
+
+
+# This method will reset the input of the pipeline to be the prefixes of all data 
+# in a particular path, and will create the "fasta" field in each new data input.
+def deaggregate(self) -> dict:
+    self.remap()
+    return {
+        prefix(file): {
+            "fasta": file
+        }
+        for file in os.listdir("/path/to/data")
+    }
+
+
+# This method will update all existing inputs to include the field "uploaded-data"
+def deaggregate(self) -> dict:
+    return {
+        record_id : {"updated-data": "data"}
+        for record_id in self.input_ids()
+    }
+
+
+# This method will call the passed function on each input id and only return valid inputs
+def deaggregate(self) -> dict:
+    return self.filter(lambda record_id: record_id > "a")
+
+
+# This method accepts some iterable of ids and filters our input ids that are not present in this iterable
+def deaggregate(self) -> dict:
+        return self.filter(self.checkm_results_iter())
 ```
 
 ------
