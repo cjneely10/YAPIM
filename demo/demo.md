@@ -830,3 +830,5 @@ Now, we can run our pipeline:
 ```shell
 yapim run -p tasks-pipeline -c tasks-pipeline/tasks-config.yaml -i ../data
 ```
+
+After it is complete, all results should be present in the `out/results` directory. There will be an enclosed subdirectory for each YAPIM pipeline that has been run on this input set.
