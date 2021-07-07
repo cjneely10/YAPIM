@@ -52,8 +52,6 @@ Let's plan our data pipeline and consider tools we can use to accomplish these s
 
 The primary logic for creating a running a YAPIM pipeline will be enclosed in classes we write that inherit from `Task` or `AggregateTask`.  
 
- 
-
 We begin be creating a new file named `identify_proteins.py` inside of our `tasks` directory.  In this file we will create our first class, which we will name `IdentifyProteins`, and have it inherit from `Task`. Because `Task` is an abstract class, we must provide definitions for any abstract methods it contains.
 
 ```python
@@ -324,8 +322,170 @@ In the final case, `self.program` returns to actual program to call, not just th
 
 ## Step 2: Perform quality analysis on each assembly
 
-With proteins identified in each genome, we would like to filter out any low-quality assemblies. To do this, we will use the program `CheckM`.
+With proteins identified in each genome, we would like to filter out any low-quality assemblies. To do this, we will use the program `CheckM`. Unlike the previous `Task` which ran `prodigal` on each genome individually, `CheckM` runs on the entire input set. To handle running programs such as these, YAPIM provides the `AggregateTask` class.
+
+Let's create a new class to handle running `CheckM`. Create a file named `quality_check.py` within the `tasks` directory. In this file, provide the following definition:
+
+```python
+from typing import List, Union, Type
+
+from yapim import AggregateTask, DependencyInput
+
+
+class QualityCheck(AggregateTask):
+    def deaggregate(self) -> dict:
+        pass
+    
+    @staticmethod
+    def requires() -> List[Union[str, Type]]:
+        pass
+
+    @staticmethod
+    def depends() -> List[DependencyInput]:
+        pass
+
+    def run(self):
+        pass
+
+```
+
+Notice that the same three methods we defined in the `Task` class need to be defined, but there is an additional method named `deaggregate()`. This method allows us to update, filter, or replace the input to the pipeline, which allow classes that extend `AggregateTask` to provide this functionality.
+
+For this `AggregateTask`, we want to use the results from the `IdentifyProteins` step as input to `CheckM`. Per its documentation, we will need to generate a directory of the protein FASTA files and provide this as input to `CheckM`.
+
+Let's fill out this information below. First, define the required input for this `AggregateTask` in the `requires()` method. In the `run()` method, we provide logic to copy the files to a single directory. Then, we run `CheckM`, and finally delete the temporary directory we created.
+
+We also made us of the `@clean(path)` decorator to remove any existing directory named `tmp` in this `AggregateTask`'s working directory. This is not strictly necessary, but is included as an example of this functionality.
+
+```python
+from typing import List, Union, Type
+
+from yapim import AggregateTask, DependencyInput, clean
+
+
+class QualityCheck(AggregateTask):
+    def deaggregate(self) -> dict:
+        pass
+
+    @staticmethod
+    def requires() -> List[Union[str, Type]]:
+        return ["IdentifyProteins"]
+
+    @staticmethod
+    def depends() -> List[DependencyInput]:
+        pass
+
+    @clean("tmp")
+    def run(self):
+        combined_dir = str(self.wdir.joinpath("tmp"))
+        self.local["mkdir"][combined_dir]()
+        for record_data in self.input_values():
+            self.local["cp"][record_data["IdentifyProteins"]["proteins"], combined_dir + "/"]()
+
+        self.parallel(
+            self.program[
+                "lineage_wf",
+                "-t", self.threads,
+                "-x", "faa",
+                "--genes",
+                combined_dir,
+                self.output["outdir"]
+            ]
+        )
+
+        self.local["rm"]["-r", combined_dir]()
+```
+
+We will now implement the `deaggregate()` method to filter our input. If we leave this method blank, then no updates to the original inputs are made. If we provide a return dictionary, then this will update existing data members and remove any ids not present in its returned value. If we call the helper method `self.remap()`, when only this returned data will be present after the filter step.
+
+For our tutorial, we want to filter the input genomes based on the `CheckM` results, which were written to `stdout` by CheckM, and which the YAPIM API automatically saves to the `Task`'s working directory.
+
+Let's write a method to create a generator over our results file, and let's use this generator to write our `deaggregate()` method.
+
+```python
+def checkm_results_iter(self):
+    min_quality = float(self.config["min_quality"])
+    with open(self.wdir.joinpath("task.log")) as log_file_ptr:
+        line = next(log_file_ptr)
+        while "Bin Id" not in line:
+            line = next(log_file_ptr)
+        next(log_file_ptr)
+        for line in log_file_ptr:
+            if line.startswith("-"):
+                return
+            line = line.split()
+            completeness = float(line[-3])
+            if completeness < min_quality:
+                return
+            yield line[0]
+
+def deaggregate(self) -> dict:
+    return self.filter(self.checkm_results_iter())
+```
+
+In our `filter_results()` method, we first collect a minimum allowable quality that we will define in our configuration file. Then, we open the results file that was saved to this `Task`'s log file, and begin reading.
+
+In the `deaggregate()` method, we use the helper `self.filter()` method to return the input keys that are in our filter.
+
+The complete `AggregateTask` file should resemble the following:
+
+```python
+from typing import List, Union, Type
+
+from yapim import AggregateTask, DependencyInput, clean
+
+
+class QualityCheck(AggregateTask):
+    def deaggregate(self) -> dict:
+        return self.filter(self.checkm_results_iter())
+
+    def checkm_results_iter(self):
+        min_quality = float(self.config["min_quality"])
+        with open(self.wdir.joinpath("task.log")) as log_file_ptr:
+            line = next(log_file_ptr)
+            while "Bin Id" not in line:
+                line = next(log_file_ptr)
+            next(log_file_ptr)
+            for line in log_file_ptr:
+                if line.startswith("-"):
+                    return
+                line = line.split()
+                completeness = float(line[-3])
+                if completeness < min_quality:
+                    return
+                yield line[0]
+
+    @staticmethod
+    def requires() -> List[Union[str, Type]]:
+        return ["IdentifyProteins"]
+
+    @staticmethod
+    def depends() -> List[DependencyInput]:
+        pass
+
+    @clean("tmp")
+    def run(self):
+        combined_dir = str(self.wdir.joinpath("tmp"))
+        self.local["mkdir"][combined_dir]()
+        for record_data in self.input_values():
+            self.local["cp"][record_data["IdentifyProteins"]["proteins"], combined_dir + "/"]()
+
+        self.parallel(
+            self.program[
+                "lineage_wf",
+                "-t", self.threads,
+                "-x", "faa",
+                "--genes",
+                combined_dir,
+                self.wdir.joinpath("out")
+            ]
+        )
+
+        self.local["rm"]["-r", combined_dir]()
+```
 
 ------
 
 ## Step 3: Annotate assemblies that passed quality filter
+
+

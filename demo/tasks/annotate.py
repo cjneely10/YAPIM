@@ -12,7 +12,7 @@ class Annotate(Task):
 
     @staticmethod
     def requires() -> List[Union[str, Type]]:
-        return ["IdentifyProteins"]
+        return ["IdentifyProteins", "QualityCheck"]
 
     @staticmethod
     def depends() -> List[DependencyInput]:

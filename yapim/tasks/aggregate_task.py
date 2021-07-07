@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import KeysView, ValuesView, ItemsView, Optional, Dict
+from typing import KeysView, ValuesView, ItemsView, Optional, Dict, Iterable
 
 from yapim.tasks.task import Task
 from yapim.tasks.utils.input_dict import InputDict
@@ -7,6 +7,7 @@ from yapim.tasks.utils.task_result import TaskResult
 from yapim.utils.config_manager import ConfigManager
 
 
+# TODO: Helper filter, update, etc. methods for deaggregate
 class AggregateTask(Task, ABC):
     def __init__(self,
                  record_id: str,
@@ -52,16 +53,11 @@ class AggregateTask(Task, ABC):
         if task._remap_results:
             output[result.task_name] = task.output
             return output
-        # if not isinstance(output, dict):
-        #     output = task.output
-        # else:
-        #     output.update(result)
         class_results[result.task_name] = result
         for key, value in output.items():
             if key not in class_results.keys():
                 class_results[key] = {}
             class_results[key][result.task_name] = value
-        # if output is not None:
         keys = set(output.keys())
         to_remove = []
         for key in class_results.keys():
@@ -69,7 +65,6 @@ class AggregateTask(Task, ABC):
                 to_remove.append(key)
         for key in to_remove:
             del class_results[key]
-        # class_results[result.task_name] = result
         return class_results
 
     def has_run(self, task_name: str, record_id: Optional[str] = None) -> bool:
@@ -80,3 +75,10 @@ class AggregateTask(Task, ABC):
         if record_id is None:
             return False
         return task_name in self.input[record_id].keys()
+
+    def filter(self, filter_values: Iterable) -> Dict[str, Dict]:
+        return {
+            record_id: self.input[record_id]
+            for record_id in filter_values
+            if record_id in self.input_ids()
+        }

@@ -4,19 +4,10 @@ from yapim import AggregateTask, DependencyInput, clean
 
 
 class QualityCheck(AggregateTask):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.output = {
-            "outdir": self.wdir.joinpath("out")
-        }
-
     def deaggregate(self) -> dict:
-        return {
-            record_id: self.input[record_id]
-            for record_id in self.filter_results()
-        }
+        return self.filter(self.checkm_results_iter())
 
-    def filter_results(self):
+    def checkm_results_iter(self):
         min_quality = float(self.config["min_quality"])
         with open(self.wdir.joinpath("task.log")) as log_file_ptr:
             line = next(log_file_ptr)
@@ -54,7 +45,7 @@ class QualityCheck(AggregateTask):
                 "-x", "faa",
                 "--genes",
                 combined_dir,
-                self.output["outdir"]
+                self.wdir.joinpath("out")
             ]
         )
 
