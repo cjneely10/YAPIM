@@ -23,7 +23,6 @@ class Merge(Task):
     def run(self):
         self.single(
             self.program[
-                "-g", self.input["fasta"],
                 "-i", self.input["AbinitioGeneMark"]["genemark-gff3"],
                 "-i", self.input["AbinitioAugustus"]["aug-gff3"],
                 "-i", self.input["Evidence"]["evidence-gff3"],
