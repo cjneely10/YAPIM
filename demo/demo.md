@@ -2,6 +2,36 @@
 
 The following demo will provide an introduction to the features available within the YAPIM API. We will be developing a very simple pipeline to find proteins in bacterial genomes/metagenome-assembled-genomes and to provide functional annotation of genomes that pass a quality check step. This three-part tutorial is succeeded by a larger 7-part tutorial for more intermediate users who may wish to learn about the more complex features available.
 
+### Step 0: Prepare working environment 
+
+While not directly required, we highly suggest building your pipeline within its own environment. Not only will this prevent dependency-related bugs from occurring during the development process, but this will also make your pipeline system-independent (at least mostly). 
+
+Here, we use miniconda to accomplish this, and start by creating a new environment and installing YAPIM: 
+
+```shell
+conda create --name yapim-demo python=3.8
+conda activate yapim-demo
+pip install git+https://github.com/cjneely10/YAPIM.git
+``` 
+
+As we develop our pipeline and add programs, using conda will make ensuring portability painless!  
+
+Also, conda has a handy “export” command to capture our current environment in a format that will allow us to install it on a separate computer, if needed. 
+
+```shell
+conda env export > environment.yml
+```
+
+With our environment set up, we can now set up our project directory. Create a working directory named “demo” and create an enclosed pipeline package named “tasks,” as shown below: 
+
+```shell
+mkdir demo && cd demo 
+mkdir tasks 
+touch tasks/__init__.py
+```
+
+The code that we write in upcoming tutorials will be stored in the `demo/tasks` directory and be a part of its eponymous python package. 
+
 ## Your first YAPIM workflow
 
 Let's plan our data pipeline and consider tools we can use to accomplish these steps.
@@ -18,14 +48,13 @@ Let's plan our data pipeline and consider tools we can use to accomplish these s
     1. We will use `mmseqs` here:
         1. `conda install -c bioconda mmseqs2`
 
-
 ## Step 1: Identify proteins in each input genome
 
 The primary logic for creating a running a YAPIM pipeline will be enclosed in classes we write that inherit from `Task` or `AggregateTask`.  
 
  
 
-We begin be creating a new file named `identify_proteins.py` inside of our “tasks” directory.  In this file we will create our first class, which we will name `IdentifyProteins`, and have it inherit from `Task`. Because `Task` is an abstract class, we must provide definitions for any abstract methods it contains.
+We begin be creating a new file named `identify_proteins.py` inside of our `tasks` directory.  In this file we will create our first class, which we will name `IdentifyProteins`, and have it inherit from `Task`. Because `Task` is an abstract class, we must provide definitions for any abstract methods it contains.
 
 ```python
 from typing import List, Union, Type
@@ -54,15 +83,11 @@ Since we want this to be the first step in the pipeline, this task will require 
 
 #### Calling a program from within YAPIM:
 
-YAPIM makes heavy use of the python library plumbum, which provides an incredibly useful API to run CLI-like commands from within python code. A typical CLI invocation using plumbum resembles: 
-
- 
+YAPIM makes heavy use of the python library plumbum, which provides an incredibly useful API to run CLI-like commands from within python code. A typical CLI invocation using plumbum resembles:
 
 ```python
 local["echo"]["Hello", "world!"]()
 ```
-
- 
 
 The above command runs the unix program `echo` from the local system with the provided arguments. From within our class, we can invoke the program assigned to this task by using:
 
@@ -74,8 +99,6 @@ self.program["Hello", "world!"]()  # Alias for above command if set in configura
 #### Using helper methods and attributes in `Task`
 
 Let’s use this opportunity to explore a bit more of the API. YAPIM provides several helper attributes and methods that allow us to simplify and automate much of the calling code: 
-
- 
 
 ```
 .wdir => the working directory in which this task is running 
@@ -94,7 +117,6 @@ Let’s use this opportunity to explore a bit more of the API. YAPIM provides se
 
 .single(cmd) => parallelize a command across potentially multiple compute nodes and allot only one thread per call.
 ```
- 
 
 For a complete list of the methods and attributes available to YAPIM tasks, see the provided documentation.
 
@@ -301,6 +323,8 @@ In the final case, `self.program` returns to actual program to call, not just th
 ------
 
 ## Step 2: Perform quality analysis on each assembly
+
+With proteins identified in each genome, we would like to filter out any low-quality assemblies. To do this, we will use the program `CheckM`.
 
 ------
 
