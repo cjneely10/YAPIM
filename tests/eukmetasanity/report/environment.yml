@@ -1,4 +1,4 @@
-name: EukMS_reporttest
+name: EukMS_report
 channels:
   - bioconda
   - conda-forge
@@ -18,3 +18,4 @@ dependencies:
     - pylint==2.6.0
     - pytest==6.2.1
     - pytest-cov==2.10.1
+    - git+https://github.com/cjneely10/YAPIM.git
