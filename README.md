@@ -38,7 +38,7 @@ yapim run -p /path/to/pipeline-directory -c /path/to/config-file.yml -i /path/to
 
 #### Clean
 
-Delete task by id and clean downstream affected downstream tasks.
+Delete task by id and clean affected downstream tasks.
 
 ```shell
 yapim clean -p /path/to/pipeline-directory id1 id2 ...
