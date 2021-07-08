@@ -71,6 +71,10 @@ class Augustus(Task):
             "5:00"
         )
 
+    def _contig_splitter(self) -> List[str]:
+        pass
+
+    # Parallelize
     def _augustus(self, species: str, _round: int, _file: str, _last: bool = False) -> str:
         """ Run augustus training round
 
@@ -80,19 +84,27 @@ class Augustus(Task):
         :param _last: Is last training round
         :return: Path to output gff3 file
         """
-        out_gff = os.path.join(
-            self.wdir, Augustus.out_path(str(self.input["fasta"]), ".%i.gb" % _round)
-        )
-        self.single(
+        contig_files = self._contig_splitter()
+        self.batch([
             self.program[
                 "--codingseq=on",
                 "--stopCodonExcludedFromCDS=false",
                 "--species=%s" % species,
-                "--outfile=%s" % out_gff,
+                "--outfile=%s" % contig_file + f".{_round}.gb",
                 ("--gff3=on" if _last else "--gff3=off"),
-                str(self.input["fasta"]),
-            ]
-        )
+                contig_file,
+            ] for contig_file in contig_files
+        ])
+
+        out_gff = Path(os.path.join(
+            self.wdir, Augustus.out_path(str(self.input["fasta"]), ".%i.gb" % _round)
+        ))
+        if out_gff.exists():
+            self.local["rm"][out_gff]()
+
+        for contig_file in contig_files:
+            (self.local["cat"][str(contig_file) + f".{_round}.gb"] >> out_gff)()
+
         return out_gff
 
     def _handle_config_output(self):

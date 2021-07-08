@@ -7,7 +7,6 @@ from yapim.tasks.utils.task_result import TaskResult
 from yapim.utils.config_manager import ConfigManager
 
 
-# TODO: Helper filter, update, etc. methods for deaggregate
 class AggregateTask(Task, ABC):
     def __init__(self,
                  record_id: str,
