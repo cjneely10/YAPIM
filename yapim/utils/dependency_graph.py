@@ -95,7 +95,7 @@ class DependencyGraph:
                 if inspect.isclass(requirement):
                     requirement = requirement.__name__
                 if requirement not in self.idx.keys():
-                    print(f"Unable to locate {requirement}")
+                    print(f"Unable to locate {requirement} in {type(task).__name__}")
                     raise DependencyGraph.ERR
                 self._graph.add_edge(Node(DependencyGraph.ROOT, requirement), task_node)
 
