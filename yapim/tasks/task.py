@@ -373,7 +373,7 @@ class Task(BaseTask, ABC):
                 self.parallel(cmd_batch)
             else:
                 self.parallel(
-                    self.create_script(cmd_batch, str(self.wdir.joinpath(f"batch-{i}.sh")), parallelize=True)
+                    self.create_script(cmd_batch, f"batch-{i}.sh", parallelize=True)
                 )
 
     def single(self, cmd: LocalCommand, time_override: Optional[str] = None):
@@ -423,7 +423,7 @@ class Task(BaseTask, ABC):
         # Write command to run
         if isinstance(cmd, list):
             for _cmd in cmd:
-                fp.write("".join((str(_cmd), "%s\n" % ("&" if parallelize else ""))))
+                fp.write("".join((str(_cmd), "%s\n" % (" &" if parallelize else ""))))
         else:
             fp.write("".join((str(cmd), "\n")))
         if parallelize:
