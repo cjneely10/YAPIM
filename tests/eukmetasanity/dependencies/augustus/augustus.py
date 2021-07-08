@@ -3,7 +3,9 @@ import os
 import shutil
 from collections import Counter
 from pathlib import Path
-from typing import List, Union, Type
+from typing import List, Union, Type, Iterable
+
+from Bio import SeqIO
 
 from yapim import Task, DependencyInput, touch
 from .taxon_ids import augustus_taxon_ids
@@ -71,8 +73,13 @@ class Augustus(Task):
             "5:00"
         )
 
-    def _contig_splitter(self) -> List[str]:
-        pass
+    def _contig_splitter(self, collector: list) -> Iterable[str]:
+        for record in SeqIO.parse(self.input["fasta"], "fasta"):
+            out_file = f"{record.id}.fasta"
+            with open(out_file, "w") as out_ptr:
+                SeqIO.write([record], out_ptr, "fasta")
+            collector.append(out_file)
+            yield out_file
 
     # Parallelize
     def _augustus(self, species: str, _round: int, _file: str, _last: bool = False) -> str:
@@ -84,24 +91,23 @@ class Augustus(Task):
         :param _last: Is last training round
         :return: Path to output gff3 file
         """
-        contig_files = self._contig_splitter()
-        self.batch([
-            self.program[
+        contig_files = []
+        contig_files_iter = self._contig_splitter(contig_files)
+        self.batch(self.program[
                 "--codingseq=on",
                 "--stopCodonExcludedFromCDS=false",
                 "--species=%s" % species,
                 "--outfile=%s" % contig_file + f".{_round}.gb",
                 ("--gff3=on" if _last else "--gff3=off"),
                 contig_file,
-            ] for contig_file in contig_files
-        ])
+            ] for contig_file in contig_files_iter)
 
         out_gff = Path(os.path.join(
             self.wdir, Augustus.out_path(str(self.input["fasta"]), ".%i.gb" % _round)
         ))
         if out_gff.exists():
             self.local["rm"][out_gff]()
-
+        out_gff = str(out_gff)
         for contig_file in contig_files:
             (self.local["cat"][str(contig_file) + f".{_round}.gb"] >> out_gff)()
 

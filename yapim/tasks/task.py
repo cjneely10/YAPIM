@@ -6,7 +6,7 @@ import time
 import traceback
 from abc import ABC
 from pathlib import Path
-from typing import Tuple, List, Union, Optional, Callable
+from typing import Tuple, List, Union, Optional, Callable, Iterable
 
 from plumbum import local, colors, ProcessExecutionError
 from plumbum.machines import LocalMachine, LocalCommand
@@ -353,14 +353,23 @@ class Task(BaseTask, ABC):
         with open(os.path.join(self.wdir, "task.log"), "a") as w:
             w.write("\n")
 
-    def _iter_batch(self, cmds: List[LocalCommand]):
+    def _iter_batch(self, cmds: Iterable[LocalCommand]):
         threads = int(self.threads)
-        for i in range(0, len(cmds), threads):
-            yield cmds[i:i + threads]
+        while True:
+            out = []
+            try:
+                i = 0
+                while i < threads:
+                    out.append(next(cmds))
+                    i += 1
+                yield out
+            except StopIteration:
+                yield out
 
-    def batch(self, cmds: List[LocalCommand]):
+    def batch(self, cmds: Iterable[LocalCommand]):
         for i, cmd_batch in enumerate(self._iter_batch(cmds)):
             if self.is_slurm:
+                # Okay since will be immediately re-written as slurm
                 self.parallel(cmd_batch)
             else:
                 self.parallel(
