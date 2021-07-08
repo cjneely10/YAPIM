@@ -366,6 +366,9 @@ class Task(BaseTask, ABC):
             except StopIteration:
                 yield out
 
+    # Current behaviour: Generates batches of commands of size self.threads, runs each batch with full resources
+    # listed in SLURM section. Since we are generating commands of size self.threads, this makes sense, and since
+    # batches will run serially, we are not over-extending resource allocations
     def batch(self, cmds: Iterable[LocalCommand]):
         for i, cmd_batch in enumerate(self._iter_batch(cmds)):
             if self.is_slurm:
