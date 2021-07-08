@@ -177,8 +177,9 @@ class Task(BaseTask, ABC):
         return bool(self.config_manager.config[ConfigManager.SLURM][ConfigManager.USE_CLUSTER])
 
     def _create_slurm_command(self,
-                              cmd: LocalCommand,
-                              time_override: Optional[str] = None) -> SLURMCaller:  # pragma: no cover
+                              cmds: Union[LocalCommand, List[LocalCommand]],
+                              time_override: Optional[str] = None,
+                              parallelize: bool = False) -> SLURMCaller:  # pragma: no cover
         """ Create a SLURM-managed process
 
         :param cmd: plumbum LocalCommand object to run
@@ -191,7 +192,7 @@ class Task(BaseTask, ABC):
         if ConfigManager.TIME not in self.config.keys() and ConfigManager.TIME not in parent_info.keys():
             raise MissingDataError("SLURM section not properly formatted within %s" % str(self.full_name))
         # Generate command to launch SLURM job
-        return SLURMCaller(cmd, self, time_override)
+        return SLURMCaller(cmds, self, time_override, parallelize)
 
     @property
     def data(self) -> List[str]:
@@ -312,7 +313,7 @@ class Task(BaseTask, ABC):
             is_complete = False
         self.is_complete = is_complete
 
-    def parallel(self, cmd: Union[LocalCommand, List[LocalCommand]], time_override: Optional[str] = None):
+    def parallel(self, cmd: LocalCommand, time_override: Optional[str] = None):
         """ Launch a command that uses multiple threads
         This method will call a given command on a SLURM cluster automatically (if requested by the user)
         In a config file, WORKERS will correspond to the number of tasks to run in parallel. For slurm users, this
@@ -352,7 +353,21 @@ class Task(BaseTask, ABC):
         with open(os.path.join(self.wdir, "task.log"), "a") as w:
             w.write("\n")
 
-    def single(self, cmd: Union[LocalCommand, List[LocalCommand]], time_override: Optional[str] = None):
+    def _iter_batch(self, cmds: List[LocalCommand]):
+        threads = int(self.threads)
+        for i in range(0, len(cmds), threads):
+            yield cmds[i:i + threads]
+
+    def batch(self, cmds: List[LocalCommand]):
+        for i, cmd_batch in enumerate(self._iter_batch(cmds)):
+            if self.is_slurm:
+                self.parallel(cmd_batch)
+            else:
+                self.parallel(
+                    self.create_script(cmd_batch, str(self.wdir.joinpath(f"batch-{i}.sh")), parallelize=True)
+                )
+
+    def single(self, cmd: LocalCommand, time_override: Optional[str] = None):
         """ Launch a command that uses a single thread.
 
         The command string will be written to the EukMetaSanity pipeline output file and will be printed to screen
@@ -365,7 +380,8 @@ class Task(BaseTask, ABC):
         """
         self.parallel(cmd, time_override)
 
-    def create_script(self, cmd: Union[str, LocalCommand, List[str], List[LocalCommand]], file_name: str) \
+    def create_script(self, cmd: Union[str, LocalCommand, List[Union[str, LocalCommand]]], file_name: str,
+                      parallelize: bool = False) \
             -> LocalCommand:
         """ Write a command to file and return its value packaged as a LocalCommand.
 
@@ -398,9 +414,11 @@ class Task(BaseTask, ABC):
         # Write command to run
         if isinstance(cmd, list):
             for _cmd in cmd:
-                fp.write("".join((str(_cmd), "\n")))
+                fp.write("".join((str(_cmd), "%s\n" % ("&" if parallelize else ""))))
         else:
             fp.write("".join((str(cmd), "\n")))
+        if parallelize:
+            fp.write("wait\n")
         fp.close()
         self.local["chmod"]["+x", _path]()
         return self.local[_path]
