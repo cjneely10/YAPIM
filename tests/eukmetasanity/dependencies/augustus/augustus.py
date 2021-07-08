@@ -95,7 +95,7 @@ class Augustus(Task):
         else:
             return self._run_mag_mode(species, _round, _file, _last)
 
-    def _run_mag_mode(self, species: str, _round: int, _file: str, _last: bool = False) -> str:
+    def _run_genome_mode(self, species: str, _round: int, _file: str, _last: bool = False) -> str:
         contig_files = []
         contig_files_iter = self._contig_splitter(contig_files)
         self.batch(self.program[
@@ -120,7 +120,7 @@ class Augustus(Task):
 
         return out_gff
 
-    def _run_genome_mode(self, species: str, _round: int, _file: str, _last: bool = False) -> str:
+    def _run_mag_mode(self, species: str, _round: int, _file: str, _last: bool = False) -> str:
         out_gff = os.path.join(
             self.wdir, Augustus.out_path(str(self.input["fasta"]), ".%i.gb" % _round)
         )
