@@ -88,6 +88,7 @@ class Task(BaseTask, ABC):
     def versions(self) -> List[VersionInfo]:
         pass
 
+    # TODO: Add to tutorial
     def condition(self) -> bool:
         pass
 
@@ -423,6 +424,7 @@ class Task(BaseTask, ABC):
         self.parallel(script)
         self.single(script)
 
+        :param parallelize:
         :param cmd: Command to write to file, or list of commands to write
         :param file_name: Name of file to create
         :return: Command to run script via plumbum interface
