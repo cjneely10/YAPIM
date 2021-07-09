@@ -182,7 +182,7 @@ class Task(BaseTask, ABC):
                               parallelize: bool = False) -> SLURMCaller:  # pragma: no cover
         """ Create a SLURM-managed process
 
-        :param cmd: plumbum LocalCommand object to run
+        :param cmds: plumbum LocalCommand object to run
         :return: SLURM-wrapped command to run script via plumbum interface
         """
         # Confirm valid SLURM section
@@ -353,24 +353,32 @@ class Task(BaseTask, ABC):
         with open(os.path.join(self.wdir, "task.log"), "a") as w:
             w.write("\n")
 
-    def _iter_batch(self, cmds: Iterable[LocalCommand]):
-        threads = int(self.threads)
+    @staticmethod
+    def _iter_batch(cmds: Iterable[LocalCommand], threads: int):
         while True:
             out = []
-            try:
-                i = 0
-                while i < threads:
-                    out.append(next(cmds))
-                    i += 1
+            i = 0
+            iter_completed = False
+            while i < threads:
+                next_fxn = next(cmds, None)
+                if next_fxn is None:
+                    iter_completed = True
+                    break
+                out.append(next_fxn)
+                i += 1
+            if iter_completed:
                 yield out
-            except StopIteration:
+                return
+            else:
                 yield out
 
     # Current behaviour: Generates batches of commands of size self.threads, runs each batch with full resources
     # listed in SLURM section. Since we are generating commands of size self.threads, this makes sense, and since
     # batches will run serially, we are not over-extending resource allocations
-    def batch(self, cmds: Iterable[LocalCommand]):
-        for i, cmd_batch in enumerate(self._iter_batch(cmds)):
+    def batch(self, cmds: Iterable[LocalCommand], threads: Optional[int] = None):
+        if threads is None:
+            threads = int(self.threads)
+        for i, cmd_batch in enumerate(self._iter_batch(cmds, threads)):
             if self.is_slurm:
                 # Okay since will be immediately re-written as slurm
                 self.parallel(cmd_batch)
