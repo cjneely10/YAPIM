@@ -24,8 +24,7 @@ class PackageGenerator(PackageManager):
         else:
             self._dependencies_directories = []
 
-    def create(self):
-        write_directory = Path(os.getcwd()).resolve().joinpath(os.path.basename(self._tasks_directory) + "-pipeline")
+    def create(self, write_directory: Path):
         if not write_directory.exists():
             os.makedirs(write_directory)
         output_data = {
@@ -37,9 +36,6 @@ class PackageGenerator(PackageManager):
             ],
             "tasks": os.path.basename(self._tasks_directory)
         }
-        # Create pipeline base directory
-        if not write_directory.exists():
-            os.makedirs(write_directory)
         # Copy pipeline contents to own directory
         shutil.copytree(self._tasks_directory, write_directory.joinpath(output_data["tasks"]),
                         symlinks=True, dirs_exist_ok=True)
@@ -51,10 +47,10 @@ class PackageGenerator(PackageManager):
             shutil.copytree(pre, write_directory.joinpath(post), symlinks=True, dirs_exist_ok=True)
         # Save metadata file
         pipeline_file = write_directory.joinpath(PackageGenerator.pipeline_file)
+        # Create config stuff
         self._create_config(write_directory)
         with open(pipeline_file, "wb") as file_ptr:
             pickle.dump(output_data, file_ptr)
-        # Create config file
 
     def _create_config(self, write_directory: Path):
         config_file_path = write_directory.joinpath(os.path.basename(self._tasks_directory) + "-config.yaml")
