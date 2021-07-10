@@ -3,12 +3,12 @@ from typing import List, Union, Type
 from yapim import Task, DependencyInput
 
 
-class Merge(Task):
+class Tier(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {
-            "merged-prot": str(self.wdir.joinpath(self.record_id + ".faa")),
-            "merged-gff3": str(self.wdir.joinpath(self.record_id + ".gff3")),
+            "merged-prot": str(self.wdir.joinpath(self.record_id + f"{self.config['tier']}.faa")),
+            "merged-gff3": str(self.wdir.joinpath(self.record_id + f"{self.config['tier']}.gff3")),
             "final": ["merged-prot", "merged-gff3"]
         }
 
@@ -26,6 +26,7 @@ class Merge(Task):
                 self.input["AbinitioGeneMark"]["genemark-gff3"],
                 self.input["AbinitioAugustus"]["aug-gff3"],
                 self.input["MetaEukEV"]["evidence-gff3"],
+                "-t", self.config["tier"],
                 "-o", self.output["merged-gff3"]
             ]
         )
