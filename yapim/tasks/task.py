@@ -47,7 +47,7 @@ def clean(*directories: Union[Path, str]):
 
 
 # TODO: Parser to identify illegal self.input accesses and prevent pipeline launch at start time
-# https://stackoverflow.com/questions/43166571/getting-all-the-nodes-from-python-ast-that-correspond-to-a-particular-variable-w
+#  https://stackoverflow.com/questions/43166571/getting-all-the-nodes-from-python-ast-that-correspond-to-a-particular-variable-w
 class Task(BaseTask, ABC):
     print_lock = threading.Lock()
 
@@ -231,6 +231,8 @@ class Task(BaseTask, ABC):
                 logging.info(_str)
                 if self.display_messages:
                     print(colors.blue & colors.bold | _str)
+            # TODO: Add internal metadata manager to allow designation of callbacks that store given data
+            #  Using this class, track completion times.
             start_time = time.time()
             self.try_run()
             end_time = time.time()
