@@ -108,6 +108,7 @@ class TaskChainDistributor(dict):
 
         # TODO: This may be problematic...
         projected_memory = int(self.config_manager.find(task.full_name, ConfigManager.MEMORY))
+        # TODO: Handle SLURM when multiple nodes may have been listed
         projected_threads = int(self.config_manager.find(task.full_name, ConfigManager.THREADS))
         with TaskChainDistributor.awaiting_resources:
             with TaskChainDistributor.update_lock:

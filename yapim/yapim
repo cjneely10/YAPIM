@@ -117,7 +117,7 @@ class YAPIMConfigCreator(cli.Application):
     def main(self):
         if self.output_path is None:
             self.output_path = Path(os.getcwd()).resolve()\
-                .joinpath(os.path.basename(self._tasks_directory) + "-pipeline")
+                .joinpath(os.path.basename(self.tasks_directory) + "-pipeline")
         PackageGenerator(self.tasks_directory, self.dependencies_directories, self.loader).create(self.output_path)
         print("Complete!")
 
