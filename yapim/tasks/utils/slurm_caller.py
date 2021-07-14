@@ -31,17 +31,17 @@ class SLURMCaller:
                  cmd: Union[LocalCommand, str, List[Union[LocalCommand, str]]],
                  task,
                  time_override: Optional[str] = None,
-                 parallelize: bool = False
+                 threads_override: Optional[str] = None
                  ):
         """ Generate SLURMCaller object using user metadata gathered from SLURM config section and
         the task's own metadata
         """
         self.task = task
         self.cmd = cmd
-        self.parallelize = parallelize
         self.config_manager = task.config_manager
         self.user_id = self.config_manager.get_slurm_userid()
         self.time_override = time_override
+        self.threads_override = threads_override
         if SLURMCaller.status is None:
             SLURMCaller.status = SlurmStatus(self.user_id)
 
@@ -126,7 +126,8 @@ class SLURMCaller:
 
         file_ptr.write(
             SLURMCaller._create_header_line("--cpus-per-task",
-                                            self.config_manager.find(self.task.full_name, ConfigManager.THREADS))
+                                            self.config_manager.find(self.task.full_name, ConfigManager.THREADS)
+                                            if self.threads_override is None else self.threads_override)
         )
         file_ptr.write(
             SLURMCaller._create_header_line("--mem",
@@ -150,17 +151,11 @@ class SLURMCaller:
                 file_ptr.write("\n")
             file_ptr.write("\n")
         # Write command to run
-        if self.parallelize:
-            ending_string = " &\n"
-        else:
-            ending_string = "\n"
         if isinstance(self.cmd, list):
             for cmd in self.cmd:
-                file_ptr.write(str(cmd) + ending_string)
+                file_ptr.write(str(cmd) + "\n")
         else:
             file_ptr.write("".join((str(self.cmd), "\n")))
-        if self.parallelize:
-            file_ptr.write("wait\n")
         file_ptr.close()
 
     @staticmethod

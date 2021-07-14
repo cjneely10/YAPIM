@@ -180,7 +180,7 @@ class Task(BaseTask, ABC):
     def _create_slurm_command(self,
                               cmds: Union[LocalCommand, List[LocalCommand]],
                               time_override: Optional[str] = None,
-                              parallelize: bool = False) -> SLURMCaller:  # pragma: no cover
+                              threads_override: Optional[str] = None) -> SLURMCaller:  # pragma: no cover
         """ Create a SLURM-managed process
 
         :param cmds: plumbum LocalCommand object to run
@@ -193,7 +193,7 @@ class Task(BaseTask, ABC):
         if ConfigManager.TIME not in self.config.keys() and ConfigManager.TIME not in parent_info.keys():
             raise MissingDataError("SLURM section not properly formatted within %s" % str(self.full_name))
         # Generate command to launch SLURM job
-        return SLURMCaller(cmds, self, time_override, parallelize)
+        return SLURMCaller(cmds, self, time_override, threads_override)
 
     @property
     def data(self) -> List[str]:
@@ -316,7 +316,7 @@ class Task(BaseTask, ABC):
             is_complete = False
         self.is_complete = is_complete
 
-    def parallel(self, cmd: LocalCommand, time_override: Optional[str] = None):
+    def parallel(self, cmd: LocalCommand, time_override: Optional[str] = None, threads_override: Optional[str] = None):
         """ Launch a command that uses multiple threads
         This method will call a given command on a SLURM cluster automatically (if requested by the user)
         In a config file, WORKERS will correspond to the number of tasks to run in parallel. For slurm users, this
@@ -330,13 +330,14 @@ class Task(BaseTask, ABC):
         Example:
         self.parallel(self.local["pwd"], "1:00")
 
+        :param threads_override:
         :param cmd: plumbum LocalCommand object to run, or list of commands to run
         :param time_override:
         :raises: MissingDataError if SLURM section improperly configured
         """
         # Write command to slurm script file and run
         if self.is_slurm:
-            cmd = self._create_slurm_command(cmd, time_override)
+            cmd = self._create_slurm_command(cmd, time_override=time_override, threads_override=threads_override)
         # Run command directly
         logging.info(str(cmd))
         if self.display_messages:
@@ -356,40 +357,6 @@ class Task(BaseTask, ABC):
         with open(os.path.join(self.wdir, "task.log"), "a") as w:
             w.write("\n")
 
-    @staticmethod
-    def _iter_batch(cmds: Iterable[LocalCommand], threads: int):
-        while True:
-            out = []
-            i = 0
-            iter_completed = False
-            while i < threads:
-                next_fxn = next(cmds, None)
-                if next_fxn is None:
-                    iter_completed = True
-                    break
-                out.append(next_fxn)
-                i += 1
-            if iter_completed:
-                yield out
-                return
-            else:
-                yield out
-
-    # Current behaviour: Generates batches of commands of size self.threads, runs each batch with full resources
-    # listed in SLURM section. Since we are generating commands of size self.threads, this makes sense, and since
-    # batches will run serially, we are not over-extending resource allocations
-    def batch(self, cmds: Iterable[LocalCommand], threads: Optional[int] = None):
-        if threads is None:
-            threads = int(self.threads)
-        for i, cmd_batch in enumerate(self._iter_batch(cmds, threads)):
-            if self.is_slurm:
-                # Okay since will be immediately re-written as slurm
-                self.parallel(cmd_batch)
-            else:
-                self.parallel(
-                    self.create_script(cmd_batch, f"batch-{i}.sh", parallelize=True)
-                )
-
     def single(self, cmd: LocalCommand, time_override: Optional[str] = None):
         """ Launch a command that uses a single thread.
 
@@ -401,7 +368,7 @@ class Task(BaseTask, ABC):
         :param cmd: plumbum LocalCommand object to run, or list of commands to run
         :param time_override:
         """
-        self.parallel(cmd, time_override)
+        self.parallel(cmd, time_override=time_override, threads_override="1")
 
     def create_script(self, cmd: Union[str, LocalCommand, List[Union[str, LocalCommand]]], file_name: str,
                       parallelize: bool = False) \
