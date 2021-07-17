@@ -75,7 +75,7 @@ class AggregateTask(Task, ABC):
             return False
         return task_name in self.input[record_id].keys()
 
-    def filter(self, filter_values: Union[Iterable, Callable[[str], bool]]) -> Dict[str, Dict]:
+    def filter(self, filter_values: Union[Iterable, Callable[[object, dict], bool]]) -> Dict[str, Dict]:
         if isinstance(filter_values, Iterable):
             return {
                 record_id: self.input[record_id]
@@ -85,6 +85,6 @@ class AggregateTask(Task, ABC):
         else:
             return {
                 record_id: self.input[record_id]
-                for record_id in self.input_ids()
-                if filter_values(record_id)
+                for record_id, record_data in self.input_items()
+                if filter_values(record_id, record_data)
             }
