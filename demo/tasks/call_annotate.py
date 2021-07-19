@@ -7,7 +7,7 @@ class CallAnnotate(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {
-            "result": self.input["CallAnnotate"]["result"],
+            "result": self.input["Annotate"]["result"],
             "proteins": self.input["IdentifyProteins"]["proteins"],
             "final": ["result", "proteins"]
         }
@@ -18,7 +18,7 @@ class CallAnnotate(Task):
 
     @staticmethod
     def depends() -> List[DependencyInput]:
-        return [DependencyInput("Annotate")]
+        return [DependencyInput("Annotate", {"IdentifyProteins": ["proteins"]})]
 
     def run(self):
         pass

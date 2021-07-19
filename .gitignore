@@ -3,5 +3,6 @@ tests/out
 tests/*/out
 tests/*/*/out
 tests/*/*out
+demo/out
 *-pipeline/
 __pycache__
