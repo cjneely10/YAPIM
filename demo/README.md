@@ -692,23 +692,154 @@ class Annotate(Task):
 
 ------
 
-## Step 4: Running and testing our pipeline
+## Step 4: Rewriting Step 3 as a dependency
+
+The `Annotate` class we wrote in Step 3 may be useful to use elsewhere. As it is currently written, we can only use its functionality in pipelines that implement the `IdentifyProteins` and `QualityCheck` steps, otherwise our pipeline won't build when we call `create`.
+
+Now is a good time to introduce the `depends()` method that we have been declaring but not defining.
+
+### `depends()`
+
+This method returns a list of `DependencyInput` objects, which are wrapper classes around `Task`/`AggregateTask` classes. The `DependencyInput` constructor provides a location for us to define the input keys that will be used to launch a Task, which allows for dynamically-generated and modularized dependency calling.
+
+Dependencies must be housed in their own directory, so we can update the project directory structure and move our `annotate.py` file from the `tasks` directory to the `dependencies` directory.
+
+```shell
+mkdir dependencies && touch dependencies/__init__.py
+mv tasks/annotate.py dependencies/
+```
+
+For our `Annotate` class, we can rewrite it as a dependency by removing any reference to requirements (note that we can use other dependencies):
+
+```python
+from typing import List, Union, Type
+
+from yapim import Task, DependencyInput
+
+
+class Annotate(Task):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.output = {
+            "result": self.wdir.joinpath("result.m8")
+        }
+
+    @staticmethod
+    def requires() -> List[Union[str, Type]]:
+        pass
+
+    @staticmethod
+    def depends() -> List[DependencyInput]:
+        pass
+
+    def run(self):
+        self.parallel(
+            self.program[
+                "easy-search",
+                self.input["proteins"],
+                self.data[0],
+                self.output["result"],
+                self.wdir.joinpath("tmp"),
+                "--remove-tmp-files",
+                "--threads", self.threads,
+                (*self.added_flags),
+            ]
+        )
+```
+
+We updated two lines - our `requires()` definition, and the input that we are using in our `run()` method. We also re-defined our output, and removed any `final` definitions, as dependencies are not allowed to finalize any output.
+
+Now, any `Task` can use our dependency class we've written to complete its output! Note that `Task` classes may not use `AggregateTask` in their dependency lists, or vice-a-versa.
+
+Now, let's create a new `Task` class that will use our `Annotate` class as a dependency. In the `tasks` directory, create a new file named `call_annotate.py`, and provide the following definition:
+
+```python
+from typing import List, Union, Type
+
+from yapim import Task, DependencyInput
+
+
+class CallAnnotate(Task):
+    @staticmethod
+    def requires() -> List[Union[str, Type]]:
+        pass
+
+    @staticmethod
+    def depends() -> List[DependencyInput]:
+        pass
+
+    def run(self):
+        pass
+```
+
+To use the dependency that we just wrote, we simply need to list it in the `depends()` method.
+
+In the `DependencyInput` initializer, we provide the name of the class. Optionally, we can provide a dictionary that defines how we should overwrite input to the dependency, which allows us to feed to it output from other `Task`s.
+
+For example, we can create `Task`s that have requirements, feed the results of completing these requirements to a dependency, and provide updated naming schemes in `from:to` syntax, if desired. 
+
+```python
+@staticmethod
+def requires() -> List[Union[str, Type]]:
+    return ["A", "B"]
+
+@staticmethod
+def depends() -> List[DependencyInput]:
+    return [
+        DependencyInput("Dependency", {"A": {"xxx": "input"}, "B": ["output"]})
+    ]
+```
+
+For our class, we do not need to do any input renaming, so we can call `Annotate` from our `depends()` method, and feed the output as the output of our wrapper `Task`:
+
+```python
+from typing import List, Union, Type
+
+from yapim import Task, DependencyInput
+
+
+class CallAnnotate(Task):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.output = {
+            "result": self.input["CallAnnotate"]["result"],
+            "proteins": self.input["IdentifyProteins"]["proteins"],
+            "final": ["result", "proteins"]
+        }
+
+    @staticmethod
+    def requires() -> List[Union[str, Type]]:
+        return ["IdentifyProteins", "QualityCheck"]
+
+    @staticmethod
+    def depends() -> List[DependencyInput]:
+        return [DependencyInput("Annotate")]
+
+    def run(self):
+        pass
+```
+
+------
+
+## Step 5: Running and testing our pipeline
 
 At this point, our project directory structure should resemble:
 
 ```
 |--demo
   |--tasks-pipeline  # Auto-generated directory
-  |--tasks  # Our working pipeline
+  |--dependencies
     |--annotate.py
+  |--tasks  # Our working pipeline
+    |--call_annotate.py
     |--quality_check.py
     |--identify_proteins.py
 ```
 
-Let's regenerate our `tasks-pipeline` output:
+Let's regenerate our `tasks-pipeline` output with our complete pipeline and all of its dependencies:
 
 ```shell
-yapim create -t tasks
+yapim create -t tasks -d dependencies
 ```
 
 If prompted, select `y` to overwrite the existing configuration file.
@@ -760,17 +891,22 @@ QualityCheck:
   memory: 8
   time: "4:00:00"
 
-Annotate:
+CallAnnotate:
   # Number of threads task will use
   threads: 1
   # Amount of memory task will use (in GB)
   memory: 8
   time: "4:00:00"
+  dependencies:
+    Annotate:
+      program:
 
 ...  # document end
 ```
 
-Let's fill in the configuration file, making sure to provide `program`, `data`, and any other definitions we used in our pipeline:
+Notice that, since we are running the `Annotate` class, we will need to define config parameters to run it within its respective section of the `Annotate` class:
+
+Let's fill in the configuration file, making sure to provide `program`, `data`, and any other definitions we used in our pipeline. Be sure to adjust resource usage to match your system:
 
 ```yaml
 ---  # document start
@@ -814,27 +950,34 @@ IdentifyProteins:
 
 QualityCheck:
   # Number of threads task will use
-  threads: 8
+  threads: 10
   # Amount of memory task will use (in GB)
-  memory: 45
+  memory: 90
   time: "4:00:00"
   program: checkm
   min_quality: 60.0
 
-Annotate:
+CallAnnotate:
   # Number of threads task will use
   threads: 1
   # Amount of memory task will use (in GB)
-  memory: 16
+  memory: 8
   time: "4:00:00"
-  program: mmseqs
-  data:
-    pfam_db
-  FLAGS:
-    --cov-mode 0
-    -s 5
-    -c 0.3
-    --split-memory-limit 10G
+  dependencies:
+    Annotate:
+      # Number of threads task will use
+      threads: 5
+      # Amount of memory task will use (in GB)
+      memory: 30
+      time: "4:00:00"
+      program: mmseqs
+      data:
+        pfam_db
+      FLAGS:
+        --cov-mode 0
+        -s 5
+        -c 0.3
+        --split-memory-limit 20G
 
 ...  # document end
 ```
@@ -863,4 +1006,4 @@ This will allow users to recreate our environment using the command:
 conda env create -f tasks-pipeline/enviroment.yml
 ```
 
-Our final directory contents in the `tasks-pipeline` directory contain the runnable pipeline, it's default editable configuration file, and the script to generate the environment to run it. We can now share this pipeline with others.
+Our final directory contents in the `tasks-pipeline` directory contain the runnable pipeline, it's default editable configuration file, and the script to generate the environment to run it. We can now share this pipeline with others. 

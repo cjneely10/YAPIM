@@ -7,14 +7,12 @@ class Annotate(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {
-            "result": self.wdir.joinpath("result.m8"),
-            "proteins": self.input["IdentifyProteins"]["proteins"],
-            "final": ["result", "proteins"]
+            "result": self.wdir.joinpath("result.m8")
         }
 
     @staticmethod
     def requires() -> List[Union[str, Type]]:
-        return ["IdentifyProteins", "QualityCheck"]
+        pass
 
     @staticmethod
     def depends() -> List[DependencyInput]:
@@ -24,7 +22,7 @@ class Annotate(Task):
         self.parallel(
             self.program[
                 "easy-search",
-                self.input["IdentifyProteins"]["proteins"],
+                self.input["proteins"],
                 self.data[0],
                 self.output["result"],
                 self.wdir.joinpath("tmp"),

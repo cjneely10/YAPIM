@@ -46,19 +46,26 @@ QualityCheck:
   program: checkm
   min_quality: 60.0
 
-Annotate:
+CallAnnotate:
   # Number of threads task will use
-  threads: 5
+  threads: 1
   # Amount of memory task will use (in GB)
-  memory: 30
+  memory: 8
   time: "4:00:00"
-  program: mmseqs
-  data:
-    /media/user/2TB/Data/mmseqs/pfam_db
-  FLAGS:
-    --cov-mode 0
-    -s 5
-    -c 0.3
-    --split-memory-limit 20G
+  dependencies:
+    Annotate:
+      # Number of threads task will use
+      threads: 5
+      # Amount of memory task will use (in GB)
+      memory: 30
+      time: "4:00:00"
+      program: mmseqs
+      data:
+        /media/user/2TB/Data/mmseqs/pfam_db
+      FLAGS:
+        --cov-mode 0
+        -s 5
+        -c 0.3
+        --split-memory-limit 20G
 
 ...  # document end
