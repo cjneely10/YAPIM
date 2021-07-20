@@ -1,14 +1,14 @@
 # Simple tutorial for creating a data workflow
 
-The following demo will provide an introduction to the features available within the YAPIM API. We will develop a very simple pipeline to find proteins in bacterial genomes/metagenome-assembled-genomes and to provide functional annotation of genomes that pass a quality check step. This three-part tutorial is succeeded by a larger 7-part tutorial for intermediate users who wish to learn about the more complex features available.
+The following demo will provide an introduction to the features available within the YAPIM API. We will develop a very simple pipeline to find proteins in bacterial genomes/metagenome-assembled-genomes and to provide functional annotation of genomes that pass a quality check step. This five-part tutorial is succeeded by a larger seven-part tutorial for intermediate users who wish to learn about the more complex features available.
 
 The complete code generated in this tutorial is available in this directory (i.e. the demo's `tasks` directory and `tasks-config.yaml` file).
 
 ### Step 0: Prepare working environment 
 
-While not directly required, we highly suggest building your pipeline within its own environment. Not only will this prevent dependency-related bugs from occurring during the development process, but this will also make your pipeline system-independent (at least mostly). 
+While not directly required, we highly suggest building your pipeline within its own environment. Not only will this prevent dependency-related bugs from occurring during the development process, but this will also make your pipeline system-independent (at least mostly). This uses `conda`. 
 
-Here, we use miniconda to accomplish this, and start by creating a new environment and installing YAPIM: 
+Start by creating a new environment and installing YAPIM: 
 
 ```shell
 conda create --name yapim-demo python=3.8
@@ -26,7 +26,7 @@ mkdir tasks
 touch tasks/__init__.py
 ```
 
-The code that we write in upcoming tutorials will be stored in the `demo/tasks` directory and be a part of its eponymous python package. 
+The code that we write in upcoming tutorials will be stored in the `demo/tasks` directory and be a part of its eponymous python package. If you are using an IDE, then the `demo` directory will be your top-level project directory. 
 
 ## Your first YAPIM workflow
 
@@ -786,7 +786,7 @@ def requires() -> List[Union[str, Type]]:
 @staticmethod
 def depends() -> List[DependencyInput]:
     return [
-        DependencyInput("Dependency", {"A": {"xxx": "input"}, "B": ["output"]})
+        DependencyInput("Dependency", {"A": {"from": "to"}, "B": ["from"]})
     ]
 ```
 

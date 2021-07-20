@@ -1,3 +1,5 @@
+"""Manage status of in-progress SLURM jobs"""
+
 import threading
 from datetime import datetime, timedelta
 
@@ -5,6 +7,7 @@ from plumbum import local
 
 
 class SlurmStatus:
+    """Queries squeue job information for user, periodically queries to update cached status. Will re-check c. 60s"""
     def __init__(self, user_id: str):
         self.lock = threading.Lock()
         self._user_id = user_id
@@ -16,6 +19,7 @@ class SlurmStatus:
         self._status_message = str(local["squeue"]["-u", self._user_id]())
 
     def update(self):
+        """Update currently tracked info once a job has been launched"""
         with self.lock:
             self._set_status()
 

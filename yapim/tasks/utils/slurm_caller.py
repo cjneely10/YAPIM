@@ -1,6 +1,7 @@
 """
 Module holds logic for running a dask distributed task within a SLURM job
 """
+
 import os
 from pathlib import Path
 from time import sleep
@@ -13,6 +14,7 @@ from yapim.utils.config_manager import ConfigManager
 
 
 class SlurmRunError(Exception):
+    """Wrapper for Exceptions raised during running SLURM job"""
     pass
 
 
@@ -170,6 +172,7 @@ class SLURMCaller:
 
     @property
     def slurm_log_file(self) -> str:
+        """Name of SLURM_generated log file"""
         return "slurm-%s.out" % self.job_id
 
     def __call__(self, *args, **kwargs):
