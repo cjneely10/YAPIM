@@ -11,7 +11,25 @@ from yapim.utils.config_manager import ConfigManager
 
 
 class AggregateTask(Task, ABC):
-    """An AggregateTask receives the entire input set for the pipeline and can operate on any part of this input"""
+    """An AggregateTask receives the entire input set for the pipeline and can operate on any part of this input.
+
+    If the condition() method is overwritten, it will be called prior to the run() method.
+
+    Lifecycle:
+
+    requires()
+
+    depends()
+
+    __init__()
+
+    [condition()]
+
+    run()
+
+    deaggregate()
+
+    """
     def __init__(self,
                  record_id: str,
                  task_scope: str,
@@ -90,8 +108,7 @@ class AggregateTask(Task, ABC):
         return class_results
 
     def has_run(self, task_name: str, record_id: Optional[str] = None) -> bool:
-        """ Check whether a task was run for a record_id. Returns false if no record_id is passed and the caller is
-        an instance of `AggregateTask`
+        """ Check whether a task was run for a record_id. Always returns false if no record_id is passed.
 
         :return: Boolean result
         """

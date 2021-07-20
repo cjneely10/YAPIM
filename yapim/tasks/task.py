@@ -1,3 +1,5 @@
+"""Task provides the primary API methods with which users will interact."""
+
 import logging
 import os
 import shutil
@@ -8,6 +10,7 @@ from abc import ABC
 from pathlib import Path
 from typing import Tuple, List, Union, Optional, Callable
 
+# pylint: disable=no-member
 from plumbum import local, colors, ProcessExecutionError
 from plumbum.machines import LocalMachine, LocalCommand
 
@@ -33,6 +36,7 @@ class TaskExecutionError(RuntimeError):
 
 
 def clean(*directories: Union[Path, str]):
+    """Remove directories in this Task's working directory prior to calling run()"""
     def method(func: Callable):
         def fxn(self):
             for directory in directories:
@@ -48,7 +52,26 @@ def clean(*directories: Union[Path, str]):
 
 # TODO: Parser to identify illegal self.input accesses and prevent pipeline launch at start time
 #  https://stackoverflow.com/questions/43166571/getting-all-the-nodes-from-python-ast-that-correspond-to-a-particular-variable-w
+# pylint: disable=too-many-public-methods
 class Task(BaseTask, ABC):
+    """The Task class manages completing a set of instructions for an item in the input set. The Task class operates on
+    a single input. str/Path objects that are defined by self.output will be validated for existence after a Task
+    completes its run() invocation. If the condition() method is overwritten, it will be called prior to the run()
+    method.
+
+    Lifecycle:
+
+    requires()
+
+    depends()
+
+    __init__()
+
+    [condition()]
+
+    run()
+
+    """
     print_lock = threading.Lock()
 
     def __init__(self,
@@ -67,8 +90,6 @@ class Task(BaseTask, ABC):
         self.input = input_data.copy()
         self.input.update(added_data)
         self.input = InputDict(self.input)
-        # print(self.input)
-        # print(added_data)
         self.output = {}
         self.wdir: Path = Path(wdir).resolve()
         self.config_manager = config_manager
@@ -83,24 +104,26 @@ class Task(BaseTask, ABC):
 
     @property
     def record_id(self) -> str:
+        """The id associated with this input. This id defines, at least, the __str__() method"""
         return self._record_id
 
     def versions(self) -> List[VersionInfo]:
+        """Allowable program versions for running this Task"""
         pass
 
     # TODO: Add to tutorial
     def condition(self) -> bool:
+        """Define Task to only run if a condition is met."""
         pass
 
+    # pylint: disable=unused-argument
     def has_run(self, task_name: str, record_id: Optional[str] = None):
+        """Check if a Task has completed for this input"""
         return task_name in self.input.keys()
 
     def get_versions(self) -> Optional[List[str]]:
-        """ Get version of program that Task is currently running
-
-        :return:
-        :rtype:
-        """
+        """Get version of program that Task is currently running"""
+        # pylint: disable=assignment-from-no-return
         versions = self.versions()
         if ConfigManager.PROGRAM not in self.config.keys() or versions is None or len(versions) == 0:
             return None
@@ -125,37 +148,41 @@ class Task(BaseTask, ABC):
         )
 
     def task_scope(self) -> str:
+        """Outer scope of Task. Will either be ConfigManager.ROOT, or will be the top-level Task of a dependency
+        chain"""
         return self._task_scope
 
     @property
     def storage_directory(self) -> Path:
+        """Get location in which this Task's input is stored"""
         return self.config_manager.storage_directory
 
     @property
     def threads(self) -> str:
         """ Number of threads when running task (as set in config file)
 
-        :return: Str of number of tasks
+        :return: Str of number of threads
         """
         return self.config_manager.find(self.full_name, ConfigManager.THREADS)
 
     @property
     def memory(self) -> str:
-        """ Number of threads when running task (as set in config file)
+        """ Amount of memory to use when running task (as set in config file)
 
-        :return: Str of number of tasks
+        :return: Str amount of memory
         """
         return self.config_manager.find(self.full_name, ConfigManager.MEMORY)
 
     @property
     def config(self) -> dict:
+        """Get section of configuration file corresponding to this Task or dependency"""
         return self.config_manager.get(self.full_name)
 
     @property
     def added_flags(self) -> List[str]:
         """ Get additional flags that user provided in config file
 
-        Example: self.local["ls"][(*self.added_flags("ls"))]
+        Example: self.local["ls"][(*self.added_flags())]
 
         :return: List of arguments to pass to calling program
         """
@@ -164,7 +191,7 @@ class Task(BaseTask, ABC):
     def flags_to_list(self, config_param: str):
         """ Get additional flags from given section, parsed to list
 
-        Example: self.local["ls"][(*self.added_flags("ls"))]
+        Example: self.local["ls"][(*self.flags_to_list(config_param))]
 
         :return: List of arguments to pass to calling program
         """
@@ -204,15 +231,11 @@ class Task(BaseTask, ABC):
         return self.config[ConfigManager.DATA].split(" ")
 
     def run_task(self) -> TaskResult:
-        """ Type of run. For Task objects, this simply calls run(). For other tasks, there
-        may be more processing required prior to returning the result.
-
-        This method will be used to return the result of the child Task class implemented run method.
-
-        :return:
-        """
+        """ Handle conditional run checks, display status messages, and call run() via a try block.
+        Track time to complete"""
         # Conditional run - either undefined (in which case self.skip defined by config presence/definition)
         # Or defined by result of evaluating condition
+        # pylint: disable=assignment-from-no-return
         condition = self.condition()
         if condition is not None:
             if condition is False:
@@ -252,10 +275,16 @@ class Task(BaseTask, ABC):
 
     @property
     def local(self) -> LocalMachine:
+        """Reference to local PATH and machine"""
         return local
 
     @property
     def program(self) -> LocalCommand:
+        """Program that is used to run this Task and that is defined by the label `program` in this Task's configuration
+        file section
+
+        Alias for self.local[self.config_manager.find(self.full_name, ConfigManager.PROGRAM)]
+        """
         program = self.config_manager.find(self.full_name, ConfigManager.PROGRAM)
         if program is None:
             raise MissingProgramSection(f"Program key not set in config section for {self.full_name}")
@@ -269,6 +298,7 @@ class Task(BaseTask, ABC):
         return self.__str__()
 
     def try_run(self):
+        """Run the task!"""
         try:
             self.run()
         # pylint: disable=broad-except
@@ -304,14 +334,13 @@ class Task(BaseTask, ABC):
         """
         is_complete = None
         for _path in self.output.values():
-            if isinstance(_path, Path) or isinstance(_path, str):
+            if isinstance(_path, (Path, str)):
                 if not os.path.exists(_path):
                     # Only call function if missing path
                     # Then move on
                     is_complete = False
                     break
-                else:
-                    is_complete = True
+                is_complete = True
         if is_complete is None:
             is_complete = False
         self.is_complete = is_complete
@@ -319,21 +348,15 @@ class Task(BaseTask, ABC):
     def parallel(self, cmd: LocalCommand, time_override: Optional[str] = None, threads_override: Optional[str] = None):
         """ Launch a command that uses multiple threads
         This method will call a given command on a SLURM cluster automatically (if requested by the user)
-        In a config file, WORKERS will correspond to the number of tasks to run in parallel. For slurm users, this
-        is the number of jobs that will run simultaneously.
 
         A time-override may be specified to manually set the maximum time limit a command (job) may run on a cluster,
-        which will override the time that is specified by the user in a config file
+        which will override the time that is specified by the user in a config file. This is also possible for a
+        thread count.
 
         The command string will be written to the EukMetaSanity pipeline output file and will be printed to screen
 
         Example:
-        self.parallel(self.local["pwd"], "1:00")
-
-        :param threads_override:
-        :param cmd: plumbum LocalCommand object to run, or list of commands to run
-        :param time_override:
-        :raises: MissingDataError if SLURM section improperly configured
+        self.parallel(self.local["pwd"])
         """
         # Write command to slurm script file and run
         if self.is_slurm:
@@ -364,9 +387,6 @@ class Task(BaseTask, ABC):
 
         Example:
         self.single(self.local["pwd"])
-
-        :param cmd: plumbum LocalCommand object to run, or list of commands to run
-        :param time_override:
         """
         self.parallel(cmd, time_override=time_override, threads_override="1")
 
@@ -393,10 +413,26 @@ class Task(BaseTask, ABC):
         self.parallel(script)
         self.single(script)
 
-        :param parallelize:
-        :param cmd: Command to write to file, or list of commands to write
-        :param file_name: Name of file to create
-        :return: Command to run script via plumbum interface
+        This may also be used to parallelize operations at the Task level:
+
+        script = self.create_script(
+            [self.local["ls"]["~"], self.local["ls"]["~"], self.local["ls"]["~"]], "cd.sh", parallelize=True
+        )
+
+
+        This will create a file within self.wdir named `cd.sh`, the contents of which will be:
+
+        #!/bin/bash
+
+        cd <wdir> || return
+
+        ls ~ &
+
+        ls ~ &
+
+        ls ~ &
+
+        wait
         """
         _path = os.path.join(self.wdir, file_name)
         fp = open(_path, "w")
@@ -416,6 +452,8 @@ class Task(BaseTask, ABC):
 
     @staticmethod
     def finalize(obj_results: dict, class_results: dict, task: "Task", result: TaskResult) -> dict:
+        """Finalize output of this Task by updating class-level output storage as well as this input's tracked
+        storage"""
         class_results[result.record_id][result.task_name] = result
         obj_results[result.task_name] = result
         return class_results

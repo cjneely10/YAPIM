@@ -982,10 +982,10 @@ CallAnnotate:
 ...  # document end
 ```
 
-Now, we can run our pipeline:
+Now, we can run our pipeline. In the `demo/data` directory of this repository, we have provided 10 MAGs that we can use to test this pipeline. Download this data (by pulling the repository) and run the following command:
 
 ```shell
-yapim run -p tasks-pipeline -c tasks-pipeline/tasks-config.yaml -i ../data
+yapim run -p tasks-pipeline -c tasks-pipeline/tasks-config.yaml -i /path/to/data
 ```
 
 After it is complete, all results should be present in the `out/results` directory. There will be an enclosed subdirectory for each YAPIM pipeline that has been run on this input set.

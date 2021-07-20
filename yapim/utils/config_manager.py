@@ -1,7 +1,4 @@
-"""
-Manages the config file, as well as arguments that are set for each part of the pipeline
-
-"""
+"""Manages the config file, as well as arguments that are set for each part of the pipeline"""
 
 import os
 from pathlib import Path
@@ -12,69 +9,49 @@ from plumbum import local, CommandNotFound
 
 
 class InvalidResourcesError(AttributeError):
-    """ When a task requests more resources than are globally available
-
-    """
+    """When a task requests more resources than are globally available"""
 
 
 class MissingRequiredHeader(AttributeError):
-    """ When a file is missing either INPUT, GLOBAL, or SLURM
-
-    """
+    """When a file is missing either INPUT, GLOBAL, or SLURM"""
 
 
 class MissingTimingData(AttributeError):
-    """ When a config file is missing required sections
-
-    """
+    """When a config file is missing required sections"""
 
 
 class MissingProgramSection(AttributeError):
-    """ When a program is requested to be used, but section is not present in Task's
-    config file section
-
-    """
+    """When a program is requested to be used, but section is not present in Task's
+    config file section"""
 
 
 class ImproperInputSection(ValueError):
-    """ Wraps error of improperly formatted input section for deriving pipeline input
-
-    """
+    """Wraps error of improperly formatted input section for deriving pipeline input"""
 
 
 class InvalidPathError(FileExistsError):
-    """ Wraps FileExistsError, raise if user provided a path that does not exist
-
-    """
+    """Wraps FileExistsError, raise if user provided a path that does not exist"""
     pass
 
 
 class MissingDataError(FileExistsError):
-    """ Wraps FileExistsError, raise if user did not fill out a required DATA
-    section in a configuration file
-
-    """
+    """Wraps FileExistsError, raise if user did not fill out a required DATA
+    section in a configuration file"""
     pass
 
 
 class InvalidProtocolError(ValueError):
-    """ Wraps ValueError, raise if user requests to use a protocol that isn't implemented
-
-    """
+    """Wraps ValueError, raise if user requests to use a protocol that isn't implemented"""
     pass
 
 
 class MissingDependenciesError(ValueError):
-    """ Wraps ValueError, raise if dependency section is missing from config file
-
-    """
+    """Wraps ValueError, raise if dependency section is missing from config file"""
     pass
 
 
 class ConfigManager:
-    """ ConfigManager handles parsing user-passed config file
-
-    """
+    """ConfigManager handles parsing user-passed config file"""
     ROOT = "root"
     SLURM = "SLURM"
     SBATCH = "SBATCH"
