@@ -1,3 +1,5 @@
+"""Group together Tasks to create longer Task chains whose completion is independent of other Task chains"""
+
 import os
 import threading
 from pathlib import Path
@@ -13,6 +15,8 @@ from yapim.utils.path_manager import PathManager
 
 
 class TaskChainDistributor(dict):
+    """Run Tasks based on available resources. Populate and track output as completed. Update input to a Task
+    prior running."""
     awaiting_resources: threading.Condition = threading.Condition()
     update_lock: threading.Lock = threading.Lock()
 
@@ -47,6 +51,7 @@ class TaskChainDistributor(dict):
 
     @staticmethod
     def initialize_class():
+        """Create empty dictionaries for tracking"""
         TaskChainDistributor.results = {}
         TaskChainDistributor.output_data_to_pickle = {}
         TaskChainDistributor.current_threads_in_use_count = 0
@@ -54,12 +59,14 @@ class TaskChainDistributor(dict):
 
     @staticmethod
     def set_allocations(config_manager: ConfigManager):
+        """Set maximum allocations of threads and memory"""
         TaskChainDistributor.maximum_threads = int(
             config_manager.config[ConfigManager.GLOBAL][ConfigManager.MAX_THREADS])
         TaskChainDistributor.maximum_gb_memory = int(
             config_manager.config[ConfigManager.GLOBAL][ConfigManager.MAX_MEMORY])
 
     def run(self):
+        """Run each task in a task chain"""
         for task_ids in self.task_identifiers:
             if len(task_ids) == 1:
                 self._run_task(task_ids[0])
@@ -70,9 +77,12 @@ class TaskChainDistributor(dict):
 
     @staticmethod
     def _is_aggregate(task: Type[Task]):
+        """Task is AggregateTask subclass"""
         return issubclass(task, AggregateTask)
 
     def _run_task(self, task_identifier: Node, top_level_node: Optional[Node] = None):
+        """Run Task/AggregateTask. Wait for available resources prior to launching. Finalize output to output
+        directories and provide updated input values prior to launching a Task"""
         wdir = ".".join(task_identifier.get()).replace(f"{ConfigManager.ROOT}.", "")
         task_blueprint = self.task_blueprints[task_identifier.name]
         if TaskChainDistributor._is_aggregate(task_blueprint):
@@ -91,8 +101,9 @@ class TaskChainDistributor(dict):
                 try:
                     updated_data = self._update_distributed_input(self.record_id,
                                                                   self.task_blueprints[top_level_node.name])
-                except KeyError as e:
-                    raise TaskExecutionError(f"Unable to load dependency data {e} for {task_identifier.get()} "
+                except KeyError as err:
+                    # pylint: disable=raise-missing-from
+                    raise TaskExecutionError(f"Unable to load dependency data {err} for {task_identifier.get()} "
                                              f"on record {self.record_id}")
             self.path_manager.add_dirs(self.record_id, [wdir])
             task = task_blueprint(
@@ -133,6 +144,7 @@ class TaskChainDistributor(dict):
 
     @staticmethod
     def _release_resources(projected_threads: int, projected_memory: int):
+        """Free resources used in running Task"""
         with TaskChainDistributor.update_lock:
             TaskChainDistributor.current_threads_in_use_count -= projected_threads
             TaskChainDistributor.current_gb_memory_in_use_count -= projected_memory
@@ -140,6 +152,8 @@ class TaskChainDistributor(dict):
             TaskChainDistributor.awaiting_resources.notifyAll()
 
     def _finalize_output(self, task: Task, result: TaskResult):
+        """Populate Task output to final output directory and output .pkl file. Do not finalize Tasks that were skipped
+        """
         with TaskChainDistributor.update_lock:
             if result.record_id not in TaskChainDistributor.results.keys():
                 TaskChainDistributor.results[result.record_id] = {}
@@ -178,8 +192,11 @@ class TaskChainDistributor(dict):
                         TaskChainDistributor.output_data_to_pickle[result.record_id][file_str] = obj
 
     @staticmethod
+    # pylint: disable=too-many-branches
     def _update_distributed_input(record_id: str, requirement_node: Type[Task]) -> Dict:
+        """Populate input to a Task with the requested from:to mapping defined in DependencyInput class"""
         amended_dict = {}
+        # pylint: disable=too-many-nested-blocks
         for dependency in requirement_node.depends():
             if dependency.collect_by is not None:
                 for prior_id, prior_mapping in dependency.collect_by.items():

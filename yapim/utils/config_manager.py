@@ -78,40 +78,40 @@ class ConfigManager:
 
         :param config_path: Path to .yaml config file
         """
-        with open(str(Path(config_path).resolve()), "r") as fp:
-            self.config = yaml.load(fp, Loader=yaml.FullLoader)
+        with open(str(Path(config_path).resolve()), "r") as file_ptr:
+            self.config = yaml.load(file_ptr, Loader=yaml.FullLoader)
             # Confirm all paths in file are valid
             self._validate_global()
         self.storage_directory = storage_directory
 
     def get(self, task_data: Tuple[str, str]) -> dict:
-        """ Get (scope, name) data from config file
-
-        :return:
-        :rtype:
-        """
+        """Get (scope, name) data from config file"""
         if task_data[0] == ConfigManager.ROOT:
             return self.config[task_data[1]]
-        else:
-            if ConfigManager.DEPENDENCIES not in self.config[task_data[0]].keys():
-                raise MissingDependenciesError("Config file is missing valid dependencies section for step")
-            return self.config[task_data[0]][ConfigManager.DEPENDENCIES][task_data[1]]
+        if ConfigManager.DEPENDENCIES not in self.config[task_data[0]].keys():
+            raise MissingDependenciesError("Config file is missing valid dependencies section for step")
+        return self.config[task_data[0]][ConfigManager.DEPENDENCIES][task_data[1]]
 
     def find(self, task_data: Tuple[str, str], key: str) -> Optional:
+        """Find a Task's data `key`. If not found in Task's own config section, check parent sections.
+        Return None if nothing is found."""
         config_section = self.get(task_data)
         if key in config_section.keys():
             return config_section[key]
         inner = self.parent_info(task_data)
         if key in inner.keys():
             return inner[key]
+        return None
 
     def parent_info(self, task_data: Tuple[str, str]) -> dict:
+        """Get this Task's parent info, which may be the top-level ConfigManager.ROOT location"""
         if task_data[0] == ConfigManager.ROOT:
             return self.config[task_data[1]]
-        else:
-            return self.config[task_data[0]]
+        return self.config[task_data[0]]
 
+    # pylint: disable=raise-missing-from
     def _validate_global(self):
+        """Confirm global settings are present and valid"""
         data_dict = self.config
         for required_arg in (ConfigManager.GLOBAL, ConfigManager.INPUT, ConfigManager.SLURM):
             if required_arg not in data_dict.keys():
@@ -127,12 +127,12 @@ class ConfigManager:
         max_threads = int(data_dict[ConfigManager.GLOBAL][ConfigManager.MAX_THREADS])
         ConfigManager._validate(self.config, False, max_memory, max_threads)
 
+    # pylint: disable=too-many-branches
     @staticmethod
     def _validate(data_dict, is_dependency: bool, max_memory: int, max_threads: int):
         """ Confirm that data and dependency paths provided in file are all valid.
 
         :raises: MissingDataError
-
         """
         if not isinstance(data_dict, dict):
             raise MissingDataError("Dependency section is improperly configured!")
@@ -214,13 +214,12 @@ class ConfigManager:
         slurm_section_data = {key: str(val)
                               for key, val in self.config[ConfigManager.SLURM].items()
                               if key not in ignore_slurm_fields}
-        return sorted([(key, value) for key, value in slurm_section_data.items()], key=lambda v: v[0])
+        return sorted(((key, value) for key, value in slurm_section_data.items()), key=lambda v: v[0])
 
     def get_slurm_userid(self):
         """ Get user id from slurm section.
 
         :raises: MissingDataError if not present
-
         :return: user-id provided in config file
         """
         if "user-id" not in self.config["SLURM"].keys():
@@ -240,6 +239,7 @@ class ConfigManager:
 
     @staticmethod
     def _parse_flags(flags):
+        """Parse config section into a list"""
         if flags is not None:
             out = flags.split(" ")
             while "" in out:

@@ -10,12 +10,12 @@ from plumbum import local
 
 
 class PathManager:
-    WDIR = "wdir"
-    RESULTS = "results"
-    STORAGE_DIR = "input"
     """
     This class manages a set of working directories. Useful for keeping files organized
     """
+    WDIR = "wdir"
+    RESULTS = "results"
+    STORAGE_DIR = "input"
 
     def __init__(self, base_path: Path):
         """ Create PathManager object rooted at `base_path`

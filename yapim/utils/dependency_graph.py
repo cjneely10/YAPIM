@@ -1,3 +1,5 @@
+"""Logic for building dependency graphs and topologically sorting to create tasks to complete"""
+
 import inspect
 from typing import List, Dict, Tuple, Type, Iterable, Optional, Set
 
@@ -18,11 +20,13 @@ class DependencyGraphGenerationError(BaseException):
 
 
 class Node:
+    """Struct to hold name, scope information (helper struct)"""
     def __init__(self, task_scope: str, task_name: str):
         self.scope = task_scope
         self.name = task_name
 
     def get(self) -> Tuple[str, str]:
+        """(scope, name)"""
         return self.scope, self.name
 
     def __str__(self):  # pragma: no cover
@@ -77,6 +81,7 @@ class DependencyGraph:
         self.sort_graph()
 
     def _build_dependency_graph(self, tasks: Iterable[Type[Task]]):
+        """Create dependency graph from list of Task class objects"""
         for task in tasks:
             task_node: Node = Node(DependencyGraph.ROOT, task.__name__)
             self._graph.add_edge(DependencyGraph.ROOT_NODE, task_node)
@@ -100,6 +105,7 @@ class DependencyGraph:
                 self._graph.add_edge(Node(DependencyGraph.ROOT, requirement), task_node)
 
     def _add_dependencies(self, task_node: Node, scope: str, graph: nx.Graph):
+        """Add in dependencies that are listed for a given Task"""
         # Link dependency names
         task = self.idx[task_node.name]
         dependency: DependencyInput
@@ -133,6 +139,7 @@ class DependencyGraph:
             self._add_dependencies(dependency_node, scope, graph)
 
     def sort_graph(self):
+        """Sort top-level Task requirements, and insert Task-level dependencies"""
         sorted_graph = list(nx.topological_sort(self._graph))
         sorted_graph.remove(DependencyGraph.ROOT_NODE)
         out_steps = []
@@ -148,43 +155,48 @@ class DependencyGraph:
 
     @property
     def sorted_graph_identifiers(self) -> List[List[Node]]:
+        """Sorted graph"""
         return self._sorted_graph
 
     def _find_task_idx(self, task_name: str, dependency_name: Optional[str] = None) -> Tuple[int, int]:
+        """Locate index of a Task within its task list"""
         for i, task_list in enumerate(self.sorted_graph_identifiers):
             if task_list[-1].name == task_name:
                 if dependency_name is None:
                     return i, -1
-                else:
-                    for j, task in enumerate(task_list[:-1]):
-                        if task.name == dependency_name:
-                            return i, j
+                for j, task in enumerate(task_list[:-1]):
+                    if task.name == dependency_name:
+                        return i, j
         return -1, -1
 
     def _get_tasks_name_strings(self, task_idx: Tuple[int, int]) -> List[str]:
+        """List tasks as TaskName.DependencyName"""
         task_names: list = [self.sorted_graph_identifiers[task_idx[0]][-1].name]
         if task_idx[1] != -1:
             task_names.append(task_names[-1] + "." + self.sorted_graph_identifiers[task_idx[0]][task_idx[1]].name)
         return task_names
 
     def _connecting_paths(self, task1: Node, task2: Node):
+        """Identify paths that connect nodes by calling the networkx method"""
         try:
             return next(nx.all_simple_paths(self._graph, task1, task2))
         except StopIteration:
             return []
 
     def get_affected_nodes(self, task_name: str, dependency_name: Optional[str] = None) -> Set[str]:
+        """Find nodes that are affected by deleting a given Task - e.g., list all nodes that depend on a given node"""
         out_nodes = set()
         self._get_nodes_helper(out_nodes, task_name, dependency_name)
         return out_nodes
 
     def _get_nodes_helper(self, out_nodes: Set[str], task_name: str, dependency_name: Optional[str] = None):
+        """Recursive search through nodes list to identify nodes that would be effected by deleting a Task's data"""
         task_pos = self._find_task_idx(task_name, dependency_name)
         if task_pos == (-1, -1):
             return
-        for task_name in self._get_tasks_name_strings(task_pos):
-            out_nodes.add(task_name)
-        for i, task_list in enumerate(self.sorted_graph_identifiers[task_pos[0] + 1:]):
+        for _task_name in self._get_tasks_name_strings(task_pos):
+            out_nodes.add(_task_name)
+        for task_list in self.sorted_graph_identifiers[task_pos[0] + 1:]:
             connections = self._connecting_paths(self.sorted_graph_identifiers[task_pos[0]][-1], task_list[-1])
             if len(connections) > 0:
                 self._get_nodes_helper(out_nodes, task_list[-1].name)
