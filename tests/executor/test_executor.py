@@ -42,6 +42,9 @@ class TestExecutor(unittest.TestCase):
         def load(self) -> Dict[str, Dict]:
             return {self.type(i): {} for i in range(self.n)}
 
+        def storage_directory(self):
+            return ""
+
     class SimpleLoader(Loader):
         def __init__(self, n: int):
             super().__init__(str, n)
@@ -206,6 +209,9 @@ class TestExecutor(unittest.TestCase):
         class TestIDLoader(InputLoader):
             def __init__(self, n: int):
                 self.n = n
+
+            def storage_directory(self):
+                return ""
 
             def load(self) -> Dict[str, Dict]:
                 return {str(i): {"input": str(i), "other": "other"} for i in range(self.n)}

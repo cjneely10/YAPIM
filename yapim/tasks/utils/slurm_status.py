@@ -15,6 +15,7 @@ class SlurmStatus:
         self._status_message = None
 
     def _set_status(self):
+        """Set status of all running tasks"""
         self._time_last_checked = datetime.now()
         self._status_message = str(local["squeue"]["-u", self._user_id]())
 
@@ -24,6 +25,7 @@ class SlurmStatus:
             self._set_status()
 
     def check_status(self, job_id: str) -> bool:
+        """Check cache for running status. Update cache if too much time has elapsed since last check"""
         with self.lock:
             if self._status_message is None:
                 self._set_status()

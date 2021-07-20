@@ -96,7 +96,7 @@ class ConfigManager:
     MAX_MEMORY = "MaxMemory"
     GLOBAL = "GLOBAL"
 
-    def __init__(self, config_path: Path, storage_directory: Path):
+    def __init__(self, config_path: Path, storage_directory: Optional[Path] = None):
         """ Create ConfigManager object
 
         :param config_path: Path to .yaml config file

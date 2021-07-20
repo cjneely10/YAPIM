@@ -6,7 +6,7 @@ import time
 import traceback
 from abc import ABC
 from pathlib import Path
-from typing import Tuple, List, Union, Optional, Callable, Iterable
+from typing import Tuple, List, Union, Optional, Callable
 
 from plumbum import local, colors, ProcessExecutionError
 from plumbum.machines import LocalMachine, LocalCommand

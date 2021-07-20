@@ -1,3 +1,6 @@
+"""Wrapper for completed run() methods for a Task"""
+
+
 class TaskResult(dict):
     """
     Wrapper for python dict class for Result of completing a Task on a given input set
