@@ -1,0 +1,13 @@
+language: python
+python:
+  - "3.8.6"      # current default Python on Travis CI
+install:
+  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - source "$HOME/miniconda/etc/profile.d/conda.sh"
+  - conda create --name yapim-demo python=3.8
+  - conda activate yapim-demo
+  - pip install git+https://github.com/cjneely10/YAPIM.git
+script:
+  - pytest
+  - echo Complete
