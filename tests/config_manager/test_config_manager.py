@@ -5,22 +5,22 @@ from yapim.utils.package_management.config_manager_generator import ConfigManage
 
 
 class TestConfigManager(unittest.TestCase):
-    cfg = ConfigManager(Path("config_files/valid-config.yaml"))
+    cfg = ConfigManager(Path(__file__).parent.joinpath("config_files/valid-config.yaml"))
 
     def test_valid(self):
         print(TestConfigManager.cfg)
 
     def test_bad_data(self):
         with self.assertRaises(MissingDataError):
-            ConfigManager(Path("config_files/bad_data-config.yaml"))
+            ConfigManager(Path(__file__).parent.joinpath("config_files/bad_data-config.yaml"))
 
     def test_invalid_program(self):
         with self.assertRaises(InvalidPathError):
-            ConfigManager(Path("config_files/bad_program-config.yaml"))
+            ConfigManager(Path(__file__).parent.joinpath("config_files/bad_program-config.yaml"))
 
     def test_invalid_dependencies_section(self):
         with self.assertRaises(MissingDataError):
-            ConfigManager(Path("config_files/invalid_dependency_section-config.yaml"))
+            ConfigManager(Path(__file__).parent.joinpath("config_files/invalid_dependency_section-config.yaml"))
 
     def test_slurm_info(self):
         self.assertEqual(
