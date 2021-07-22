@@ -7,7 +7,7 @@ install:
   - source "$HOME/miniconda/etc/profile.d/conda.sh"
   - conda create --name yapim-demo python=3.8
   - conda activate yapim-demo
-  - pip install git+https://github.com/cjneely10/YAPIM.git
+  - pip install -y git+https://github.com/cjneely10/YAPIM.git
 script:
   - pytest
   - echo Complete
