@@ -28,13 +28,13 @@ MMSeqsCreateDB:
   threads: 3
   memory: 2
   time: "4:00:00"
-  program: /home/user/miniconda3/envs/EukMS_run/bin/mmseqs
+  program: mmseqs
 
 MMSeqsConcatDB:
   threads: 2
   memory: 2
   time: "4:00:00"
-  program: /home/user/miniconda3/envs/EukMS_run/bin/mmseqs
+  program: mmseqs
 
 Empty:
   threads: 2
