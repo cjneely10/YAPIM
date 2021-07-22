@@ -9,4 +9,4 @@ install:
   - conda activate yapim
   - pip install git+https://github.com/cjneely10/YAPIM.git
 script:
-  - cd tests/config_manger && pytest && cd -
+  - cd tests/config_manager && pytest && cd -

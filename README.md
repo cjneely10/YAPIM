@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/cjneely10/YAPIM.svg?branch=main)](https://travis-ci.com/cjneely10/YAPIM)
+
 # Yet Another PIpeline (Manager)
 
 ## Getting Started/Installation 
