@@ -21,7 +21,7 @@ class ExtensionLoader(InputLoader):
         Examples of mapping:
 
         mapping = {
-            (".fna", ".fa", ".fasta", ".faa"): ("fasta", ExtensionLoader.parse_fasta),
+            (".fna", ".fa", ".fasta", ".faa", ".fas"): ("fasta", ExtensionLoader.parse_fasta),
             (".faa",): ("fasta", ExtensionLoader.parse_fasta),
             ("_1.fastq", "_1.fq", ".1.fastq", ".1.fq"): ("fastq_1", ExtensionLoader.parse_fastq),
             ("_2.fastq", "_2.fq", ".2.fastq", ".2.fq"): ("fastq_2", ExtensionLoader.parse_fastq),
@@ -34,7 +34,7 @@ class ExtensionLoader(InputLoader):
         """
         if extension_mapping is None:
             mapping = {
-                (".fna", ".fa", ".fasta", ".faa"): ("fasta", ExtensionLoader.parse_fasta),
+                (".fna", ".fa", ".fasta", ".faa", ".fas"): ("fasta", ExtensionLoader.parse_fasta),
                 (".faa",): ("fasta", ExtensionLoader.parse_fasta),
                 ("_1.fastq", "_1.fq", ".1.fastq", ".1.fq"): ("fastq_1", ExtensionLoader.parse_fastq),
                 ("_2.fastq", "_2.fq", ".2.fastq", ".2.fq"): ("fastq_2", ExtensionLoader.parse_fastq),
