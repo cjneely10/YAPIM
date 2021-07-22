@@ -10,3 +10,6 @@ install:
   - pip install git+https://github.com/cjneely10/YAPIM.git
 script:
   - cd tests/config_manager && pytest && cd -
+  - cd tests/cli && pytest && cd -
+  - cd tests/dependency_graph && pytest && cd -
+  - cd tests/executor && pytest && cd -
