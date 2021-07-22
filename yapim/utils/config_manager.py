@@ -74,10 +74,6 @@ class ConfigManager:
     GLOBAL = "GLOBAL"
 
     def __init__(self, config_path: Path, storage_directory: Optional[Path] = None):
-        """ Create ConfigManager object
-
-        :param config_path: Path to .yaml config file
-        """
         with open(str(Path(config_path).resolve()), "r") as file_ptr:
             self.config = yaml.load(file_ptr, Loader=yaml.FullLoader)
             # Confirm all paths in file are valid

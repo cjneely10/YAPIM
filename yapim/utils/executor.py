@@ -1,11 +1,15 @@
+"""Manage execution of Task pipeline across input set"""
+
 import logging
 import os
 import pickle
+import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import List, Dict, Optional, Union
 
 from art import tprint
+# pylint: disable=no-member
 from plumbum import colors
 
 from yapim import AggregateTask
@@ -18,6 +22,9 @@ from yapim.utils.path_manager import PathManager
 
 
 class Executor:
+    """YAPIM executor generates a topologically-sorted list of Tasks to complete. AggregateTasks break TaskLists -
+    execution of Task list ends at an AggregateTask and waits for complete input to reach this point before
+    proceeding"""
     def __init__(self,
                  input_data: InputLoader,
                  config_path: Union[Path, str],
@@ -26,6 +33,17 @@ class Executor:
                  dependencies_directories: Optional[List[Union[Path, str]]] = None,
                  display_status_messages: bool = True
                  ):
+        """ Generate executor
+
+        :param input_data: Extends InputLoader, this object's abstract methods will be called to generate initial input
+         data
+        :param config_path: Path to configuration file for pipeline
+        :param base_output_dir: Output directory to which to write
+        :param pipeline_steps_directory: Directory (possibly nested) of Tasks/AggregateTasks in pipeline
+        :param dependencies_directories: Directory (possibly nested) of dependencies in pipeline. Names may overwrite
+         existing pipeline steps
+        :param display_status_messages: Display status messages as pipeline runs
+        """
         pipeline_tasks, self.task_blueprints = PackageLoader.load_from_directories(pipeline_steps_directory,
                                                                                    dependencies_directories)
         self.task_list: List[List[Node]] = DependencyGraph(pipeline_tasks, self.task_blueprints) \
@@ -44,9 +62,9 @@ class Executor:
         try:
             self.config_manager = ConfigManager(config_path, input_data.storage_directory())
         # pylint: disable=broad-except
-        except BaseException as e:
-            print(e)
-            exit(1)
+        except BaseException as err:
+            print(err)
+            sys.exit(1)
         TaskChainDistributor.initialize_class()
         TaskChainDistributor.set_allocations(self.config_manager)
         TaskChainDistributor.results.update(self.input_data_dict)
@@ -58,6 +76,7 @@ class Executor:
 
     @staticmethod
     def _load_input_data(input_data: InputLoader):
+        """Call InputLoader load method"""
         input_data_dict: dict = input_data.load()
         for key in input_data_dict.keys():
             if "object at" in str(key):
@@ -65,6 +84,7 @@ class Executor:
         return input_data_dict
 
     def begin_logging(self, base_output_dir: Path):
+        """Log pipeline top-level messages"""
         log_file = os.path.join(base_output_dir, "%s-eukmetasanity.log" % self.pipeline_name)
         logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO, filename=log_file, filemode='a')
         for _line in ("*" * 80, "",
@@ -75,11 +95,12 @@ class Executor:
             print(colors.yellow & colors.bold | _line)
 
     def run(self):
+        """Launch executor!"""
         if len(self.input_data_dict) == 0:
             print(colors.red & colors.bold | "No input was provided, exiting")
-            exit()
+            sys.exit()
         tprint(self.pipeline_name, font="smslant")
-        for task_batch in self.task_batch():
+        for task_batch in self._task_batch():
             workers = self._get_max_resources_in_batch(task_batch[1])
             with ThreadPoolExecutor(workers) as executor:
                 futures = []
@@ -110,7 +131,8 @@ class Executor:
         out_ptr.close()
         print(colors.yellow & colors.bold | "\n%s complete!\n" % self.pipeline_name)
 
-    def task_batch(self):
+    def _task_batch(self):
+        """Batch tasks based on AggregateTasks in pipeline"""
         agg_positions = []
         task: Node
         for i, task_list in enumerate(self.task_list):
@@ -126,6 +148,7 @@ class Executor:
         yield "Task", self.task_list[start:]
 
     def _get_max_resources_in_batch(self, task_batch: List[List[Node]]) -> int:
+        """Determine resource allotments based on threads and memory and return limiting resource"""
         min_threads: int = 500
         min_memory: int = 50000
         for task_list in task_batch:
@@ -143,6 +166,7 @@ class Executor:
         return resources
 
     def _populate_requested_existing_input(self) -> Dict[str, Dict]:
+        """Load existing pipeline data referenced in configuration file"""
         input_section = self.config_manager.config[ConfigManager.INPUT]
         err = ImproperInputSection("INPUT should consist of dictionary {pipeline_name: key-mapping} or "
                                    "{pipeline_name: all}")
