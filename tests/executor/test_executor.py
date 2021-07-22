@@ -224,14 +224,6 @@ class TestExecutor(unittest.TestCase):
             ["confirm_not_overwritten/dependencies"]
         ).run()
 
-    def test_versioned_data(self):
-        Executor(
-            TestExecutor.SimpleLoader(10),
-            TestExecutor.file.joinpath("versioned_data/versioned_data-config.yaml"),
-            TestExecutor.file.joinpath("versioned_data-out"),
-            "versioned_data/tasks",
-        ).run()
-
     def test_improper_versioned_data(self):
         with self.assertRaises(TaskExecutionError):
             Executor(
