@@ -32,6 +32,6 @@ Quality:
   time: "4:00:00"
   dependencies:
     CheckM:
-      program: checkm
+      program: cat
 
 ...  # document end
