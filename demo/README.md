@@ -13,7 +13,7 @@ Start by creating a new environment and installing YAPIM:
 ```shell
 conda create --name yapim-demo python=3.8
 conda activate yapim-demo
-pip install git+https://github.com/cjneely10/YAPIM.git
+pip install git+https://github.com/cjneely10/YAPIM.git@v0.1.0
 ``` 
 
 As we develop our pipeline and add programs, using conda will make ensuring portability painless!
