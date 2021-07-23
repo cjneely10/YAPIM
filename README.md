@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/cjneely10/YAPIM.svg?branch=main)](https://travis-ci.com/cjneely10/YAPIM)
+[![Build Status](https://travis-ci.com/cjneely10/YAPIM.svg?branch=main)](https://travis-ci.com/cjneely10/YAPIM) 
 
 # Yet Another PIpeline (Manager)
 
@@ -9,6 +9,10 @@ conda create --name yapim-demo python=3.8
 conda activate yapim-demo  
 pip install git+https://github.com/cjneely10/YAPIM.git@v0.1.0 
 ```
+
+## Documentation
+
+[https://cjneely10.github.io/YAPIM/]()
 
 
 # Quick usage
