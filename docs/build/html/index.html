@@ -1,0 +1,202 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Welcome to YAPIM’s documentation! &#8212; YAPIM-docs  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/nature.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Task" href="tasks.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="tasks.html" title="Task"
+             accesskey="N">next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">YAPIM-docs  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Welcome to YAPIM’s documentation!</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="welcome-to-yapim-s-documentation">
+<h1>Welcome to YAPIM’s documentation!<a class="headerlink" href="#welcome-to-yapim-s-documentation" title="Permalink to this headline">¶</a></h1>
+<section id="about">
+<h2>About<a class="headerlink" href="#about" title="Permalink to this headline">¶</a></h2>
+<p>Created with bioinformatics workflows on very large datasets in mind, Yet Another PIpeline Manager (yapim) seeks to automate the concurrent execution of long-running programs across an input set (i.e., parallelization). Because this process can be cumbersome and error-prone, we have developed an API to optimize this process while maintaining portability, extendibility, and modularity. Yapim is built entirely using Python and is implemented using simple object-oriented programming (OOP) concepts that allow for further extension and development of the API.</p>
+<p>YAPIM supports workstation/server usage and High Performance Computing systems that use SLURM.</p>
+<p>YAPIM creates its pipelines by generating dependency graphs for a set of Python classes that implement the provided
+<code class="docutils literal notranslate"><span class="pre">Task</span></code> or <code class="docutils literal notranslate"><span class="pre">AggregateTask</span></code> abstract base classes. For a given input set, tasks are topologically sorted and automatically
+parallelized to the user-provided cpus/threads/nodes and memory.</p>
+<section id="why-use-it">
+<h3>Why use it?<a class="headerlink" href="#why-use-it" title="Permalink to this headline">¶</a></h3>
+<p>Many pipeline development tools exist today that offer many options for developers. Yapim was developed with bioinformatics software engineers in mind – its core features focus on:</p>
+<ul class="simple">
+<li><p>Sandboxing local environments to allow for bash script-like development</p></li>
+<li><p>Providing the ability to reuse existing tools in future pipeline with minimal-to-no code changes</p></li>
+<li><p>Automating data flow between “tasks” in a data pipeline</p></li>
+<li><p>Developing reusable and portable analyses that can directly transfer between local workstations and High-Performance Computing (HPC) systems</p></li>
+<li><p>Automate data management tasks – logging, packaging output, error management, etc.</p></li>
+</ul>
+</section>
+</section>
+<section id="top-level-api-overview">
+<h2>Top-level API overview<a class="headerlink" href="#top-level-api-overview" title="Permalink to this headline">¶</a></h2>
+<p>A yapim data analysis pipeline operates on user-defined Python classes that inherit from the internally-defined <code class="docutils literal notranslate"><span class="pre">BaseTask</span></code> class and parses them into a simple dependency graph based on the requirements that are defined within each class. Each task also has an expected output, and this output is validated and forwarded to tasks that depend on this information to run.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">BaseTask</span></code> class is further subclassed into two types – the <code class="docutils literal notranslate"><span class="pre">Task</span></code> class and the <code class="docutils literal notranslate"><span class="pre">AggregateTask</span></code> class, with the former operating on each input item individually, and the latter operating on the entire input set at once.</p>
+<p>At runtime, the dependency graph is topologically sorted into a list of tasks to complete for a set of inputs. The internally-defined <code class="docutils literal notranslate"><span class="pre">InputLoader</span></code> class provides logic to populate this input set, which can consist of any type that defines the <code class="docutils literal notranslate"><span class="pre">__str__()</span></code> method. Yapim is packaged with a focus on biologically-relevant files and thus provides a default <code class="docutils literal notranslate"><span class="pre">ExtensionLoader</span></code> that loads input from local storage, but this is easily extendible to other input and file types.</p>
+<p>Pipeline users can modify the total available resources, as well as the task-specific resources, via a provided configuration file. This information is used to automatically parallelize the pipeline across the input set. This implementation also allows a single pipeline to be applied to multiple similar analyses, and allows for more complex analysis operations without any need to modify written code.</p>
+<p>Based on the resources available, the provided Executor class will launch threads that operate on the input set to complete the entire list of blueprints on each item in the input set. The implementation scales to very large input sizes (&gt;100,000 input items) without overwhelming CPU or memory resources. Additionally, this implementation is immediately available to run on either local workstations or SLURM-managed HPC systems, or both.</p>
+<p>As items from the input set complete each task, valid output will be automatically copied to a separate output directory. This allows for fast transfer of completed results between workstations, as well as the ability to use results generated by one pipeline as output into another pipeline.</p>
+</section>
+<section id="task-lifecycle-and-methods">
+<h2>Task lifecycle and methods<a class="headerlink" href="#task-lifecycle-and-methods" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">Task</span></code> and <code class="docutils literal notranslate"><span class="pre">AggregateTask</span></code> classes follow a specific lifecycle that affords internal dependency graph generation and output accumulation.  (Note: Below, “start time” refers to when a yapim pipeline is first launched).</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">requires()</span></code>: <code class="docutils literal notranslate"><span class="pre">Tasks</span></code> define a list of other <code class="docutils literal notranslate"><span class="pre">Task</span></code> classes that provide direct input. This method is used to provide an initial topological sort.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">depends()</span></code>: Yapim’s modular <code class="docutils literal notranslate"><span class="pre">Task</span></code> design allows for a <code class="docutils literal notranslate"><span class="pre">Task</span></code>/<code class="docutils literal notranslate"><span class="pre">AggregateTask</span></code> to be reused as dependencies in other <code class="docutils literal notranslate"><span class="pre">Tasks</span></code>. For example, a <code class="docutils literal notranslate"><span class="pre">Task</span></code> may be run multiple times at different points in a data analysis pipeline on newly-identified information, or a wrapper <code class="docutils literal notranslate"><span class="pre">Task</span></code> may expose a program that is used in multiple pipelines. A dependency graph is also generated in the case of dependencies depending on other dependencies. A <code class="docutils literal notranslate"><span class="pre">Task</span></code> may only depend on other <code class="docutils literal notranslate"><span class="pre">Tasks</span></code>, and an <code class="docutils literal notranslate"><span class="pre">AggregateTask</span></code> may only depend on other <code class="docutils literal notranslate"><span class="pre">AggregateTasks</span></code>.</p></li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">__init__(*args,</span> <span class="pre">**kwargs)</span></code>: Once the pipeline is parsed into a list of tasks to complete, the yapim executor will begin using the defined <code class="docutils literal notranslate"><span class="pre">Task</span></code>/<code class="docutils literal notranslate"><span class="pre">AggregateTask</span></code> class blueprints to complete the analysis pipeline.</dt><dd><ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">super().__init__(*args,</span> <span class="pre">**kwargs)</span></code>: After calling the superclass initializer, all attributes are available for use, such as output, input, wdir, etc. (link to documentation).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">self.output</span></code>: Within the initializer, <code class="docutils literal notranslate"><span class="pre">Tasks</span></code> will typically define expected output. A <code class="docutils literal notranslate"><span class="pre">Task</span></code> can output any Python object. Any <code class="docutils literal notranslate"><span class="pre">str</span></code> or <code class="docutils literal notranslate"><span class="pre">Path</span></code> type variable will be validated as a file path and confirmed as output for this task (unless wrapped with the provided helper <code class="docutils literal notranslate"><span class="pre">Result</span></code> class). Additionally, the <code class="docutils literal notranslate"><span class="pre">Task</span></code> may define output that will be copied to a separate output directory.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">run()</span></code>: The run method contains logic to run any programs, functions, etc., that may be needed to generate the output defined previously. After the run method is called, the yapim executor will confirm that any paths in the previously defined output now exist. Finally, this output is used to update the internal input state. Any tasks that occur after this point can now reference this data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">deaggregate()</span></code>: After an <code class="docutils literal notranslate"><span class="pre">AggregateTask</span></code> completes its run method, it will de-structure its results into individual dictionaries based on the results it generated. This can either be a simple update for all existing input, or can act as a filter to remove input from downstream processing that does not match filter criteria.</p></li>
+</ul>
+<p>There are two ways to stop a Task’s lifecycle prior to calling the <code class="docutils literal notranslate"><span class="pre">run()</span></code> method:</p>
+<ol class="arabic simple">
+<li><p>Skip the task in the configuration file.</p></li>
+<li><p>Define the condition() method to only run a Task if a given boolean condition is first satisfied.</p></li>
+</ol>
+<p>Aside from lifecycle methods, classes that inherit from <code class="docutils literal notranslate"><span class="pre">Task</span></code>/<code class="docutils literal notranslate"><span class="pre">AggregateTask</span></code> have a multitude of helper methods available to easily interface with a local system and apply external software, as well as to immediately distribute large computations to HPC systems based on user settings.</p>
+</section>
+<section id="project-directory-structure">
+<h2>Project directory structure<a class="headerlink" href="#project-directory-structure" title="Permalink to this headline">¶</a></h2>
+<p>At start time, yapim generates a project directory structure that resembles::</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">|--</span><span class="n">out</span>
+   <span class="o">|--</span><span class="nb">input</span>
+   <span class="o">|--</span><span class="n">wdir</span>
+   <span class="o">|--</span><span class="n">results</span>
+</pre></div>
+</div>
+<p>During runtime, intermediary files and results are stored in wdir. As tasks complete, designated output files are automatically copied to their corresponding subdirectory within the results output directory.</p>
+<p>Yapim is packaged with an eponymous script that handles key features involved in using yapim pipelines:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">create</span></code>: Once a pipeline is written, this module will confirm the pipeline is valid (e.g., not cyclic, not referencing any programs or Tasks that do not exist, etc.). Upon confirmation, a YAML-formatted configuration file is generated that can be modified to fit the pipeline specifications (see tutorial for more information).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">run</span></code>: Once a pipeline is created, this module will launch the pipeline.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">clean</span></code>: This module allows users to delete output stored from a given step. This will also delete any task that is directly affected by the output of this task.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">remove</span></code>: This module deletes stored input data by id from a pipeline’s internal storage.</p></li>
+</ul>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tasks.html">Task</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aggregate_tasks.html">AggregateTask</a></li>
+<li class="toctree-l1"><a class="reference internal" href="input_loader.html">InputLoader</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extension_loader.html">ExtensionLoader</a></li>
+<li class="toctree-l1"><a class="reference internal" href="helpers.html">Helper functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">Utilities</a></li>
+</ul>
+</div>
+</section>
+</section>
+<section id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Welcome to YAPIM’s documentation!</a><ul>
+<li><a class="reference internal" href="#about">About</a><ul>
+<li><a class="reference internal" href="#why-use-it">Why use it?</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#top-level-api-overview">Top-level API overview</a></li>
+<li><a class="reference internal" href="#task-lifecycle-and-methods">Task lifecycle and methods</a></li>
+<li><a class="reference internal" href="#project-directory-structure">Project directory structure</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+
+  <h4>Next topic</h4>
+  <p class="topless"><a href="tasks.html"
+                        title="next chapter">Task</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="tasks.html" title="Task"
+             >next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">YAPIM-docs  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Welcome to YAPIM’s documentation!</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021, Christopher Neely.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.1.1.
+    </div>
+  </body>
+</html>
