@@ -1,0 +1,187 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>AggregateTask &#8212; YAPIM-docs  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/nature.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Task" href="tasks.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="tasks.html" title="Task"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">YAPIM-docs  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">AggregateTask</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="aggregatetask">
+<h1>AggregateTask<a class="headerlink" href="#aggregatetask" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="module-yapim.tasks.aggregate_task"></span><p>AggregateTask functionality for handling tasks that operate on entire input set at once</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="yapim.tasks.aggregate_task.AggregateTask">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">yapim.tasks.aggregate_task.</span></span><span class="sig-name descname"><span class="pre">AggregateTask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_scope</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_manager</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">yapim.utils.config_manager.ConfigManager</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wdir</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">display_messages</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#yapim.tasks.aggregate_task.AggregateTask" title="Permalink to this definition">¶</a></dt>
+<dd><p>An AggregateTask receives the entire input set for the pipeline and can operate on any part of this input.</p>
+<p>If the condition() method is overwritten, it will be called prior to the run() method.</p>
+<p>Lifecycle:</p>
+<p>requires()</p>
+<p>depends()</p>
+<p>__init__()</p>
+<p>[condition()]</p>
+<p>run()</p>
+<p>deaggregate()</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="yapim.tasks.aggregate_task.AggregateTask.deaggregate">
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">deaggregate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#yapim.tasks.aggregate_task.AggregateTask.deaggregate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Output result dictionary that will be used to update or populate pipeline input for any downstream
+<cite>Task</cite>/<cite>AggregateTask</cite>.</p>
+<p>Rule: If deaggregate is not defined, the original input data will not be modified.</p>
+<p>Rule: If defined and remap() is called in the method body, currently stored input will be replaced with the
+output of this method.</p>
+<p>Rule: If defined and remap() is not called in the method body, for each id present in the output of this method,
+any labels in the output will be used to update the id’s stored results. Ids not present in this dictionary will
+be removed from tracking.</p>
+<p>Input dictionaries resemble:  {record_id: {label: value}}</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Dictionary that will be used to update input data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="yapim.tasks.aggregate_task.AggregateTask.filter">
+<span class="sig-name descname"><span class="pre">filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_values</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">collections.abc.Iterable</span><span class="p"><span class="pre">,</span> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">object</span><span class="p"><span class="pre">,</span> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#yapim.tasks.aggregate_task.AggregateTask.filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filter the stored input data of this pipeline with either:</p>
+<ol class="arabic simple">
+<li><p>An iterable of ids that will be kept.</p></li>
+</ol>
+<p>2) A callable (lambda, function, functor, etc.) that accepts an input record_id and a dictionary of data and
+returns a boolean for if the input will continue to be tracked.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="yapim.tasks.aggregate_task.AggregateTask.finalize">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">finalize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj_results</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_results</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#yapim.tasks.aggregate_task.AggregateTask" title="yapim.tasks.aggregate_task.AggregateTask"><span class="pre">yapim.tasks.aggregate_task.AggregateTask</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">result</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">yapim.tasks.utils.task_result.TaskResult</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#yapim.tasks.aggregate_task.AggregateTask.finalize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finalize output of this Task by updating class-level output storage as well as this input’s tracked
+storage</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="yapim.tasks.aggregate_task.AggregateTask.has_run">
+<span class="sig-name descname"><span class="pre">has_run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_name</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">record_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#yapim.tasks.aggregate_task.AggregateTask.has_run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check whether a task was run for a record_id. Always returns false if no record_id is passed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Boolean result</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="yapim.tasks.aggregate_task.AggregateTask.input_ids">
+<span class="sig-name descname"><span class="pre">input_ids</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">KeysView</span></span></span><a class="headerlink" href="#yapim.tasks.aggregate_task.AggregateTask.input_ids" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper for self.input.keys()</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="yapim.tasks.aggregate_task.AggregateTask.input_items">
+<span class="sig-name descname"><span class="pre">input_items</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ItemsView</span></span></span><a class="headerlink" href="#yapim.tasks.aggregate_task.AggregateTask.input_items" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper for self.input.items()</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="yapim.tasks.aggregate_task.AggregateTask.input_values">
+<span class="sig-name descname"><span class="pre">input_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ValuesView</span></span></span><a class="headerlink" href="#yapim.tasks.aggregate_task.AggregateTask.input_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper for self.input.values()</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="yapim.tasks.aggregate_task.AggregateTask.remap">
+<span class="sig-name descname"><span class="pre">remap</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#yapim.tasks.aggregate_task.AggregateTask.remap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove all currently tracked input from storage. <cite>remap()</cite> should be called within <cite>deaggregate()</cite>,
+and the dictionary that this method returns will define the output of the pipeline after this AggregateTask
+completes</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="tasks.html"
+                        title="previous chapter">Task</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/aggregate_tasks.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="tasks.html" title="Task"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">YAPIM-docs  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">AggregateTask</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021, Christopher Neely.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.1.1.
+    </div>
+  </body>
+</html>
