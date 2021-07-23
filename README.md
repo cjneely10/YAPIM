@@ -12,7 +12,7 @@ pip install git+https://github.com/cjneely10/YAPIM.git@v0.1.0
 
 ## Documentation
 
-[https://cjneely10.github.io/YAPIM/]()
+[https://cjneely10.github.io/YAPIM/](https://cjneely10.github.io/YAPIM/)
 
 
 # Quick usage
