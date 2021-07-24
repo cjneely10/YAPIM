@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/cjneely10/YAPIM.svg?branch=main)](https://travis-ci.com/cjneely10/YAPIM) 
+[![Build Status](https://travis-ci.com/cjneely10/YAPIM.svg?branch=main)](https://travis-ci.com/cjneely10/YAPIM)
 
 # Yet Another PIpeline (Manager)
 
@@ -116,4 +116,8 @@ Yapim is packaged with an eponymous script that handles key features involved in
 
 ## Writing a custom InputLoader 
 
-To populate input data, Yapim’s `Executor` class requires an object that extends `InputLoader` and defines a `load()` method. This method must return a dictionary of input data, and this dictionary will be passed to the pipeline that the `Executor` is launching. The provided `ExtensionLoader` class accomplishes this by collecting all files with the same basename into a dictionary, and matching file extension types to a broader set of biologically-relevant input terms (such as “fasta,” “fastq,” “gff,” etc.).  
+To populate input data, Yapim’s `Executor` class requires an object that extends `InputLoader` and defines a `load()` method. This method must return a dictionary of input data, and this dictionary will be passed to the pipeline that the `Executor` is launching. The provided `ExtensionLoader` class accomplishes this by collecting all files with the same basename into a dictionary, and matching file extension types to a broader set of biologically-relevant input terms (such as “fasta,” “fastq,” “gff,” etc.).
+
+## Licensing
+
+<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">Creative Commons Attribution-NonCommercial 4.0 International License</a>.

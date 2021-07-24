@@ -2,13 +2,23 @@
 
 The following demo will provide an introduction to the features available within the YAPIM API. We will develop a very simple pipeline to find proteins in bacterial genomes/metagenome-assembled-genomes and to provide functional annotation of genomes that pass a quality check step. This five-part tutorial is succeeded by a larger seven-part tutorial for intermediate users who wish to learn about the more complex features available.
 
-The complete code generated in this tutorial is available in this directory (i.e. the demo's `tasks` directory and `tasks-config.yaml` file).
+The complete code generated in this tutorial is available in this directory (i.e. the demo's `tasks` directory and `tasks-config.yaml` file). To complete this tutorial with our provided test data, you will need to clone this repository to have access to these contents:
+
+```shell
+git clone https://github.com/cjneely10/YAPIM.git
+```
 
 ### Step 0: Prepare working environment 
 
-While not directly required, we highly suggest building your pipeline within its own environment. Not only will this prevent dependency-related bugs from occurring during the development process, but this will also make your pipeline system-independent (at least mostly). This uses `conda`. 
+While not directly required, we highly suggest building your pipeline within its own environment. Not only will this prevent dependency-related bugs from occurring during the development process, but this will also make your pipeline system-independent (at least mostly). This uses `conda`.
 
-Start by creating a new environment and installing YAPIM: 
+We have provided an `environment.yml` file in the `demo` directory that can be used to directly build your working environment:
+
+```shell
+conda env create -f environment.yml
+```
+
+If you wish to create your environment from scratch, start by creating a new environment and installing YAPIM: 
 
 ```shell
 conda create --name yapim-demo python=3.8
@@ -30,7 +40,7 @@ The code that we write in upcoming tutorials will be stored in the `demo/tasks` 
 
 ## Your first YAPIM workflow
 
-Let's plan our data pipeline and download the tools we can use to accomplish these steps.
+Let's plan our data pipeline and download the tools we can use to accomplish these steps. If you are using our pre-built environment, then skip the provided installation steps.
 
 1. Identify proteins in the input genome
     1. This can be completed using `prodigal`:
@@ -38,6 +48,7 @@ Let's plan our data pipeline and download the tools we can use to accomplish the
 2. Determine the quality of each assembly
     1. `checkm` provides this feature:
         1. See [the installation wiki](https://github.com/Ecogenomics/CheckM/wiki/Installation) for dependency download information
+           1. If using our pre-built environment, you will need to make sure that `checkm` dependencies are present on your system.
         2. `pip install numpy matplotlib pysam`
         3. `pip install checkm-genome`
 3. Annotate proteins with PFam
@@ -558,7 +569,7 @@ def deaggregate(self) -> dict:
 
 # This method accepts some iterable of ids and filters out input ids that are not present in the iterable
 def deaggregate(self) -> dict:
-        return self.filter(self.checkm_results_iter())
+    return self.filter(self.checkm_results_iter())
 ```
 
 ------
@@ -625,7 +636,7 @@ class Annotate(Task):
                 self.wdir.joinpath("tmp"),
                 "--remove-tmp-files",
                 "--threads", self.threads,
-                (*self.added_flags),
+                (*self.added_flags)
             ]
         )
 ```
