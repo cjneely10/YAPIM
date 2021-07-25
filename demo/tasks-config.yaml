@@ -4,7 +4,7 @@
 ## Global settings
 GLOBAL:
   # Maximum threads/cpus to use in analysis
-  MaxThreads: 10
+  MaxThreads: 20
   # Maximum memory to use (in GB)
   MaxMemory: 100
 
@@ -39,7 +39,7 @@ IdentifyProteins:
 
 QualityCheck:
   # Number of threads task will use
-  threads: 10
+  threads: 20
   # Amount of memory task will use (in GB)
   memory: 90
   time: "4:00:00"
@@ -48,9 +48,9 @@ QualityCheck:
 
 Annotate:
   # Number of threads task will use
-  threads: 1
+  threads: 10
   # Amount of memory task will use (in GB)
-  memory: 8
+  memory: 30
   time: "4:00:00"
   dependencies:
     MMSeqsEasySearch:
