@@ -8,6 +8,8 @@ The complete code generated in this tutorial is available in this directory (i.e
 git clone https://github.com/cjneely10/YAPIM.git
 ```
 
+Test data files are available in `YAPIM/demo/data`.
+
 ### Prepare working environment 
 
 While not directly required, we highly suggest building your pipeline within its own environment. Not only will this prevent dependency-related bugs from occurring during the development process, but this will also make your pipeline system-independent (at least mostly). This uses `conda`.
@@ -396,6 +398,59 @@ class QualityCheck(AggregateTask):
 
 Notice that the same three methods we defined in the `Task` class need to be defined here, but there is an additional method named `deaggregate()`. This method allows us to update, filter, or replace the input to the pipeline, which allows classes that extend `AggregateTask` to provide this functionality.
 
+### deaggregate()
+
+We will now implement the `deaggregate()` method to filter our input. If we leave this method blank, then no updates to the original inputs are made. If we provide a return dictionary, then this will update existing data members and remove any ids not present in its returned value. If we call the helper method `self.remap()`, then only this returned data will be present after the filter step.
+
+Note that `AggregateTask` has helper attributes available for deaggregating output of an `AggregateTask`:
+
+```shell
+self.input_ids: self.input.keys
+self.input_values: self.input.values
+self.input_items: self.input.items
+```
+
+Using these helpers, we can define custom filter methods. YAPIM has additional helper methods that automate a few common filter operations: 
+```python
+import os
+
+from yapim import prefix
+
+
+# This method will update all existing inputs to include the field "uploaded-data". No ids or stored results will be removed. 
+def deaggregate(self) -> dict:
+    return {
+        record_id : {"updated-data": "data"}
+        for record_id in self.input_ids()
+    }
+
+
+# This method will reset the input of the pipeline to be the prefixes of all data 
+# in a particular path, and will create the "fasta" field in each new data input. 
+# No other ids, or any other stored result attributes, will be available if they are not explicitly defined here.
+def deaggregate(self) -> dict:
+    self.remap()
+    return {
+        prefix(file): {
+            "fasta": file
+        }
+        for file in os.listdir("/path/to/data")
+    }
+
+
+# This method will call the passed function on each input and only return data that pass the filter.
+# The function must accept the record_id (typically a string) and the record results data (typically a dictionary) and return a boolean
+def deaggregate(self) -> dict:
+    return self.filter(lambda record_id, record_data: record_id > "a")
+
+
+# This method accepts some iterable of ids and filters out input ids that are not present in the iterable
+def deaggregate(self) -> dict:
+    return self.filter(self.checkm_results_iter())
+```
+
+---
+
 `AggregateTask` inherits from `Task`, so we have all the same functionality that we had in the previous step here to complete this step.
 
 For this `AggregateTask`, we want to use the results from the `IdentifyProteins` step as input to `CheckM`. Per its documentation, we will need to generate a directory of the protein FASTA files and provide this as input to `CheckM`.
@@ -447,57 +502,6 @@ class QualityCheck(AggregateTask):
         )
 
         self.local["rm"]["-r", combined_dir]()
-```
-
-### deaggregate()
-
-We will now implement the `deaggregate()` method to filter our input. If we leave this method blank, then no updates to the original inputs are made. If we provide a return dictionary, then this will update existing data members and remove any ids not present in its returned value. If we call the helper method `self.remap()`, then only this returned data will be present after the filter step.
-
-Note that `AggregateTask` has helper attributes available for deaggregating output of an `AggregateTask`:
-
-```shell
-self.input_ids: self.input.keys
-self.input_values: self.input.values
-self.input_items: self.input.items
-```
-
-Using these helpers, we can define custom filter methods. YAPIM has additional helper methods that automate a few common filter operations: 
-```python
-import os
-
-from yapim import prefix
-
-
-# This method will update all existing inputs to include the field "uploaded-data". No ids or stored results will be removed. 
-def deaggregate(self) -> dict:
-    return {
-        record_id : {"updated-data": "data"}
-        for record_id in self.input_ids()
-    }
-
-
-# This method will reset the input of the pipeline to be the prefixes of all data 
-# in a particular path, and will create the "fasta" field in each new data input. 
-# No other ids, or any other stored result attributes, will be available if they are not explicitly defined here.
-def deaggregate(self) -> dict:
-    self.remap()
-    return {
-        prefix(file): {
-            "fasta": file
-        }
-        for file in os.listdir("/path/to/data")
-    }
-
-
-# This method will call the passed function on each input and only return data that pass the filter.
-# The function must accept the record_id (typically a string) and the record results data (typically a dictionary) and return a boolean
-def deaggregate(self) -> dict:
-    return self.filter(lambda record_id, record_data: record_id > "a")
-
-
-# This method accepts some iterable of ids and filters out input ids that are not present in the iterable
-def deaggregate(self) -> dict:
-    return self.filter(self.checkm_results_iter())
 ```
 
 For our tutorial, we want to filter the input genomes based on the `CheckM` results, which were written to `stdout` by CheckM, and which the YAPIM API automatically saved to the `Task`'s log file.

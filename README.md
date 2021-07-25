@@ -1,4 +1,4 @@
-![example workflow](https://github.com/cjneely10/YAPIC/actions/workflows/ci.yml/badge.svg)
+![example workflow](https://github.com/cjneely10/YAPIM/actions/workflows/ci.yml/badge.svg)
 
 # Yet Another PIpeline (Manager)
 
