@@ -8,7 +8,7 @@ The complete code generated in this tutorial is available in this directory (i.e
 git clone https://github.com/cjneely10/YAPIM.git
 ```
 
-### Step 0: Prepare working environment 
+### Prepare working environment 
 
 While not directly required, we highly suggest building your pipeline within its own environment. Not only will this prevent dependency-related bugs from occurring during the development process, but this will also make your pipeline system-independent (at least mostly). This uses `conda`.
 
@@ -56,6 +56,50 @@ Let's plan our data pipeline and download the tools we can use to accomplish the
         1. `conda install -c bioconda mmseqs2`
     2. The PFam database can be downloaded directly:
         1. `mmseqs databases --remove-tmp-files --threads 16 Pfam-A.full pfam_db tmp`
+
+## Step 0: Define an `InputLoader`
+
+To populate input data, Yapim’s `Executor` class requires an object that extends `InputLoader` and defines a `load()` method. This method must return a dictionary of input data, and this dictionary will be passed to the pipeline that the `Executor` is launching.
+
+The provided `ExtensionLoader` class accomplishes this by collecting all files with the same basename into a dictionary, and matching file extension types to a broader set of biologically-relevant input terms (such as “fasta,” “fastq,” “gff,” etc.).
+
+For our tutorial, note that all input loaded from running YAPIM via its CLI will populate into the following categories based on the file's extension:
+
+```
+fasta:     .fna, .faa, .fasta, .fa
+fastq_1:   _1.fastq, _1.fq, .1.fastq, .1.fq
+fastq_2:   _2.fastq, _2.fq, .2.fastq, .2.fq
+gff3:      .gff3, .gff
+```
+
+So, in the case of an input directory containing the following files:
+
+```
+-- directory
+   |-- genome1.fna
+   |-- genome1.gff3
+   |-- SRR1234.1.fq
+   |-- SRR1234.2.fq
+```
+
+We would expect the input data to the pipeline to resemble:
+
+```python
+{
+    "genome1": {
+        "fasta": "genome1.fna",
+        "gff3": "genome1.gff3"
+    },
+    "SRR1234": {
+        "fastq_1": "SRR1234.1.fq",
+        "fastq_2": "SRR1234.2.fq"
+    }
+}
+```
+
+We will be using the default `ExtenstionLoader` class, so there is nothing further to do in this step.
+
+---
 
 ## Step 1: Identify proteins in each input genome
 
@@ -196,44 +240,6 @@ After calling its superclass initializer, we can define the expected output that
 **Any data that is of `str` or `Path` type will be validated for existence after the `Task` completes its `run()` method, unless first wrapped in the accessory class `Result`**. All data defined in the `Task` output will be made available as input to the next task.
 
 Here, we have listed that this task will output a file in its working directory, and this will be checked when the `Task` completes. Finally, as a matter of convenience, we replaced the hard-coded output value in the `run()` method with its respective value in `self.output`.
-
-### Where did `self.input["fasta"]` in the `run()` method come from??
-
-At runtime, YAPIM loads all potential input before running the first Task. Advanced users may see the `InputLoader` section of the documentation for creating customized loaders.
-
-For our tutorial, note that all input loaded from running YAPIM via its CLI will populate into the following categories based on the file's extension:
-
-```
-fasta:     .fna, .faa, .fasta, .fa
-fastq_1:   _1.fastq, _1.fq, .1.fastq, .1.fq
-fastq_2:   _2.fastq, _2.fq, .2.fastq, .2.fq
-gff3:      .gff3, .gff
-```
-
-So, in the case of an input directory containing the following files:
-
-```
--- directory
-   |-- genome1.fna
-   |-- genome1.gff3
-   |-- SRR1234.1.fq
-   |-- SRR1234.2.fq
-```
-
-We would expect the input data to the pipeline to resemble:
-
-```python
-{
-    "genome1": {
-        "fasta": "genome1.fna",
-        "gff3": "genome1.gff3"
-    },
-    "SRR1234": {
-        "fastq_1": "SRR1234.1.fq",
-        "fastq_2": "SRR1234.2.fq"
-    }
-}
-```
 
 This implementation allows any class that inherits from `Task` to operate on each individual key:value pair, whereas classes that inherit from `AggregateTask` can operate on the entire input set. We will demonstrate this more in Step 2.
 
@@ -422,14 +428,63 @@ class QualityCheck(AggregateTask):
                 "-x", "faa",
                 "--genes",
                 combined_dir,
-                self.output["outdir"]
+                self.wdir.joinpath("out")
             ]
         )
 
         self.local["rm"]["-r", combined_dir]()
 ```
 
+### deaggregate()
+
 We will now implement the `deaggregate()` method to filter our input. If we leave this method blank, then no updates to the original inputs are made. If we provide a return dictionary, then this will update existing data members and remove any ids not present in its returned value. If we call the helper method `self.remap()`, then only this returned data will be present after the filter step.
+
+Note that `AggregateTask` has helper attributes available for deaggregating output of an `AggregateTask`:
+
+```shell
+self.input_ids: self.input.keys()
+self.input_values: self.input.values()
+self.input_items: self.input.items()
+```
+
+Using these helpers, we can define custom filter methods. YAPIM has additional helper methods that automate a few common filter operations: 
+```python
+import os
+
+from yapim import prefix
+
+
+# This method will reset the input of the pipeline to be the prefixes of all data 
+# in a particular path, and will create the "fasta" field in each new data input. 
+# No other ids, or any other stored result attributes, will be available if they are not explicitly defined here.
+def deaggregate(self) -> dict:
+    self.remap()
+    return {
+        prefix(file): {
+            "fasta": file
+        }
+        for file in os.listdir("/path/to/data")
+    }
+
+
+# This method will update all existing inputs to include the field "uploaded-data". No ids or stored results will be removed. 
+def deaggregate(self) -> dict:
+    return {
+        record_id : {"updated-data": "data"}
+        for record_id in self.input_ids()
+    }
+
+
+# This method will call the passed function on each input and only return data that pass the filter.
+# The function must accept the record_id (typically a string) and the record results data (typically a dictionary) and return a boolean
+def deaggregate(self) -> dict:
+    return self.filter(lambda record_id, record_data: record_id > "a")
+
+
+# This method accepts some iterable of ids and filters out input ids that are not present in the iterable
+def deaggregate(self) -> dict:
+    return self.filter(self.checkm_results_iter())
+```
 
 For our tutorial, we want to filter the input genomes based on the `CheckM` results, which were written to `stdout` by CheckM, and which the YAPIM API automatically saved to the `Task`'s log file.
 
@@ -521,55 +576,6 @@ class QualityCheck(AggregateTask):
         )
 
         self.local["rm"]["-r", combined_dir]()
-```
-
-### deaggregate()
-
-Note that `AggregateTask` has helper attributes available for deaggregating output of an `AggregateTask`:
-
-```shell
-self.input_ids: self.input.keys()
-self.input_values: self.input.values()
-self.input_items: self.input.items()
-```
-
-Using these helpers, we can define custom filter methods. YAPIM has additional helper methods that automate a few common filter operations: 
-```python
-import os
-
-from yapim import prefix
-
-
-# This method will reset the input of the pipeline to be the prefixes of all data 
-# in a particular path, and will create the "fasta" field in each new data input. 
-# No other ids, or any other stored result attributes, will be available if they are not explicitly defined here.
-def deaggregate(self) -> dict:
-    self.remap()
-    return {
-        prefix(file): {
-            "fasta": file
-        }
-        for file in os.listdir("/path/to/data")
-    }
-
-
-# This method will update all existing inputs to include the field "uploaded-data". No ids or stored results will be removed. 
-def deaggregate(self) -> dict:
-    return {
-        record_id : {"updated-data": "data"}
-        for record_id in self.input_ids()
-    }
-
-
-# This method will call the passed function on each input and only return data that pass the filter.
-# The function must accept the record_id (typically a string) and the record results data (typically a dictionary) and return a boolean
-def deaggregate(self) -> dict:
-    return self.filter(lambda record_id, record_data: record_id > "a")
-
-
-# This method accepts some iterable of ids and filters out input ids that are not present in the iterable
-def deaggregate(self) -> dict:
-    return self.filter(self.checkm_results_iter())
 ```
 
 ------

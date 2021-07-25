@@ -15,10 +15,10 @@ class PackageGenerator(PackageManager):
                  dependencies_directories: Optional[List[Path]],
                  input_loader_path: Optional[Path] = None):
         self._tasks_directory = tasks_directory
-        if input_loader_path is not None and PackageGenerator._loader_type_is_valid(str(input_loader_path)):
-            self._loader = input_loader_path
-        else:
-            self._loader = None
+        # if input_loader_path is not None and PackageGenerator._loader_type_is_valid(str(input_loader_path)):
+        self._loader = input_loader_path
+        # else:
+        #     self._loader = None
         if dependencies_directories is not None:
             self._dependencies_directories = dependencies_directories
         else:
@@ -28,7 +28,7 @@ class PackageGenerator(PackageManager):
         if not write_directory.exists():
             os.makedirs(write_directory)
         output_data = {
-            "loader": (os.path.basename(self._loader) if self._loader is not None else None),
+            "loader": (False if self._loader is not None else True),
             "dependencies": [
                 os.path.basename(dependency_directory)
                 for dependency_directory in self._dependencies_directories
@@ -49,6 +49,9 @@ class PackageGenerator(PackageManager):
         pipeline_file = write_directory.joinpath(PackageGenerator.pipeline_file)
         # Create config stuff
         self._create_config(write_directory)
+        # Make a python package
+        open(write_directory.joinpath("__init__.py"), "a").close()
+        # Store data
         with open(pipeline_file, "wb") as file_ptr:
             pickle.dump(output_data, file_ptr)
 
@@ -56,7 +59,3 @@ class PackageGenerator(PackageManager):
         config_file_path = write_directory.joinpath(os.path.basename(self._tasks_directory) + "-config.yaml")
         if not config_file_path.exists() or input("Overwrite existing configuration file? [Y/n]: ").upper() == "Y":
             ConfigManagerGenerator(self._tasks_directory, self._dependencies_directories).write(config_file_path)
-
-    @staticmethod
-    def _loader_type_is_valid(loader_name: str) -> bool:
-        return issubclass(PackageGenerator._get_loader(loader_name), InputLoader)

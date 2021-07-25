@@ -1,7 +1,7 @@
-import os
+import pkgutil
 from abc import ABC
-from importlib import import_module
 from inspect import isclass
+from pathlib import Path
 from typing import Type
 
 from yapim.utils.input_loader import InputLoader
@@ -11,15 +11,13 @@ class PackageManager(ABC):
     pipeline_file = ".pipeline.pkl"
 
     @staticmethod
-    def _get_loader(loader_name: str) -> Type[InputLoader]:
-        current_dir = os.getcwd()
-        os.chdir(os.path.dirname(loader_name))
-        module = import_module(os.path.basename(os.path.splitext(loader_name)[0]))
-        for attribute_name in dir(module):
-            attribute = getattr(module, attribute_name)
-            if isclass(attribute) and issubclass(attribute, InputLoader) and loader_name in attribute.__name__:
-                os.chdir(current_dir)
-                return attribute
-        os.chdir(current_dir)
+    def _get_loader(pipeline_dir: Path) -> Type[InputLoader]:
+        for loader, module_name, _ in pkgutil.walk_packages([str(pipeline_dir)]):
+            module = loader.find_module(module_name).load_module(module_name)
+            for attribute_name in dir(module):
+                attribute = getattr(module, attribute_name)
+                if isclass(attribute) and issubclass(attribute, InputLoader):
+                    # Add the class to this package's variables
+                    return attribute
         print("Unable to import loader module")
         exit(1)
