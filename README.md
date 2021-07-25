@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/cjneely10/YAPIM.svg?branch=main)](https://travis-ci.com/cjneely10/YAPIM)
+![example workflow](https://github.com/cjneely10/YAPIC/actions/workflows/ci.yml/badge.svg)
 
 # Yet Another PIpeline (Manager)
 
