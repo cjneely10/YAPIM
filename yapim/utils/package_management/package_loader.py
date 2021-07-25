@@ -36,7 +36,7 @@ class PackageLoader(PackageManager):
         ]
         # Load and validate input loader
         loader_path = pipeline_data.get("loader")
-        if loader_path is False or loader_path is None:
+        if loader_path is None or loader_path is False:
             pipeline_data["loader"] = ExtensionLoader
         else:
             loader = PackageLoader._get_loader(self._pipeline_directory)

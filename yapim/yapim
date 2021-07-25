@@ -185,7 +185,7 @@ class YAPIMRunner(cli.Application):
             ).run()
         else:
             Executor(
-                pipeline_data["loader"](*args),
+                pipeline_data["loader"](self.input_directory, self.output_directory, *args),
                 self.config_path,
                 self.output_directory,
                 pipeline_data["tasks"],

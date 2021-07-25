@@ -28,7 +28,7 @@ class PackageGenerator(PackageManager):
         if not write_directory.exists():
             os.makedirs(write_directory)
         output_data = {
-            "loader": (False if self._loader is not None else True),
+            "loader": (True if self._loader is not None else False),
             "dependencies": [
                 os.path.basename(dependency_directory)
                 for dependency_directory in self._dependencies_directories
