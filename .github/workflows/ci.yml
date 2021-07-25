@@ -48,5 +48,4 @@ jobs:
           exit 1
 
       - name: Write
-        run: |
-          echo ${{ steps.pytester-cov.outputs.output-table }}
+        run: cat ${{ steps.pytester-cov.outputs.output-table }}
