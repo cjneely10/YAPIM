@@ -379,6 +379,7 @@ class Task(BaseTask, ABC):
                 w.write("------END SLURM LOG OUTPUT SECTION------\n")
         with open(os.path.join(self.wdir, "task.log"), "a") as w:
             w.write("\n")
+        return out
 
     def single(self, cmd: LocalCommand, time_override: Optional[str] = None):
         """ Launch a command that uses a single thread.
@@ -388,7 +389,7 @@ class Task(BaseTask, ABC):
         Example:
         self.single(self.local["pwd"])
         """
-        self.parallel(cmd, time_override=time_override, threads_override="1")
+        return self.parallel(cmd, time_override=time_override, threads_override="1")
 
     def create_script(self, cmd: Union[str, LocalCommand, List[Union[str, LocalCommand]]], file_name: str,
                       parallelize: bool = False) \
