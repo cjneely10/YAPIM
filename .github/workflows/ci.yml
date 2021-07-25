@@ -46,8 +46,3 @@ jobs:
         run: |
           echo "cov single fail ${{ steps.pytester-cov.outputs.cov-threshold-total-fail }}"
           exit 1
-
-      - name: pytest-coverage-commentator
-        uses: coroo/pytest-coverage-commentator@v1.0.2
-        with:
-          pytest-coverage: ${{ steps.pytester-cov.outputs.output-table }}
