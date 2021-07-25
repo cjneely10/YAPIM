@@ -8,13 +8,12 @@ on:
       - '*'
 
 jobs:
-  test:
+  install:
     strategy:
       matrix:
         python-version:
           - 3.8
           - 3.9
-    needs: install
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -23,7 +22,8 @@ jobs:
       - run: conda activate yapim
       - run: conda install -y -c bioconda mmseqs2
       - run: pip install git+https://github.com/cjneely10/YAPIM.git
-  install:
+  test:
+    needs: install
     runs-on: ubuntu-latest
     env:
       COVERAGE_SINGLE: 60
@@ -37,7 +37,6 @@ jobs:
         uses: alexanderdamiani/pytester-cov@v1.2.0
         with:
           pytest-root-dir: '.'
-          cov-omit-list: 'test/*, temp/main3.py, temp/main4.py'
           cov-threshold-single: ${{ env.COVERAGE_SINGLE }}
           cov-threshold-total: ${{ env.COVERAGE_TOTAL }}
 
