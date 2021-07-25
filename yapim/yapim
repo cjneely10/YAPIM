@@ -174,24 +174,14 @@ class YAPIMRunner(cli.Application):
 
     def main(self, *args):
         pipeline_data = PackageLoader(self.pipeline_pkl_path).validate_pipeline_pkl()
-        if pipeline_data["loader"].__name__ == ExtensionLoader.__name__:
-            Executor(
-                pipeline_data["loader"](self.input_directory, self.output_directory),
-                self.config_path,
-                self.output_directory,
-                pipeline_data["tasks"],
-                pipeline_data["dependencies"],
-                self.display_status
-            ).run()
-        else:
-            Executor(
-                pipeline_data["loader"](self.input_directory, self.output_directory, *args),
-                self.config_path,
-                self.output_directory,
-                pipeline_data["tasks"],
-                pipeline_data["dependencies"],
-                self.display_status
-            ).run()
+        Executor(
+            pipeline_data["loader"](self.input_directory, self.output_directory, *args),
+            self.config_path,
+            self.output_directory,
+            pipeline_data["tasks"],
+            pipeline_data["dependencies"],
+            self.display_status
+        ).run()
 
 
 if __name__ == "__main__":

@@ -189,8 +189,8 @@ class ConfigManager:
             if isinstance(prog_data, dict):
                 provided_program = ""
                 try:
-                    provided_program = prog_data[ConfigManager.PROGRAM]
                     if ConfigManager.PROGRAM in prog_data.keys():
+                        provided_program = prog_data[ConfigManager.PROGRAM]
                         if not os.path.exists(provided_program):
                             local.which(provided_program)
                 except CommandNotFound:

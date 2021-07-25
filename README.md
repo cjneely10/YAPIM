@@ -7,7 +7,7 @@
 ```shell
 conda create --name yapim-demo python=3.8 
 conda activate yapim-demo  
-pip install git+https://github.com/cjneely10/YAPIM.git@v0.1.0 
+pip install git+https://github.com/cjneely10/YAPIM.git@v0.1.2
 ```
 
 ## Documentation

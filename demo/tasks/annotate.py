@@ -3,11 +3,11 @@ from typing import List, Union, Type
 from yapim import Task, DependencyInput
 
 
-class CallAnnotate(Task):
+class Annotate(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {
-            "result": self.input["Annotate"]["result"],
+            "result": self.input["MMSeqsEasySearch"]["result"],
             "proteins": self.input["IdentifyProteins"]["proteins"],
             "final": ["result", "proteins"]
         }
@@ -18,7 +18,7 @@ class CallAnnotate(Task):
 
     @staticmethod
     def depends() -> List[DependencyInput]:
-        return [DependencyInput("Annotate", {"IdentifyProteins": ["proteins"]})]
+        return [DependencyInput("MMSeqsEasySearch", {"IdentifyProteins": ["proteins"]})]
 
     def run(self):
         pass

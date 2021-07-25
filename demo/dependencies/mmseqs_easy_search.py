@@ -3,7 +3,7 @@ from typing import List, Union, Type
 from yapim import Task, DependencyInput
 
 
-class Annotate(Task):
+class MMSeqsEasySearch(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.output = {

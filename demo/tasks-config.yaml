@@ -46,14 +46,14 @@ QualityCheck:
   program: checkm
   min_quality: 60.0
 
-CallAnnotate:
+Annotate:
   # Number of threads task will use
   threads: 1
   # Amount of memory task will use (in GB)
   memory: 8
   time: "4:00:00"
   dependencies:
-    Annotate:
+    MMSeqsEasySearch:
       # Number of threads task will use
       threads: 5
       # Amount of memory task will use (in GB)
