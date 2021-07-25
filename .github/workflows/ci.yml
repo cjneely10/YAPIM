@@ -13,11 +13,10 @@ jobs:
       matrix:
         python-version:
           - 3.8
-          - 3.9
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-conda@v1
+      - uses: s-weigand/setup-conda@v1
       - run: conda create -y --name yapim python=${{ matrix.python-version }}
       - run: conda activate yapim
       - run: conda install -y -c bioconda mmseqs2
@@ -30,8 +29,6 @@ jobs:
       COVERAGE_TOTAL: 60
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-conda@v1
-      - run: conda activate yapim
       - name: pytest
         id: pytest
         uses: alexanderdamiani/pytester-cov@v1.2.0
