@@ -1,6 +1,6 @@
 import pkgutil
 from abc import ABC
-from inspect import isclass
+from inspect import isclass, isabstract
 from pathlib import Path
 from typing import Type
 
@@ -16,7 +16,7 @@ class PackageManager(ABC):
             module = loader.find_module(module_name).load_module(module_name)
             for attribute_name in dir(module):
                 attribute = getattr(module, attribute_name)
-                if isclass(attribute) and issubclass(attribute, InputLoader):
+                if isclass(attribute) and issubclass(attribute, InputLoader) and not isabstract(attribute):
                     # Add the class to this package's variables
                     return attribute
         print("Unable to import loader module")

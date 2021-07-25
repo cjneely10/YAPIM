@@ -39,7 +39,7 @@ class PackageLoader(PackageManager):
         if loader_path is None or loader_path is False:
             pipeline_data["loader"] = ExtensionLoader
         else:
-            loader = PackageLoader._get_loader(self._pipeline_directory)
+            loader = PackageManager._get_loader(self._pipeline_directory)
             if not issubclass(loader, InputLoader):
                 print(f"Unable to validate loader")
                 exit(1)
