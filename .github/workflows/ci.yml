@@ -9,9 +9,71 @@ on:
 
 jobs:
   test:
+    strategy:
+      matrix:
+        python-version:
+          - 3.8
+          - 3.9
+    needs: install
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: setup-conda
-        uses: s-weigand/setup-conda@v1.0.7
+      - uses: actions/setup-conda@v1
+      - run: conda create -y --name yapim python=${{ matrix.python-version }}
+      - run: conda activate yapim
+      - run: conda install -y -c bioconda mmseqs2
+      - run: pip install git+https://github.com/cjneely10/YAPIM.git
   install:
+    runs-on: ubuntu-latest
+    env:
+      COVERAGE_SINGLE: 60
+      COVERAGE_TOTAL: 60
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-conda@v1
+      - run: conda activate yapim
+      - name: pytest
+        id: pytest
+        uses: alexanderdamiani/pytester-cov@v1.2.0
+        with:
+          pytest-root-dir: '.'
+          cov-omit-list: 'test/*, temp/main3.py, temp/main4.py'
+          cov-threshold-single: ${{ env.COVERAGE_SINGLE }}
+          cov-threshold-total: ${{ env.COVERAGE_TOTAL }}
+
+      - name: Coverage single fail - new issue
+        if: ${{ steps.pytester-cov.outputs.cov-threshold-single-fail == 'true' }}
+        uses: nashmaniac/create-issue-action@v1.1
+        with:
+          title: Pytest coverage single falls below minimum ${{ env.COVERAGE_SINGLE }}
+          token: ${{secrets.GITHUB_TOKEN}}
+          assignees: ${{github.actor}}
+          labels: workflow-failed
+          body: ${{ steps.pytester-cov.outputs.output-table }}
+
+      - name: Coverage single fail - exit
+        if: ${{ steps.pytester-cov.outputs.cov-threshold-single-fail == 'true' }}
+        run: |
+          echo "cov single fail ${{ steps.pytester-cov.outputs.cov-threshold-single-fail }}"
+          exit 1
+
+      - name: Coverage total fail - new issue
+        if: ${{ steps.pytester-cov.outputs.cov-threshold-total-fail == 'true' }}
+        uses: nashmaniac/create-issue-action@v1.1
+        with:
+          title: Pytest coverage total falls below minimum ${{ env.COVERAGE_TOTAL }}
+          token: ${{secrets.GITHUB_TOKEN}}
+          assignees: ${{github.actor}}
+          labels: workflow-failed
+          body: ${{ steps.pytester-cov.outputs.output-table }}
+
+      - name: Coverage total fail - exit
+        if: ${{ steps.pytester-cov.outputs.cov-threshold-total-fail == 'true' }}
+        run: |
+          echo "cov single fail ${{ steps.pytester-cov.outputs.cov-threshold-total-fail }}"
+          exit 1
+
+      - name: Commit pytest coverage table
+        uses: peter-evans/commit-comment@v1
+        with:
+          body: ${{ steps.pytester-cov.outputs.output-table }}
