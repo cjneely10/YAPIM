@@ -63,16 +63,19 @@ class DependencyGraph:
     ROOT = ConfigManager.ROOT
     ROOT_NODE = Node(ROOT, ROOT)
 
-    def __init__(self, tasks: List[Type[Task]], task_blueprints: Dict[str, Type[Task]]):
+    def __init__(self, tasks: List[Type[Task]], task_blueprints: Dict[str, Type[Task]] = None):
         """ Create DAG from list of TaskList class objects
 
         :param tasks: List of TaskList class objects
+        :param task_blueprints: Mapping of task name to type. If not provided, generated using `__name__(self)`
         :raises: DependencyGraphGenerationError
         """
-        self.idx: Dict[str, Type[Task]] = task_blueprints
-
         self._graph = nx.DiGraph()
         self._graph.add_node(DependencyGraph.ROOT_NODE)
+        if task_blueprints is not None:
+            self.idx: Dict[str, Type[Task]] = task_blueprints
+        else:
+            self.idx = {task.__name__: task for task in tasks}
         self._build_dependency_graph(tasks)
         self._sorted_graph: Optional[List[List[Node]]] = None
         if not nx.is_directed_acyclic_graph(self._graph):
