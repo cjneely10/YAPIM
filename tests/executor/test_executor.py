@@ -60,10 +60,10 @@ class TestExecutor(unittest.TestCase):
     def test_simple(self):
         Executor(
             TestExecutor.SimpleLoader(10),  # Input loader
-            TestExecutor.file.joinpath("simple/sample-config.yaml"),  # Config file path
+            TestExecutor.file.joinpath("simple").joinpath("sample-config.yaml"),  # Config file path
             TestExecutor.file.joinpath("simple-out"),  # Base output dir path
-            Path("simple/sample_tasks1"),  # Relative path to pipeline directory
-            [Path("simple/sample_dependencies")],  # List of relative paths to dependency directories,
+            Path("simple").joinpath("sample_tasks1"),  # Relative path to pipeline directory
+            [Path("simple").joinpath("sample_dependencies")],  # List of relative paths to dependency directories,
             display_status_messages=False  # Silence status messages
         ).run()
 
@@ -73,10 +73,10 @@ class TestExecutor(unittest.TestCase):
             shutil.rmtree(out_dir)
         Executor(
             TestExecutor.ComplexLoader(10),  # Input loader
-            TestExecutor.file.joinpath("simple/sample-config.yaml"),  # Config file path
+            TestExecutor.file.joinpath("simple").joinpath("sample-config.yaml"),  # Config file path
             out_dir,  # Base output dir path
-            Path("simple/sample_tasks1"),  # Relative path to pipeline directory
-            [Path("simple/sample_dependencies")],  # List of relative paths to dependency directories,
+            Path("simple").joinpath("sample_tasks1"),  # Relative path to pipeline directory
+            [Path("simple").joinpath("sample_dependencies")],  # List of relative paths to dependency directories,
             # display_status_messages=False  # Silence status messages
         ).run()
 
@@ -84,10 +84,10 @@ class TestExecutor(unittest.TestCase):
         with self.assertRaises(AttributeError):
             Executor(
                 TestExecutor.ImproperComplexLoader(10),  # Input loader
-                TestExecutor.file.joinpath("simple/sample-config.yaml"),  # Config file path
+                TestExecutor.file.joinpath("simple").joinpath("sample-config.yaml"),  # Config file path
                 TestExecutor.file.joinpath("simple-out"),  # Base output dir path
-                Path("simple/sample_tasks1"),  # Relative path to pipeline directory
-                [Path("simple/sample_dependencies")],  # List of relative paths to dependency directories,
+                Path("simple").joinpath("sample_tasks1"),  # Relative path to pipeline directory
+                [Path("simple").joinpath("sample_dependencies")],  # List of relative paths to dependency directories,
                 # display_status_messages=False  # Silence status messages
             ).run()
 
@@ -98,7 +98,7 @@ class TestExecutor(unittest.TestCase):
                 Path("../data").resolve(),
                 out_dir,
             ),
-            TestExecutor.file.joinpath("fasta/fasta-config.yaml"),  # Config file path
+            TestExecutor.file.joinpath("fasta").joinpath("fasta-config.yaml"),  # Config file path
             out_dir,  # Base output dir path
             Path("fasta/tasks"),  # Relative path to pipeline directory
             display_status_messages=False
@@ -111,7 +111,7 @@ class TestExecutor(unittest.TestCase):
                 Path("../data").resolve(),
                 out_dir,
             ),
-            TestExecutor.file.joinpath("nested/nested-config.yaml"),  # Config file path
+            TestExecutor.file.joinpath("nested").joinpath("nested-config.yaml"),  # Config file path
             out_dir,  # Base output dir path
             Path("nested/tasks"),  # Relative path to pipeline directory
             [Path("nested/mmseqs_dependencies")],
@@ -120,7 +120,7 @@ class TestExecutor(unittest.TestCase):
     def test_no_output_defined(self):
         Executor(
             TestExecutor.SimpleLoader(10),  # Input loader
-            TestExecutor.file.joinpath("no_output/no_output-config.yaml"),  # Config file path
+            TestExecutor.file.joinpath("no_output").joinpath("no_output-config.yaml"),  # Config file path
             TestExecutor.file.joinpath("no_output-out"),  # Base output dir path
             "no_output/tasks",  # Relative path to pipeline directory
         ).run()
@@ -129,7 +129,7 @@ class TestExecutor(unittest.TestCase):
         with self.assertRaises(BaseTask.TaskCompletionError):
             Executor(
                 TestExecutor.SimpleLoader(10),  # Input loader
-                TestExecutor.file.joinpath("missing_output/missing_output-config.yaml"),  # Config file path
+                TestExecutor.file.joinpath("missing_output").joinpath("missing_output-config.yaml"),  # Config file path
                 TestExecutor.file.joinpath("missing_output-out"),  # Base output dir path
                 "missing_output",  # Relative path to pipeline directory
             ).run()
@@ -138,7 +138,7 @@ class TestExecutor(unittest.TestCase):
         with self.assertRaises(CommandNotFound):
             Executor(
                 TestExecutor.SimpleLoader(1),  # Input loader
-                TestExecutor.file.joinpath("bad_program_path/bad_program_path-config.yaml"),  # Config file path
+                TestExecutor.file.joinpath("bad_program_path").joinpath("bad_program_path-config.yaml"),  # Config file path
                 TestExecutor.file.joinpath("bad_program_path-out"),  # Base output dir path
                 "bad_program_path",  # Relative path to pipeline directory
                 display_status_messages=False
@@ -147,7 +147,7 @@ class TestExecutor(unittest.TestCase):
     def test_existing_data(self):
         Executor(
             TestExecutor.SimpleLoader(1),  # Input loader
-            TestExecutor.file.joinpath("existing_data/first_pipeline-config.yaml"),  # Config file path
+            TestExecutor.file.joinpath("existing_data").joinpath("first_pipeline-config.yaml"),  # Config file path
             TestExecutor.file.joinpath("existing_data-out"),  # Base output dir path
             "existing_data/first_pipeline",  # Relative path to pipeline directory
             ["existing_data/sample_dependencies"]
@@ -155,7 +155,7 @@ class TestExecutor(unittest.TestCase):
 
         Executor(
             TestExecutor.SimpleLoader(1),  # Input loader
-            TestExecutor.file.joinpath("existing_data/second_pipeline-config.yaml"),  # Config file path
+            TestExecutor.file.joinpath("existing_data").joinpath("second_pipeline-config.yaml"),  # Config file path
             TestExecutor.file.joinpath("existing_data-out"),  # Base output dir path
             "existing_data/second_pipeline",  # Relative path to pipeline directory
         ).run()
@@ -163,7 +163,7 @@ class TestExecutor(unittest.TestCase):
     def test_aggregate_dependencies(self):
         Executor(
             TestExecutor.SimpleLoader(1),  # Input loader
-            TestExecutor.file.joinpath("aggregate_dependency/aggregate-config.yaml"),  # Config file path
+            TestExecutor.file.joinpath("aggregate_dependency").joinpath("aggregate-config.yaml"),  # Config file path
             TestExecutor.file.joinpath("aggregate_dependency-out"),  # Base output dir path
             "aggregate_dependency/tasks",  # Relative path to pipeline directory
             ["aggregate_dependency/dependencies"]
@@ -172,7 +172,7 @@ class TestExecutor(unittest.TestCase):
     def test_nested_requirements(self):
         Executor(
             TestExecutor.SimpleLoader(10),
-            TestExecutor.file.joinpath("nested_requirements/nested_requirements-config.yaml"),
+            TestExecutor.file.joinpath("nested_requirements").joinpath("nested_requirements-config.yaml"),
             TestExecutor.file.joinpath("nested_requirements-out"),
             "nested_requirements/tasks",
             ["nested_requirements/dependencies"]
@@ -182,7 +182,7 @@ class TestExecutor(unittest.TestCase):
         with self.assertRaises(DependencyGraphGenerationError):
             Executor(
                 TestExecutor.SimpleLoader(10),
-                TestExecutor.file.joinpath("bad_mixing/bad_mixing-config.yaml"),
+                TestExecutor.file.joinpath("bad_mixing").joinpath("bad_mixing-config.yaml"),
                 TestExecutor.file.joinpath("bad_mixing-out"),
                 "bad_mixing/tasks",
                 ["bad_mixing/dependencies"]
@@ -191,7 +191,7 @@ class TestExecutor(unittest.TestCase):
     def test_cross_types_reqs_deps(self):
         Executor(
             TestExecutor.SimpleLoader(10),
-            TestExecutor.file.joinpath("cross_types_reqs_deps/cross_types_reqs_deps.yaml"),
+            TestExecutor.file.joinpath("cross_types_reqs_deps").joinpath("cross_types_reqs_deps.yaml"),
             TestExecutor.file.joinpath("cross_types_reqs_deps-out"),
             "cross_types_reqs_deps/tasks",
             ["cross_types_reqs_deps/dependencies"]
@@ -200,7 +200,7 @@ class TestExecutor(unittest.TestCase):
     def test_added_imports(self):
         Executor(
             TestExecutor.SimpleLoader(10),
-            TestExecutor.file.joinpath("added_imports/added_imports-config.yaml"),
+            TestExecutor.file.joinpath("added_imports").joinpath("added_imports-config.yaml"),
             TestExecutor.file.joinpath("added_imports-out"),
             "added_imports/tasks",
         ).run()
@@ -218,7 +218,7 @@ class TestExecutor(unittest.TestCase):
 
         Executor(
             TestIDLoader(10),
-            TestExecutor.file.joinpath("confirm_not_overwritten/confirm_not_overwritten-config.yaml"),
+            TestExecutor.file.joinpath("confirm_not_overwritten").joinpath("confirm_not_overwritten-config.yaml"),
             TestExecutor.file.joinpath("confirm_not_overwritten-out"),
             "confirm_not_overwritten/tasks",
             ["confirm_not_overwritten/dependencies"]
@@ -228,7 +228,7 @@ class TestExecutor(unittest.TestCase):
         with self.assertRaises(TaskExecutionError):
             Executor(
                 TestExecutor.SimpleLoader(10),
-                TestExecutor.file.joinpath("improper_versioned_data/improper_versioned_data-config.yaml"),
+                TestExecutor.file.joinpath("improper_versioned_data").joinpath("improper_versioned_data-config.yaml"),
                 TestExecutor.file.joinpath("improper_versioned_data-out"),
                 "improper_versioned_data/tasks",
             ).run()
@@ -236,7 +236,7 @@ class TestExecutor(unittest.TestCase):
     def test_conditional_run(self):
         Executor(
             TestExecutor.SimpleLoader(10),
-            TestExecutor.file.joinpath("conditional_task/tasks-config.yaml"),
+            TestExecutor.file.joinpath("conditional_task").joinpath("tasks-config.yaml"),
             TestExecutor.file.joinpath("conditional_task-out"),
             "conditional_task/tasks"
         ).run()

@@ -134,27 +134,29 @@ class ConfigManager:
             raise MissingDataError("Dependency section is improperly configured!")
         for task_name, task_dict in data_dict.items():
             if not is_dependency and task_name not in (ConfigManager.INPUT, ConfigManager.SLURM, ConfigManager.GLOBAL):
-                for required_arg in \
-                        (ConfigManager.TIME, ConfigManager.MEMORY, ConfigManager.THREADS):
+                for required_arg in (ConfigManager.MEMORY, ConfigManager.THREADS, ConfigManager.TIME):
+                    # Verify that the required args are defined
                     if required_arg not in task_dict.keys():
-                        raise MissingTimingData(f"Config section for {task_name} is missing required flag "
-                                                f"{required_arg}")
-                    if task_dict[required_arg] == "0":
-                        raise InvalidResourcesError(f"Requested {required_arg} with 0 resources!")
-                try:
-                    threads = int(task_dict[ConfigManager.THREADS])
-                    if threads > max_threads or threads < 1:
-                        raise InvalidResourcesError(f"Max threads is set a {max_threads} "
-                                                    f"but {task_name} requests {threads}")
-                except ValueError:
-                    raise ValueError(f"Section {task_name} threads is invalid!")
-                try:
-                    memory = int(task_dict[ConfigManager.MEMORY])
-                    if memory > max_memory or memory < 1:
-                        raise InvalidResourcesError(f"Max memory is set a {max_memory} "
-                                                    f"but {task_name} requests {memory}")
-                except ValueError:
-                    raise ValueError(f"Section {task_name} memory is invalid!")
+                        raise MissingTimingData(f"Config section for {task_name} is missing required definition "
+                                                f"'{required_arg}'")
+                task_requirements = {ConfigManager.THREADS: 0, ConfigManager.MEMORY: 0}
+                for required_arg in task_requirements.keys():
+                    # Parse argument for numeric, positive value
+                    try:
+                        req_res_value = int(task_dict[required_arg])
+                        if req_res_value <= 0:
+                            raise InvalidResourcesError(f"'{required_arg}' should be a positive value")
+                        task_requirements[required_arg] = req_res_value
+                    except ValueError:
+                        raise InvalidResourcesError(f"Requested resource '{required_arg}' must be numeric")
+                threads = task_requirements[ConfigManager.THREADS]
+                if threads > max_threads:
+                    raise InvalidResourcesError(f"Max threads is set to {max_threads} "
+                                                f"but {task_name} requests {threads}")
+                memory = task_requirements[ConfigManager.MEMORY]
+                if memory > max_memory:
+                    raise InvalidResourcesError(f"Max memory is set to {max_memory} "
+                                                f"but {task_name} requests {memory}")
             if ConfigManager.SKIP in task_dict.keys() and task_dict[ConfigManager.SKIP] is True:
                 continue
             if ConfigManager.DATA in task_dict.keys():
