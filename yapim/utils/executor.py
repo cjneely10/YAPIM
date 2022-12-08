@@ -126,9 +126,8 @@ class Executor:
                 for future in as_completed(futures):
                     if future.exception() is not None:
                         raise future.exception()
-        out_ptr = open(self.results_base_dir.joinpath(f"{self.pipeline_name}.pkl"), "wb")
-        pickle.dump(TaskChainDistributor.output_data_to_pickle, out_ptr)
-        out_ptr.close()
+        with open(self.results_base_dir.joinpath(f"{self.pipeline_name}.pkl"), "wb") as out_ptr:
+            pickle.dump(TaskChainDistributor.output_data_to_pickle, out_ptr)
         print(colors.yellow & colors.bold | "\n%s complete!\n" % self.pipeline_name)
 
     def _task_batch(self):
@@ -168,27 +167,46 @@ class Executor:
     def _populate_requested_existing_input(self) -> Dict[str, Dict]:
         """Load existing pipeline data referenced in configuration file"""
         input_section = self.config_manager.config[ConfigManager.INPUT]
-        err = ImproperInputSection("INPUT should consist of dictionary {pipeline_name: key-mapping} or "
-                                   "{pipeline_name: all}")
+        err = ImproperInputSection("""
+INPUT section format should be either:
+
+INPUT:
+  pipeline_name:
+    to: from
+
+or:
+
+INPUT:
+  pipeline_name: all
+""")
         if not isinstance(input_section, dict):
             raise err
         requested_input = {}
-        for requested_pipeline_id in input_section.keys():
-            pipeline_input = input_section[requested_pipeline_id]
+        for requested_pipeline_id, requested_pipeline_input in input_section.items():
+            # Root definition should not be required to be input, but is kept for legacy reasons
             if requested_pipeline_id == ConfigManager.ROOT:
                 continue
+            # Enclosed .pkl file and data
             pkl_file = Path(os.path.dirname(self.results_base_dir)) \
                 .joinpath(requested_pipeline_id).joinpath(requested_pipeline_id + ".pkl")
             pkl_data = InputLoader.load_pkl_data(pkl_file)
-            pkl_input_data = {key: {} for key in pkl_data.keys()}
-            if isinstance(pipeline_input, dict):
-                for _to, _from in pipeline_input.items():
-                    for record_id in pkl_input_data.keys():
-                        if _from in pkl_data[record_id].keys():
-                            pkl_input_data[record_id][_to] = pkl_data[record_id][_from]
-                        else:
-                            raise err
+            # Definition is a {"to": "from"} mapping
+            if isinstance(requested_pipeline_input, dict):
+                pkl_input_data = {key: {} for key in pkl_data.keys()}
+                for record_id, pkl_record_data in pkl_data.items():
+                    # Check if pipeline pkl data records are needed in this pipeline
+                    required = False
+                    for _to, _from in requested_pipeline_input.items():
+                        if _from in pkl_record_data.keys():
+                            pkl_input_data[record_id][_to] = pkl_record_data[_from]
+                            required = True
+                    # Drop `record_id` if it does not contain any required information
+                    if not required:
+                        del pkl_input_data[record_id]
                 requested_input.update(pkl_input_data)
-            else:
+            # Definition requests all information
+            elif isinstance(requested_pipeline_input, str) and requested_pipeline_input == "all":
                 requested_input.update(pkl_data)
+            else:
+                raise err
         return requested_input
