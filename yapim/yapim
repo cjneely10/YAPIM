@@ -10,6 +10,9 @@ from typing import Optional, List
 from plumbum import cli
 
 from yapim.utils.executor import Executor
+# pylint: disable=fixme
+# TODO: Remove this requirement
+# Import is needed dynamically
 from yapim.utils.extension_loader import ExtensionLoader
 from yapim.utils.package_management.directory_cleaner import DirectoryCleaner
 from yapim.utils.package_management.package_generator import PackageGenerator
@@ -20,7 +23,7 @@ class YAPIM(cli.Application):
     """
     Create and run Yet Another PIpeline (Manager)
     """
-    VERSION = "0.1.0"
+    VERSION = "0.1.3"
 
     def main(self, *args):
         if args:

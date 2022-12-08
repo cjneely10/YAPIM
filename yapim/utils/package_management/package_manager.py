@@ -1,4 +1,6 @@
+"""Utilities for package management classes"""
 import pkgutil
+import sys
 from abc import ABC
 from inspect import isclass, isabstract
 from pathlib import Path
@@ -7,7 +9,9 @@ from typing import Type
 from yapim.utils.input_loader import InputLoader
 
 
+# pylint: disable=too-few-public-methods
 class PackageManager(ABC):
+    """Base class defining means by which to access pipeline loader and pkl internals"""
     pipeline_file = ".pipeline.pkl"
 
     @staticmethod
@@ -20,4 +24,4 @@ class PackageManager(ABC):
                     # Add the class to this package's variables
                     return attribute
         print("Unable to import loader module")
-        exit(1)
+        sys.exit(1)

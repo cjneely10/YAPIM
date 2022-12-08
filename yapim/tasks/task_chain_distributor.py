@@ -117,8 +117,10 @@ class TaskChainDistributor(dict):
             )
         task.set_is_complete()
 
+        # pylint: disable=fixme
         # TODO: This may be problematic...
         projected_memory = int(self.config_manager.find(task.full_name, ConfigManager.MEMORY))
+        # pylint: disable=fixme
         # TODO: Handle SLURM when multiple nodes may have been listed
         projected_threads = int(self.config_manager.find(task.full_name, ConfigManager.THREADS))
         with TaskChainDistributor.awaiting_resources:
@@ -157,6 +159,7 @@ class TaskChainDistributor(dict):
         with TaskChainDistributor.update_lock:
             if result.record_id not in TaskChainDistributor.results.keys():
                 TaskChainDistributor.results[result.record_id] = {}
+                # pylint: disable=fixme
                 # TODO: Manage memory better (write tasks as they complete, reload for AggregateTasks)
                 #  https://docs.h5py.org/en/stable/index.html
                 TaskChainDistributor.output_data_to_pickle[result.record_id] = {}

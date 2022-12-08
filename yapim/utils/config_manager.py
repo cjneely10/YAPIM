@@ -140,6 +140,7 @@ class ConfigManager:
                         raise MissingTimingData(f"Config section for {task_name} is missing required definition "
                                                 f"'{required_arg}'")
                 task_requirements = {ConfigManager.THREADS: 0, ConfigManager.MEMORY: 0}
+                # pylint: disable=consider-iterating-dictionary
                 for required_arg in task_requirements.keys():
                     # Parse argument for numeric, positive value
                     try:

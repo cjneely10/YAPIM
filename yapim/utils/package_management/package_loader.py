@@ -1,4 +1,6 @@
+"""Utilities for end-users to load a packaged pipeline"""
 import pickle
+import sys
 from pathlib import Path
 from typing import Dict, Type, Tuple, List, Optional
 
@@ -10,14 +12,25 @@ from yapim.utils.package_management.package_manager import PackageManager
 
 
 class PackageLoader(PackageManager):
+    """Loads package and defined InputLoader"""
     def __init__(self, pipeline_package_directory: Path):
+        """
+        Create package loader
+
+        :param pipeline_package_directory: Top-level packaged pipeline directory
+        """
         self._pipeline_directory = pipeline_package_directory
 
     def validate_pipeline_pkl(self) -> dict:
+        """
+        Confirm that the pipeline directory adequately describes a YAPIM pipeline
+
+        :return: True/False if pipeline contents are valid
+        """
         pipeline_pkl_path = self._pipeline_directory.joinpath(PackageLoader.pipeline_file)
         if not pipeline_pkl_path.exists():
             print("Unable to find pipeline .pkl file")
-            exit(1)
+            sys.exit(1)
         pipeline_data: dict
         with open(pipeline_pkl_path, "rb") as provided_pipeline_file:
             pipeline_data = pickle.load(provided_pipeline_file)
@@ -26,8 +39,8 @@ class PackageLoader(PackageManager):
                     (isinstance(pipeline_data[key], Path)
                      and not self._pipeline_directory.joinpath(pipeline_data[key]).exists()):
                 print(f"Unable to load {key} {pipeline_data[key]}")
-                print(f"Re-run yaml config to update pipeline")
-                exit(1)
+                print("Re-run yaml config to update pipeline")
+                sys.exit(1)
         # Load task/dependencies at directory level
         pipeline_data["tasks"] = self._pipeline_directory.joinpath(pipeline_data["tasks"])
         pipeline_data["dependencies"] = [
@@ -39,14 +52,15 @@ class PackageLoader(PackageManager):
         if loader_path is None or loader_path is False:
             pipeline_data["loader"] = ExtensionLoader
         else:
-            loader = PackageManager._get_loader(self._pipeline_directory)
+            loader = super()._get_loader(self._pipeline_directory)
             if not issubclass(loader, InputLoader):
-                print(f"Unable to validate loader")
-                exit(1)
+                print("Unable to validate loader")
+                sys.exit(1)
             pipeline_data["loader"] = loader
         return pipeline_data
 
     def load_from_package(self) -> Tuple[List[Type[Task]], Dict[str, Type[Task]]]:
+        """Load YAPIM pipeline from directory"""
         pipeline_data = self.validate_pipeline_pkl()
         return PackageLoader.load_from_directories(pipeline_data["tasks"], pipeline_data["dependencies"])
 
@@ -54,6 +68,13 @@ class PackageLoader(PackageManager):
     def load_from_directories(
             tasks_directory: Path,
             dependencies_directories: Optional[List[Path]]) -> Tuple[List[Type[Task]], Dict[str, Type[Task]]]:
+        """
+        Load YAPIM pipeline from directories
+
+        :param tasks_directory: Directory containing YAPIM tasks
+        :param dependencies_directories: List of dependency directories
+        :return: Tuple containing list of pipeline tasks and a {name: type} mapping for each task
+        """
         task_blueprints: Dict[str, Type[Task]] = get_modules(tasks_directory)
         pipeline_tasks = list(task_blueprints.values())
         if dependencies_directories is not None and len(dependencies_directories) > 0:

@@ -50,6 +50,7 @@ def clean(*directories: Union[Path, str]):
     return method
 
 
+# pylint: disable=line-too-long,fixme
 # TODO: Parser to identify illegal self.input accesses and prevent pipeline launch at start time
 #  https://stackoverflow.com/questions/43166571/getting-all-the-nodes-from-python-ast-that-correspond-to-a-particular-variable-w
 # pylint: disable=too-many-public-methods
@@ -111,6 +112,7 @@ class Task(BaseTask, ABC):
         """Allowable program versions for running this Task"""
         pass
 
+    # pylint: disable=fixme
     # TODO: Add to tutorial
     def condition(self) -> bool:
         """Define Task to only run if a condition is met."""
@@ -254,6 +256,7 @@ class Task(BaseTask, ABC):
                 logging.info(_str)
                 if self.display_messages:
                     print(colors.blue & colors.bold | _str)
+            # pylint: disable=fixme
             # TODO: Add internal metadata manager to allow designation of callbacks that store given data
             #  Using this class, track completion times.
             start_time = time.time()
@@ -365,20 +368,20 @@ class Task(BaseTask, ABC):
         logging.info(str(cmd))
         if self.display_messages:
             print("  " + str(cmd))
-        with open(os.path.join(self.wdir, "task.log"), "a") as w:
-            w.write(str(cmd) + "\n")
+        with open(os.path.join(self.wdir, "task.log"), "a") as task_log:
+            task_log.write(str(cmd) + "\n")
         out = cmd()
         # Store log info in any was generated
         if out is not None:
-            with open(os.path.join(self.wdir, "task.log"), "a") as w:
-                w.write(str(out) + "\n")
+            with open(os.path.join(self.wdir, "task.log"), "a") as task_log:
+                task_log.write(str(out) + "\n")
         if isinstance(cmd, SLURMCaller) and os.path.exists(cmd.slurm_log_file):
-            with open(os.path.join(self.wdir, "task.log"), "a") as w:
-                w.write("------BEGIN SLURM LOG OUTPUT SECTION------\n")
-                w.write("".join(open(cmd.slurm_log_file, "r").readlines()))
-                w.write("------END SLURM LOG OUTPUT SECTION------\n")
-        with open(os.path.join(self.wdir, "task.log"), "a") as w:
-            w.write("\n")
+            with open(os.path.join(self.wdir, "task.log"), "a") as task_log:
+                task_log.write("------BEGIN SLURM LOG OUTPUT SECTION------\n")
+                task_log.write("".join(open(cmd.slurm_log_file, "r").readlines()))
+                task_log.write("------END SLURM LOG OUTPUT SECTION------\n")
+        with open(os.path.join(self.wdir, "task.log"), "a") as task_log:
+            task_log.write("\n")
         return out
 
     def single(self, cmd: LocalCommand, time_override: Optional[str] = None):
@@ -436,18 +439,18 @@ class Task(BaseTask, ABC):
         wait
         """
         _path = os.path.join(self.wdir, file_name)
-        fp = open(_path, "w")
+        script_ptr = open(_path, "w")
         # Write shebang and move to working directory
-        fp.write("#!/bin/bash\ncd %s || return\n\n" % self.wdir)
+        script_ptr.write("#!/bin/bash\ncd %s || return\n\n" % self.wdir)
         # Write command to run
         if isinstance(cmd, list):
             for _cmd in cmd:
-                fp.write("".join((str(_cmd), "%s\n" % (" &" if parallelize else ""))))
+                script_ptr.write("".join((str(_cmd), "%s\n" % (" &" if parallelize else ""))))
         else:
-            fp.write("".join((str(cmd), "\n")))
+            script_ptr.write("".join((str(cmd), "\n")))
         if parallelize:
-            fp.write("wait\n")
-        fp.close()
+            script_ptr.write("wait\n")
+        script_ptr.close()
         self.local["chmod"]["+x", _path]()
         return self.local[_path]
 
