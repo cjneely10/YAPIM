@@ -26,4 +26,4 @@ jobs:
     steps:
       - name: Run tests and coverage
         run: |
-          ${GITHUB_WORKSPACE}/run_tests.sh
+          /run_tests.sh
