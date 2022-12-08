@@ -11,3 +11,4 @@ venv
 yapim.egg-info
 build
 bin
+.coverage
