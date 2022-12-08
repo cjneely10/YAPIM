@@ -1,3 +1,4 @@
+"""Pipeline package generation utilities"""
 import errno
 import os
 import pickle
@@ -9,11 +10,20 @@ from yapim.utils.package_management.config_manager_generator import ConfigManage
 from yapim.utils.package_management.package_manager import PackageManager
 
 
+# pylint: disable=too-few-public-methods
 class PackageGenerator(PackageManager):
+    """Create user-deliverable package from pipeline contents"""
     def __init__(self,
                  tasks_directory: Path,
                  dependencies_directories: Optional[List[Path]],
                  input_loader_path: Optional[Path] = None):
+        """
+        Create generator for a YAPIM pipeline
+
+        :param tasks_directory: Directory of pipeline tasks
+        :param dependencies_directories: List of dependency directories that were used
+        :param input_loader_path: Path to input loader. If not provided, will default to `ExtensionLoader`.
+        """
         self._tasks_directory = tasks_directory
         self._loader = input_loader_path
         if dependencies_directories is not None:
@@ -22,6 +32,12 @@ class PackageGenerator(PackageManager):
             self._dependencies_directories = []
 
     def create(self, write_directory: Path):
+        """
+        Create packaged pipeline
+
+        :param write_directory: Output directory
+        :raises OSError: If unable to copy contents
+        """
         if not write_directory.exists():
             os.makedirs(write_directory)
         output_data = {
@@ -43,7 +59,7 @@ class PackageGenerator(PackageManager):
         for pre, post in zip(self._dependencies_directories, output_data["dependencies"]):
             PackageGenerator._try_copy(pre, write_directory.joinpath(post), symlinks=True, dirs_exist_ok=True)
         # Save metadata file
-        pipeline_file = write_directory.joinpath(PackageGenerator.pipeline_file)
+        pipeline_file = write_directory.joinpath(super().pipeline_file)
         # Create config stuff
         self._create_config(write_directory)
         # Make a python package
@@ -72,6 +88,7 @@ class PackageGenerator(PackageManager):
         try:
             shutil.copytree(pre, post, *args, **kwargs)
         except shutil.Error:
+            # pylint: disable=protected-access
             orig_copyxattr = shutil._copyxattr
 
             def patched_copyxattr(src, dst, *, follow_symlinks=True):
@@ -81,5 +98,6 @@ class PackageGenerator(PackageManager):
                     if ex.errno != errno.EACCES:
                         raise
 
+            # pylint: disable=protected-access
             shutil._copyxattr = patched_copyxattr
             shutil.copytree(pre, post, *args, **kwargs)

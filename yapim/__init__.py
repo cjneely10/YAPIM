@@ -1,3 +1,4 @@
+"""Yet Another PIpeline Manager"""
 from yapim.tasks.aggregate_task import AggregateTask
 from yapim.tasks.task import Task, clean
 from yapim.tasks.task import TaskExecutionError
