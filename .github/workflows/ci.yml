@@ -19,11 +19,11 @@ jobs:
       - uses: actions/checkout@v2
       - uses: s-weigand/setup-conda@v1
       - run: conda install -y -c bioconda mmseqs2
-      - run: pip install git+https://github.com/cjneely10/YAPIM.git
+      - run: pip install git+https://github.com/cjneely10/YAPIM.git@${GITHUB_REF##*/}
   test:
     needs: install
     runs-on: ubuntu-latest
     steps:
       - name: Run tests and coverage
-        run: |
-          /run_tests.sh
+        run: ./.github/run_tests.sh
+        shell: bash
