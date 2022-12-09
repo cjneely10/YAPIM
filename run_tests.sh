@@ -25,4 +25,4 @@ done
 cd .. || exit 1
 
 # Lint code
-pylint yapim
+pylint yapim --rcfile=.pylintrc
