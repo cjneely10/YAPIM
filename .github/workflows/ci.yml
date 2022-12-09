@@ -25,5 +25,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Run tests and coverage
-        run: ./.github/run_tests.sh
+        run: ./run_tests.sh
         shell: bash
