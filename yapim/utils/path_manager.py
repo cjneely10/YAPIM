@@ -4,9 +4,7 @@ Module contains PathManager that manages directory tree focused on using record_
 
 import os
 from pathlib import Path
-from typing import List, Dict
-
-from plumbum import local
+from typing import List, Dict, Any
 
 
 class PathManager:
@@ -60,22 +58,26 @@ class PathManager:
         """
         return self._dbs
 
-    def add_dirs(self, record_id: str, _subdirs: List[str] = None):
+    def add_dirs(self, record_id: Any, _subdirs: List[str] = None):
         """ Add a subdirectory to a given record directory
 
-        :param record_id: Directory within self.wdir to which to add subdirectories
+        :param record_id: Directory within self.wdir to which to add subdirectories. `__str__(self)` must be defined.
         :param _subdirs: List of subdirectories to add to a directory within self.wdir
         :raises: AssertionError for improper types
         """
-        # Record base dir
-        local["mkdir"]["-p", os.path.join(self.wdir, str(record_id))]()
+        # Record base dir - may be complex type, must convert properly to str
+        record_id = str(record_id)
+        base_dir = Path(self.wdir).joinpath(record_id)
+        if not base_dir.exists():
+            base_dir.mkdir()
         # Additional dirs, if needed
         if _subdirs is not None:
             assert isinstance(_subdirs, list)
             # Create all subdirectories provided in list and track them
             for _subd in _subdirs:
-                added_path = os.path.join(self.wdir, str(record_id), _subd)
-                local["mkdir"]["-p", added_path]()
+                added_path = Path(self.wdir).joinpath(record_id).joinpath(_subd)
+                if not added_path.exists():
+                    added_path.mkdir()
                 self._dbs[_subd] = added_path
 
     def get_dir(self, record_id: str = None, subdir: str = None) -> str:
@@ -103,6 +105,10 @@ class PathManager:
 
         """
         # Base output directory
-        local["mkdir"]["-p", self._base]()
+        base = Path(self._base)
+        if not base.exists():
+            base.mkdir()
         # Working directory
-        local["mkdir"]["-p", os.path.join(self._base, self._wdir)]()
+        wdir = base.joinpath(self.wdir)
+        if not wdir.exists():
+            wdir.mkdir()

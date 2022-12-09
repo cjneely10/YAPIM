@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import Dict, List
 
 from yapim import Executor, InputLoader, ExtensionLoader
-from yapim.utils.config_manager import ConfigManager
 from yapim.utils.package_management.directory_cleaner import DirectoryCleaner
 from yapim.utils.path_manager import PathManager
 
@@ -54,7 +53,7 @@ class TestCLI(unittest.TestCase):
                 Path("../data").resolve(),
                 out_dir,
             ),
-            TestCLI.file.joinpath("fasta/fasta-config.yaml"),  # Config file path
+            TestCLI.file.joinpath("fasta").joinpath("fasta-config.yaml"),  # Config file path
             out_dir,  # Base output dir path
             Path("fasta/tasks"),  # Relative path to pipeline directory
             display_status_messages=False

@@ -6,3 +6,9 @@ tests/*/*out
 demo/out
 *-pipeline/
 __pycache__
+venv
+.pytest_cache
+yapim.egg-info
+build
+bin
+.coverage

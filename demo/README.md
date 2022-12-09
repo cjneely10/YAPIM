@@ -25,7 +25,7 @@ If you wish to create your environment from scratch, start by creating a new env
 ```shell
 conda create --name yapim-demo python=3.8
 conda activate yapim-demo
-pip install git+https://github.com/cjneely10/YAPIM.git@v0.1.2
+pip install git+https://github.com/cjneely10/YAPIM.git@v0.1.3
 ``` 
 
 As we develop our pipeline and add programs, using conda will make ensuring portability painless!

@@ -4,45 +4,25 @@ on:
   push:
     branches:
       - main
+      - development
     tags:
       - '*'
 
 jobs:
-  install:
+  build:
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version:
-          - 3.8
-    runs-on: ubuntu-latest
+        python-version: [ "3.8" ]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: s-weigand/setup-conda@v1
-      - run: conda install -y -c bioconda mmseqs2
-      - run: pip install git+https://github.com/cjneely10/YAPIM.git
-  test:
-    needs: install
-    runs-on: ubuntu-latest
-    env:
-      COVERAGE_SINGLE: 60
-      COVERAGE_TOTAL: 60
-    steps:
-      - uses: actions/checkout@v2
-      - name: pytest
-        id: pytest
-        uses: alexanderdamiani/pytester-cov@v1.2.0
         with:
-          pytest-root-dir: '.'
-          cov-threshold-single: ${{ env.COVERAGE_SINGLE }}
-          cov-threshold-total: ${{ env.COVERAGE_TOTAL }}
-
-      - name: Coverage single fail - exit
-        if: ${{ steps.pytester-cov.outputs.cov-threshold-single-fail == 'true' }}
+          python-version: ${{ matrix.python-version }}
+      - name: Install python dependencies
         run: |
-          echo "cov single fail ${{ steps.pytester-cov.outputs.cov-threshold-single-fail }}"
-          exit 1
-
-      - name: Coverage total fail - exit
-        if: ${{ steps.pytester-cov.outputs.cov-threshold-total-fail == 'true' }}
-        run: |
-          echo "cov single fail ${{ steps.pytester-cov.outputs.cov-threshold-total-fail }}"
-          exit 1
+          conda install -y -c bioconda mmseqs2
+          pip install . pylint==2.6.0
+      - name: Run tests and coverage
+        run: ./run_tests.sh
+        shell: bash
