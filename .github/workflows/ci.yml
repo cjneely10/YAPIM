@@ -12,19 +12,17 @@ jobs:
   install:
     strategy:
       matrix:
-        python-version:
-          - 3.8
+        python-version: [ "3.8" ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: s-weigand/setup-conda@v1
-      - run: conda install -y -c bioconda mmseqs2
-      - run: pip install .
-  test:
-    needs: install
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
+      - name: Install python dependencies
+        with:
+          python-version: ${{ matrix.python-version }}
+        run: |
+          conda install -y -c bioconda mmseqs2
+          pip install .
       - name: Run tests and coverage
         run: ./run_tests.sh
         shell: bash
