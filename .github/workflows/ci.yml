@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: s-weigand/setup-conda@v1
       - run: conda install -y -c bioconda mmseqs2
-      - run: pip install git+https://github.com/cjneely10/YAPIM.git@${GITHUB_REF##*/}
+      - run: pip install .
   test:
     needs: install
     runs-on: ubuntu-latest
