@@ -22,7 +22,7 @@ jobs:
       - name: Install python dependencies
         run: |
           conda install -y -c bioconda mmseqs2
-          pip install .
+          pip install . pylint==2.6.0
       - name: Run tests and coverage
         run: ./run_tests.sh
         shell: bash
