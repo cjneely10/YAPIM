@@ -5,9 +5,9 @@
 ## Getting Started/Installation 
 
 ```shell
-conda create --name yapim-demo python=3.8 
-conda activate yapim-demo  
-pip install git+https://github.com/cjneely10/YAPIM.git@v0.1.3
+conda create --name myenv python=3.8 
+conda activate myenv  
+pip install git+https://github.com/cjneely10/YAPIM.git
 ```
 
 ## Documentation
