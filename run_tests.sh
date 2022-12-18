@@ -2,6 +2,7 @@
 ### Run YAPIM test suite
 ### Installation:
 ### - pip install .
+### - conda install -c bioconda mmseqs2
 ### Usage: ./run_tests.sh
 
 # Display commands and exit on non-zero return status

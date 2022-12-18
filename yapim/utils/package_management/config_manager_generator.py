@@ -42,7 +42,7 @@ GLOBAL:
 ###########################################
 ## SLURM run settings
 SLURM:
-  ## Set to True if using SLURM
+  ## Set to true if using SLURM
   USE_CLUSTER: false
   ## Pass any flags you wish below
   ## DO NOT PASS the following:

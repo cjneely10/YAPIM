@@ -11,7 +11,7 @@ GLOBAL:
 ###########################################
 ## SLURM run settings
 SLURM:
-  ## Set to True if using SLURM
+  ## Set to true if using SLURM
   USE_CLUSTER: false
   ## Pass any flags you wish below
   ## DO NOT PASS the following:
@@ -34,6 +34,13 @@ Write:
   memory: 8
   time: "4:00:00"
 
+Merge:
+  # Number of threads task will use
+  threads: 1
+  # Amount of memory task will use (in GB)
+  memory: 8
+  time: "4:00:00"
+
 Update:
   # Number of threads task will use
   threads: 1
@@ -43,12 +50,5 @@ Update:
   dependencies:
     Sed:
       program:
-
-Merge:
-  # Number of threads task will use
-  threads: 1
-  # Amount of memory task will use (in GB)
-  memory: 8
-  time: "4:00:00"
 
 ...  # document end

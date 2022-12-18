@@ -40,7 +40,7 @@ class TestExecutor(unittest.TestCase):
             self.type = creation_type
 
         def load(self) -> Dict[str, Dict]:
-            return {self.type(i): {} for i in range(self.n)}
+            return {str(self.type(i)): {} for i in range(self.n)}
 
         def storage_directory(self):
             return ""

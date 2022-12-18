@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='yapim',
-    version='0.1.3',
+    version='0.1.4',
     description='Pipeline generation tool',
     url='',
     author='Christopher Neely',
@@ -13,11 +13,11 @@ setup(
     install_requires=[
         "bcbio-gff>=0.6.6",
         "biopython>=1.76",
-        "plumbum==1.6.6",
-        "networkx==2.2",
+        "plumbum>=1.6.6",
+        "networkx>=2.8.8",
         "pyyaml>=5.3.1",
         "art>=5.1",
-        "pylint>=2.6.0",
+        "pylint==2.6.0",
         "pytest>=6.2.1",
         "pytest-cov>=2.10.1"
     ],
