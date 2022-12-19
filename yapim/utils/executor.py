@@ -25,6 +25,22 @@ class Executor:
     """YAPIM executor generates a topologically-sorted list of Tasks to complete. AggregateTasks break TaskLists -
     execution of Task list ends at an AggregateTask and waits for complete input to reach this point before
     proceeding"""
+
+    # Default error message for improper input parsing
+    err = ImproperInputSection("""
+INPUT section format should be either:
+
+INPUT:
+  pipeline_name:
+    to: from
+
+or:
+
+INPUT:
+  pipeline_name:
+    all
+""")
+
     def __init__(self,
                  input_data: InputLoader,
                  config_path: Union[Path, str],
@@ -164,32 +180,25 @@ class Executor:
             return 64
         return resources
 
+    # pylint: disable=too-many-branches
     def _populate_requested_existing_input(self) -> Dict[str, Dict]:
         """Load existing pipeline data referenced in configuration file"""
         input_section = self.config_manager.config[ConfigManager.INPUT]
-        err = ImproperInputSection("""
-INPUT section format should be either:
-
-INPUT:
-  pipeline_name:
-    to: from
-
-or:
-
-INPUT:
-  pipeline_name: all
-""")
         if not isinstance(input_section, dict):
-            raise err
+            raise Executor.err
         requested_input = {}
         for requested_pipeline_id, requested_pipeline_input in input_section.items():
             # Root definition should not be required to be input, but is kept for legacy reasons
             if requested_pipeline_id == ConfigManager.ROOT:
                 continue
             # Enclosed .pkl file and data
-            pkl_file = Path(os.path.dirname(self.results_base_dir)) \
-                .joinpath(requested_pipeline_id).joinpath(requested_pipeline_id + ".pkl")
-            pkl_data = InputLoader.load_pkl_data(pkl_file)
+            try:
+                pkl_data = InputLoader.load_pkl_data(
+                    Path(os.path.dirname(self.results_base_dir)).joinpath(requested_pipeline_id).joinpath(
+                        requested_pipeline_id + ".pkl"))
+            except FileNotFoundError as f_err:
+                raise ImproperInputSection(f"Requested pipeline {requested_pipeline_id} is not present "
+                                           f"or is improperly formatted") from f_err
             # Definition is a {"to": "from"} mapping
             if isinstance(requested_pipeline_input, dict):
                 pkl_input_data = {key: {} for key in pkl_data.keys()}
@@ -204,9 +213,19 @@ INPUT:
                     if not required:
                         del pkl_input_data[record_id]
                 requested_input.update(pkl_input_data)
-            # Definition requests all information
-            elif isinstance(requested_pipeline_input, str) and requested_pipeline_input == "all":
-                requested_input.update(pkl_data)
+            # Definition is a list of keys to collect
+            elif isinstance(requested_pipeline_input, (list, str)):
+                if isinstance(requested_pipeline_input, str):
+                    requested_pipeline_input = [requested_pipeline_input]
+                for req_input in requested_pipeline_input:
+                    if req_input == "all":
+                        requested_input.update(pkl_data)
+                        continue
+                    try:
+                        requested_input[req_input] = pkl_data[req_input]
+                    except KeyError as k_err:
+                        raise ImproperInputSection(f"INPUT {requested_pipeline_id}.{req_input} does not exist") \
+                            from k_err
             else:
-                raise err
+                raise Executor.err
         return requested_input

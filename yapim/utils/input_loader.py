@@ -32,7 +32,5 @@ class InputLoader(ABC):
 
         :return:
         """
-        if pkl_file.exists():
-            with open(pkl_file, "rb") as file_ptr:
-                return pickle.load(file_ptr)
-        return {}
+        with open(pkl_file, "rb") as file_ptr:
+            return pickle.load(file_ptr)
