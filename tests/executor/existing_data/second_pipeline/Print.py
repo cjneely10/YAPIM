@@ -20,5 +20,5 @@ class Print(Task):
         return []
 
     def run(self):
-        print(self.input)
+        assert "input" in self.input.keys()
         open(self.output["output"], "a").close()

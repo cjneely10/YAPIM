@@ -45,6 +45,16 @@ class TestExecutor(unittest.TestCase):
         def storage_directory(self):
             return ""
 
+    class LoaderWithData(InputLoader):
+        def __init__(self, n: int):
+            self.n = n
+
+        def load(self) -> Dict[str, Dict]:
+            return {str(i): {"value": chr(i + ord('A'))} for i in range(self.n)}
+
+        def storage_directory(self):
+            return ""
+
     class SimpleLoader(Loader):
         def __init__(self, n: int):
             super().__init__(str, n)
@@ -146,7 +156,7 @@ class TestExecutor(unittest.TestCase):
 
     def test_existing_data(self):
         Executor(
-            TestExecutor.SimpleLoader(1),  # Input loader
+            TestExecutor.LoaderWithData(10),  # Input loader
             TestExecutor.file.joinpath("existing_data").joinpath("first_pipeline-config.yaml"),  # Config file path
             TestExecutor.file.joinpath("existing_data-out"),  # Base output dir path
             "existing_data/first_pipeline",  # Relative path to pipeline directory
@@ -154,10 +164,17 @@ class TestExecutor(unittest.TestCase):
         ).run()
 
         Executor(
-            TestExecutor.SimpleLoader(1),  # Input loader
+            TestExecutor.LoaderWithData(10),  # Input loader
             TestExecutor.file.joinpath("existing_data").joinpath("second_pipeline-config.yaml"),  # Config file path
             TestExecutor.file.joinpath("existing_data-out"),  # Base output dir path
             "existing_data/second_pipeline",  # Relative path to pipeline directory
+        ).run()
+
+        Executor(
+            TestExecutor.LoaderWithData(10),  # Input loader
+            TestExecutor.file.joinpath("existing_data").joinpath("third_pipeline-config.yaml"),  # Config file path
+            TestExecutor.file.joinpath("existing_data-out"),  # Base output dir path
+            "existing_data/third_pipeline",  # Relative path to pipeline directory
         ).run()
 
     def test_aggregate_dependencies(self):
