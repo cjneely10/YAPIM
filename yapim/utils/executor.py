@@ -6,7 +6,7 @@ import pickle
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import List, Dict, Optional, Union
+from typing import List, Optional, Union
 
 from art import tprint
 # pylint: disable=no-member
@@ -14,7 +14,7 @@ from plumbum import colors
 
 from yapim import AggregateTask
 from yapim.tasks.task_chain_distributor import TaskChainDistributor
-from yapim.utils.config_manager import ConfigManager, ImproperInputSection
+from yapim.utils.config_manager import ConfigManager
 from yapim.utils.dependency_graph import Node, DependencyGraph
 from yapim.utils.input_loader import InputLoader
 from yapim.utils.package_management.package_loader import PackageLoader
@@ -25,22 +25,6 @@ class Executor:
     """YAPIM executor generates a topologically-sorted list of Tasks to complete. AggregateTasks break TaskLists -
     execution of Task list ends at an AggregateTask and waits for complete input to reach this point before
     proceeding"""
-
-    # Default error message for improper input parsing
-    err = ImproperInputSection("""
-INPUT section format should be either:
-
-INPUT:
-  pipeline_name:
-    to: from
-
-or:
-
-INPUT:
-  pipeline_name:
-    all
-""")
-
     def __init__(self,
                  input_data: InputLoader,
                  config_path: Union[Path, str],
@@ -85,9 +69,15 @@ INPUT:
         TaskChainDistributor.set_allocations(self.config_manager)
         TaskChainDistributor.results.update(self.input_data_dict)
         TaskChainDistributor.output_data_to_pickle.update({key: {} for key in TaskChainDistributor.results.keys()})
-        existing_data = self._populate_requested_existing_input()
-        self.input_data_dict.update(existing_data)
-        TaskChainDistributor.results.update(existing_data)
+        existing_data = InputLoader.populate_requested_existing_input(
+            self.config_manager.config[ConfigManager.INPUT], self.results_base_dir)
+        for key, value in existing_data.items():
+            if key not in self.input_data_dict.keys():
+                self.input_data_dict[key] = {}
+            if key not in TaskChainDistributor.results.keys():
+                TaskChainDistributor.results[key] = {}
+            self.input_data_dict[key].update(value)
+            TaskChainDistributor.results[key].update(value)
         self.begin_logging(base_output_dir)
 
     @staticmethod
@@ -179,53 +169,3 @@ INPUT:
         if resources > 64:
             return 64
         return resources
-
-    # pylint: disable=too-many-branches
-    def _populate_requested_existing_input(self) -> Dict[str, Dict]:
-        """Load existing pipeline data referenced in configuration file"""
-        input_section = self.config_manager.config[ConfigManager.INPUT]
-        if not isinstance(input_section, dict):
-            raise Executor.err
-        requested_input = {}
-        for requested_pipeline_id, requested_pipeline_input in input_section.items():
-            # Root definition should not be required to be input, but is kept for legacy reasons
-            if requested_pipeline_id == ConfigManager.ROOT:
-                continue
-            # Enclosed .pkl file and data
-            try:
-                pkl_data = InputLoader.load_pkl_data(
-                    Path(os.path.dirname(self.results_base_dir)).joinpath(requested_pipeline_id).joinpath(
-                        requested_pipeline_id + ".pkl"))
-            except FileNotFoundError as f_err:
-                raise ImproperInputSection(f"Requested pipeline {requested_pipeline_id} is not present "
-                                           f"or is improperly formatted") from f_err
-            # Definition is a {"to": "from"} mapping
-            if isinstance(requested_pipeline_input, dict):
-                pkl_input_data = {key: {} for key in pkl_data.keys()}
-                for record_id, pkl_record_data in pkl_data.items():
-                    # Check if pipeline pkl data records are needed in this pipeline
-                    required = False
-                    for _to, _from in requested_pipeline_input.items():
-                        if _from in pkl_record_data.keys():
-                            pkl_input_data[record_id][_to] = pkl_record_data[_from]
-                            required = True
-                    # Drop `record_id` if it does not contain any required information
-                    if not required:
-                        del pkl_input_data[record_id]
-                requested_input.update(pkl_input_data)
-            # Definition is a list of keys to collect
-            elif isinstance(requested_pipeline_input, (list, str)):
-                if isinstance(requested_pipeline_input, str):
-                    requested_pipeline_input = [requested_pipeline_input]
-                for req_input in requested_pipeline_input:
-                    if req_input == "all":
-                        requested_input.update(pkl_data)
-                        continue
-                    try:
-                        requested_input[req_input] = pkl_data[req_input]
-                    except KeyError as k_err:
-                        raise ImproperInputSection(f"INPUT {requested_pipeline_id}.{req_input} does not exist") \
-                            from k_err
-            else:
-                raise Executor.err
-        return requested_input

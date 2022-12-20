@@ -1,10 +1,10 @@
 """Top-level ABC for loading input into pipeline. Developers may extend InputLoader to create customized pipeline
 input loaders"""
-
-import pickle
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Dict
+
+from yapim.utils.existing_input_loader import ExistingInputLoader
 
 
 class InputLoader(ABC):
@@ -27,10 +27,6 @@ class InputLoader(ABC):
         """
 
     @staticmethod
-    def load_pkl_data(pkl_file: Path) -> Dict[str, Dict]:
-        """ Load a pkl result file into a dictionary. Useful for when populating input from completed pipelines
-
-        :return:
-        """
-        with open(pkl_file, "rb") as file_ptr:
-            return pickle.load(file_ptr)
+    def populate_requested_existing_input(input_section: dict, results_base_dir: str) -> Dict[str, Dict]:
+        """Load existing pipeline data referenced in configuration file"""
+        return ExistingInputLoader(input_section, results_base_dir).populate()
