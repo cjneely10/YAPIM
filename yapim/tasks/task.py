@@ -232,7 +232,7 @@ class Task(BaseTask, ABC):
         """
         return self.config[ConfigManager.DATA].split(" ")
 
-    def run_task(self, is_in_skipped_chain: bool = False) -> TaskResult:
+    def run_task(self) -> TaskResult:
         """ Handle conditional run checks, display status messages, and call run() via a try block.
         Track time to complete"""
         # Conditional run - either undefined (in which case self.skip defined by config presence/definition)
