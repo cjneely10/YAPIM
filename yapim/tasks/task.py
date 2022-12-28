@@ -112,11 +112,11 @@ class Task(BaseTask, ABC):
         """Allowable program versions for running this Task"""
         pass
 
-    # pylint: disable=fixme
+    # pylint: disable=fixme,no-self-use
     # TODO: Add to tutorial
     def condition(self) -> bool:
         """Define Task to only run if a condition is met."""
-        pass
+        return True
 
     # pylint: disable=unused-argument
     def has_run(self, task_name: str, record_id: Optional[str] = None):
@@ -232,7 +232,7 @@ class Task(BaseTask, ABC):
         """
         return self.config[ConfigManager.DATA].split(" ")
 
-    def run_task(self) -> TaskResult:
+    def run_task(self, is_in_skipped_chain: bool = False) -> TaskResult:
         """ Handle conditional run checks, display status messages, and call run() via a try block.
         Track time to complete"""
         # Conditional run - either undefined (in which case self.skip defined by config presence/definition)

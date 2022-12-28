@@ -126,13 +126,13 @@ class ConfigManager:
     # pylint: disable=too-many-branches
     @staticmethod
     def _validate(data_dict, is_dependency: bool, max_memory: int, max_threads: int):
-        """ Confirm that data and dependency paths provided in file are all valid.
-
-        :raises: MissingDataError
-        """
+        """ Confirm that data and dependency paths provided in file are all valid."""
         if not isinstance(data_dict, dict):
             raise MissingDataError("Dependency section is improperly configured!")
         for task_name, task_dict in data_dict.items():
+            if task_dict is None:
+                raise MissingDataError(
+                    f"Config region for {'dependency ' if is_dependency else ''}{task_name} is empty or malformed")
             if not is_dependency and task_name not in (ConfigManager.INPUT, ConfigManager.SLURM, ConfigManager.GLOBAL):
                 for required_arg in (ConfigManager.MEMORY, ConfigManager.THREADS, ConfigManager.TIME):
                     # Verify that the required args are defined
@@ -180,6 +180,8 @@ class ConfigManager:
                 ConfigManager._validate(task_dict["dependencies"], True, max_memory, max_threads)
                 ConfigManager._check_dependencies(task_dict)
 
+    # pylint: disable=fixme
+    # TODO: Handle empty input dictionaries for config-level dependencies
     @staticmethod
     def _check_dependencies(task_dict: Dict):
         """ Check dependencies section of config file section
@@ -196,11 +198,10 @@ class ConfigManager:
                         provided_program = prog_data[ConfigManager.PROGRAM]
                         if not os.path.exists(provided_program):
                             local.which(provided_program)
-                except CommandNotFound:
-                    # pylint: disable=raise-missing-from
+                except CommandNotFound as not_found_err:
                     raise InvalidPathError(
                         "Dependency %s (program path provided: %s) is not present in your system's path!" % (
-                            prog_name, provided_program))
+                            prog_name, provided_program)) from not_found_err
             else:
                 raise MissingDataError("Dependency section is improperly configured!")
 
