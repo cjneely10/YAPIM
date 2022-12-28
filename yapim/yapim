@@ -23,7 +23,7 @@ class YAPIM(cli.Application):
     """
     Create and run Yet Another PIpeline (Manager)
     """
-    VERSION = "0.2.0"
+    VERSION = "0.3.0"
 
     def main(self, *args):
         if args:

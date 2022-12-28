@@ -85,8 +85,11 @@ class Executor:
         """Call InputLoader load method"""
         input_data_dict: dict = input_data.load()
         for key in input_data_dict.keys():
-            if "object at" in str(key):
-                raise AttributeError("Valid input key types must implement .__str__(self) that returns unique ids!")
+            key = str(key)
+            if " " in key:
+                raise AttributeError("Valid input key types must not contain spaces in their names")
+            if "object at" in key:
+                raise AttributeError("Valid input key types must implement .__str__(self) that returns unique ids")
         return input_data_dict
 
     def begin_logging(self, base_output_dir: Path):
@@ -130,8 +133,9 @@ class Executor:
                                                       self.results_base_dir, self.display_messages)
                     futures.append(executor.submit(task_chain.run))
                 for future in as_completed(futures):
-                    if future.exception() is not None:
-                        raise future.exception()
+                    exception = future.exception()
+                    if exception is not None:
+                        raise exception
         with open(self.results_base_dir.joinpath(f"{self.pipeline_name}.pkl"), "wb") as out_ptr:
             pickle.dump(TaskChainDistributor.output_data_to_pickle, out_ptr)
         print(colors.yellow & colors.bold | "\n%s complete!\n" % self.pipeline_name)
@@ -158,8 +162,14 @@ class Executor:
         min_memory: int = 50000
         for task_list in task_batch:
             for task in task_list:
-                min_threads = min(min_threads, self.config_manager.find(task.get(), ConfigManager.THREADS))
-                min_memory = min(min_memory, self.config_manager.find(task.get(), ConfigManager.MEMORY))
+                threads = self.config_manager.find(task.get(), ConfigManager.THREADS)
+                if threads is None:
+                    threads = min_threads
+                min_threads = min(min_threads, threads)
+                memory = self.config_manager.find(task.get(), ConfigManager.MEMORY)
+                if memory is None:
+                    memory = min_memory
+                min_memory = min(min_memory, memory)
         min_threads = self.config_manager.config[ConfigManager.GLOBAL][ConfigManager.MAX_THREADS] // min_threads or 1
         min_memory = self.config_manager.config[ConfigManager.GLOBAL][ConfigManager.MAX_MEMORY] // min_memory or 1
         if min_memory < min_threads:

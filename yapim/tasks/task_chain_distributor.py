@@ -60,29 +60,34 @@ class TaskChainDistributor(dict):
     @staticmethod
     def set_allocations(config_manager: ConfigManager):
         """Set maximum allocations of threads and memory"""
-        TaskChainDistributor.maximum_threads = int(
-            config_manager.config[ConfigManager.GLOBAL][ConfigManager.MAX_THREADS])
-        TaskChainDistributor.maximum_gb_memory = int(
-            config_manager.config[ConfigManager.GLOBAL][ConfigManager.MAX_MEMORY])
+        global_options = config_manager.config[ConfigManager.GLOBAL]
+        TaskChainDistributor.maximum_threads = int(global_options[ConfigManager.MAX_THREADS])
+        TaskChainDistributor.maximum_gb_memory = int(global_options[ConfigManager.MAX_MEMORY])
 
     def run(self):
         """Run each task in a task chain"""
         for task_ids in self.task_identifiers:
             if len(task_ids) == 1:
-                self._run_task(task_ids[0])
+                # Single task with no dependencies
+                self._run_task(self._create_task(task_ids[0]))
             else:
-                for task_id in task_ids[:-1]:
-                    self._run_task(task_id, task_ids[-1])
-                self._run_task(task_ids[-1])
+                # Task with list of dependencies to complete first
+                # top_level_task = object.__new__(self.task_blueprints[task_ids[-1].name])
+                tasks = [self._create_task(task_id, task_ids[-1]) for task_id in task_ids[:-1]]
+                tasks.append(self._create_task(task_ids[-1]))
+                if tasks[-1].condition():
+                    for task in tasks:
+                        self._run_task(task)
+                else:
+                    self._run_task(tasks[-1])
 
     @staticmethod
     def _is_aggregate(task: Type[Task]):
         """Task is AggregateTask subclass"""
         return issubclass(task, AggregateTask)
 
-    def _run_task(self, task_identifier: Node, top_level_node: Optional[Node] = None):
-        """Run Task/AggregateTask. Wait for available resources prior to launching. Finalize output to output
-        directories and provide updated input values prior to launching a Task"""
+    def _create_task(self, task_identifier: Node, top_level_node: Optional[Node] = None):
+        """Generate Task object"""
         wdir = ".".join(task_identifier.get()).replace(f"{ConfigManager.ROOT}.", "")
         task_blueprint = self.task_blueprints[task_identifier.name]
         if TaskChainDistributor._is_aggregate(task_blueprint):
@@ -115,13 +120,17 @@ class TaskChainDistributor(dict):
                 self.path_manager.get_dir(self.record_id, wdir),
                 self.display_status_messages
             )
+        self._finalize_results(task, TaskResult(task.record_id, task.name, task.output))
+        return task
+
+    def _run_task(self, task: Task):
+        """Run Task/AggregateTask. Wait for available resources prior to launching. Finalize output to output
+        directories and provide updated input values prior to launching a Task"""
         task.set_is_complete()
 
         # pylint: disable=fixme
-        # TODO: This may be problematic...
-        projected_memory = int(self.config_manager.find(task.full_name, ConfigManager.MEMORY))
-        # pylint: disable=fixme
         # TODO: Handle SLURM when multiple nodes may have been listed
+        projected_memory = int(self.config_manager.find(task.full_name, ConfigManager.MEMORY))
         projected_threads = int(self.config_manager.find(task.full_name, ConfigManager.THREADS))
         with TaskChainDistributor.awaiting_resources:
             with TaskChainDistributor.update_lock:
@@ -153,6 +162,14 @@ class TaskChainDistributor(dict):
         with TaskChainDistributor.awaiting_resources:
             TaskChainDistributor.awaiting_resources.notifyAll()
 
+    def _finalize_results(self, task: Task, result: TaskResult):
+        """Call task finalization method"""
+        if not isinstance(task, AggregateTask):
+            with TaskChainDistributor.update_lock:
+                TaskChainDistributor.results = type(task).finalize(self, TaskChainDistributor.results, task, result)
+        else:
+            TaskChainDistributor.results = type(task).finalize(self, TaskChainDistributor.results, task, result)
+
     def _finalize_output(self, task: Task, result: TaskResult):
         """Populate Task output to final output directory and output .pkl file. Do not finalize Tasks that were skipped
         """
@@ -163,59 +180,51 @@ class TaskChainDistributor(dict):
                 # TODO: Manage memory better (write tasks as they complete, reload for AggregateTasks)
                 #  https://docs.h5py.org/en/stable/index.html
                 TaskChainDistributor.output_data_to_pickle[result.record_id] = {}
-        if not isinstance(task, AggregateTask):
-            with TaskChainDistributor.update_lock:
-                TaskChainDistributor.results = type(task).finalize(self, TaskChainDistributor.results, task, result)
-        else:
-            TaskChainDistributor.results = type(task).finalize(self, TaskChainDistributor.results, task, result)
+        self._finalize_results(task, result)
         if task.is_skip:
             return
         for result_key, result_data in result.items():
-            if result_key == "final":
-                if not isinstance(result_data, list):
-                    raise TaskSetupError("'final' section of output should be a list of keys")
-                _sub_out = os.path.join(self.results_dir, str(result.record_id))
-                if not os.path.exists(_sub_out):
-                    os.makedirs(_sub_out)
-                for file_str in result_data:
-                    obj = result.get(file_str)
-                    if obj is None:
-                        raise TaskSetupError("'final' should consist of keys present in task output")
-                    if isinstance(obj, Path) or (isinstance(obj, str) and os.path.exists(obj)):
-                        _path = os.path.splitext(os.path.basename(obj))
-                        _out = os.path.join(
-                            _sub_out,
-                            _path[0] + "." + result.task_name + _path[1]
-                        )
-                        copy(obj, _out)
-                        obj = _out
-                    with TaskChainDistributor.update_lock:
-                        if result.record_id not in TaskChainDistributor.output_data_to_pickle.keys():
-                            TaskChainDistributor.output_data_to_pickle[result.record_id] = {}
-                        TaskChainDistributor.output_data_to_pickle[result.record_id][file_str] = obj
+            if result_key != "final":
+                continue
+            if not isinstance(result_data, list):
+                raise TaskSetupError("'final' section of output should be a list of keys")
+            _sub_out = os.path.join(self.results_dir, str(result.record_id))
+            if not os.path.exists(_sub_out):
+                os.makedirs(_sub_out)
+            for file_str in result_data:
+                obj = result.get(file_str)
+                if obj is None:
+                    raise TaskSetupError("'final' should consist of keys present in task output")
+                if isinstance(obj, Path) or (isinstance(obj, str) and os.path.exists(obj)):
+                    _path = os.path.splitext(os.path.basename(obj))
+                    _out = os.path.join(_sub_out, _path[0] + "." + result.task_name + _path[1])
+                    copy(obj, _out)
+                    obj = _out
+                with TaskChainDistributor.update_lock:
+                    if result.record_id not in TaskChainDistributor.output_data_to_pickle.keys():
+                        TaskChainDistributor.output_data_to_pickle[result.record_id] = {}
+                    TaskChainDistributor.output_data_to_pickle[result.record_id][file_str] = obj
 
     @staticmethod
-    # pylint: disable=too-many-branches
     def _update_distributed_input(record_id: str, requirement_node: Type[Task]) -> Dict:
         """Populate input to a Task with the requested from:to mapping defined in DependencyInput class"""
         amended_dict = {}
-        # pylint: disable=too-many-nested-blocks
         for dependency in requirement_node.depends():
-            if dependency.collect_by is not None:
-                for prior_id, prior_mapping in dependency.collect_by.items():
-                    if isinstance(prior_mapping, dict):
-                        if prior_id.lower() != ConfigManager.ROOT.lower():
-                            for _from, _to in prior_mapping.items():
-                                amended_dict[_to] = TaskChainDistributor.results[record_id][prior_id][_from]
-                        else:
-                            for _from, _to in prior_mapping.items():
-                                amended_dict[_to] = TaskChainDistributor.results[record_id][_from]
-                    else:
-                        for attr in prior_mapping:
-                            if attr.lower() != ConfigManager.ROOT.lower():
-                                amended_dict[attr] = TaskChainDistributor.results[record_id][prior_id][attr]
-                            else:
-                                amended_dict[attr] = TaskChainDistributor.results[record_id][attr]
-            else:
+            if dependency.collect_by is None:
                 amended_dict.update(TaskChainDistributor.results[record_id])
+                continue
+            for prior_id, prior_mapping in dependency.collect_by.items():
+                if isinstance(prior_mapping, dict):
+                    if prior_id.lower() != ConfigManager.ROOT.lower():
+                        for _from, _to in prior_mapping.items():
+                            amended_dict[_to] = TaskChainDistributor.results[record_id][prior_id][_from]
+                    else:
+                        for _from, _to in prior_mapping.items():
+                            amended_dict[_to] = TaskChainDistributor.results[record_id][_from]
+                else:
+                    for attr in prior_mapping:
+                        if attr.lower() != ConfigManager.ROOT.lower():
+                            amended_dict[attr] = TaskChainDistributor.results[record_id][prior_id][attr]
+                        else:
+                            amended_dict[attr] = TaskChainDistributor.results[record_id][attr]
         return amended_dict

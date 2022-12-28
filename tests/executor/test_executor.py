@@ -255,7 +255,8 @@ class TestExecutor(unittest.TestCase):
             TestExecutor.SimpleLoader(10),
             TestExecutor.file.joinpath("conditional_task").joinpath("tasks-config.yaml"),
             TestExecutor.file.joinpath("conditional_task-out"),
-            "conditional_task/tasks"
+            "conditional_task/tasks",
+            ["conditional_task/dependencies"]
         ).run()
 
 

@@ -37,5 +37,12 @@ MultiplyByTwo:
   # Amount of memory task will use (in GB)
   memory: 8
   time: "4:00:00"
+  dependencies:
+    LevelOne:
+      threads: 1
+    LevelTwo:
+      threads: 1
+    LevelThree:
+      threads: 1
 
 ...  # document end

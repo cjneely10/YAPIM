@@ -112,11 +112,11 @@ class Task(BaseTask, ABC):
         """Allowable program versions for running this Task"""
         pass
 
-    # pylint: disable=fixme
+    # pylint: disable=fixme,no-self-use
     # TODO: Add to tutorial
     def condition(self) -> bool:
         """Define Task to only run if a condition is met."""
-        pass
+        return True
 
     # pylint: disable=unused-argument
     def has_run(self, task_name: str, record_id: Optional[str] = None):

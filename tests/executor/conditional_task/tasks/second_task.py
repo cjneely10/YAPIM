@@ -20,7 +20,9 @@ class MultiplyByTwo(Task):
 
     @staticmethod
     def depends() -> List[DependencyInput]:
-        pass
+        return [DependencyInput("LevelOne", {"InitialTask": ["id"]})]
 
     def run(self):
-        pass
+        assert int(self.record_id) % 2 == 0
+        if self.has_run("LevelOne"):
+            assert int(self.input["LevelOne"]["id"]) % 2 == 0
