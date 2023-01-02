@@ -226,15 +226,14 @@ class ConfigManager:
             raise MissingDataError("SLURM section missing required user data")
         return self.config["SLURM"]["user-id"]
 
-    @staticmethod
-    def flags_to_list(cfg_manager: "ConfigManager", task, config_param: str):
+    def flags_to_list(self, task, config_param: str):
         """ Get additional flags from given section, parsed to list
 
         Example: self.local["ls"][(*self.added_flags("ls"))]
 
         :return: List of arguments to pass to calling program
         """
-        flags = cfg_manager.find(task.full_name, config_param)
+        flags = self.find(task.full_name, config_param)
         return ConfigManager._parse_flags(flags)
 
     @staticmethod

@@ -72,7 +72,6 @@ class TaskChainDistributor(dict):
                 self._run_task(self._create_task(task_ids[0]))
             else:
                 # Task with list of dependencies to complete first
-                # top_level_task = object.__new__(self.task_blueprints[task_ids[-1].name])
                 tasks = [self._create_task(task_id, task_ids[-1]) for task_id in task_ids[:-1]]
                 tasks.append(self._create_task(task_ids[-1]))
                 if tasks[-1].condition():
@@ -107,9 +106,8 @@ class TaskChainDistributor(dict):
                     updated_data = self._update_distributed_input(self.record_id,
                                                                   self.task_blueprints[top_level_node.name])
                 except KeyError as err:
-                    # pylint: disable=raise-missing-from
                     raise TaskExecutionError(f"Unable to load dependency data {err} for {task_identifier.get()} "
-                                             f"on record {self.record_id}")
+                                             f"on record {self.record_id}") from err
             self.path_manager.add_dirs(self.record_id, [wdir])
             task = task_blueprint(
                 self.record_id,
