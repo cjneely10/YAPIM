@@ -277,7 +277,7 @@ class Task(BaseTask, ABC):
             self.try_run()
             end_time = time.time()
             with Task.print_lock:
-                _str = "Is complete:  {} {} ({:.3f}{})".format(str(self.record_id), task_name,
+                _str = "Is complete:  record_id:{}  task:{}  ({:.3f}{})".format(str(self.record_id), task_name,
                                                                *Task._parse_time(end_time - start_time))
                 logging.info(_str)
                 if self.display_messages:
