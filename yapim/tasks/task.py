@@ -48,6 +48,7 @@ def clean(*paths: Union[Path, str]):
     :param paths: Relative paths to remove
     :return:
     """
+
     def method(func: Callable):
         def fxn(self):
             func(self)
@@ -261,7 +262,7 @@ class Task(BaseTask, ABC):
             return TaskResult(self.record_id, self.name, self.output)
 
         if not self.is_complete:
-            task_name = (self.task_scope() + " " if self.task_scope() != ConfigManager.ROOT else "") +\
+            task_name = (self.task_scope() + " " if self.task_scope() != ConfigManager.ROOT else "") + \
                         (self.name if self.task_scope() == ConfigManager.ROOT else f"(using {self.name})")
             with Task.print_lock:
                 if self.display_messages:
@@ -278,7 +279,8 @@ class Task(BaseTask, ABC):
             end_time = time.time()
             with Task.print_lock:
                 _str = "Is complete:  record_id:{}  task:{}  ({:.3f}{})".format(str(self.record_id), task_name,
-                                                               *Task._parse_time(end_time - start_time))
+                                                                                *Task._parse_time(
+                                                                                    end_time - start_time))
                 logging.info(_str)
                 if self.display_messages:
                     print(colors.blue & colors.bold | _str)
