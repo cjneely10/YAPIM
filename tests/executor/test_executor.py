@@ -1,3 +1,4 @@
+import glob
 import os
 import shutil
 import unittest
@@ -148,7 +149,7 @@ class TestExecutor(unittest.TestCase):
         with self.assertRaises(CommandNotFound):
             Executor(
                 TestExecutor.SimpleLoader(1),  # Input loader
-                TestExecutor.file.joinpath("bad_program_path").joinpath("bad_program_path-config.yaml"),  # Config file path
+                TestExecutor.file.joinpath("bad_program_path").joinpath("bad_program_path-config.yaml"),
                 TestExecutor.file.joinpath("bad_program_path-out"),  # Base output dir path
                 "bad_program_path",  # Relative path to pipeline directory
                 display_status_messages=False
@@ -258,6 +259,25 @@ class TestExecutor(unittest.TestCase):
             "conditional_task/tasks",
             ["conditional_task/dependencies"]
         ).run()
+
+    def test_post_run_cleanup(self):
+        Executor(
+            TestExecutor.SimpleLoader(10),
+            TestExecutor.file.joinpath("post_run_cleanup").joinpath("tasks-config.yaml"),
+            TestExecutor.file.joinpath("post_run_cleanup-out"),
+            "post_run_cleanup/tasks",
+        ).run()
+        out_dir = Path(__file__).parent.joinpath("post_run_cleanup-out")
+        assert out_dir.exists()
+        result_files = glob.glob(
+            str(out_dir.joinpath("wdir").joinpath("*").joinpath("TaskWithCleanup").joinpath("*.txt")))
+        assert len(result_files) == 10
+        deleted_dirs = glob.glob(
+            str(out_dir.joinpath("wdir").joinpath("*").joinpath("TaskWithCleanup").joinpath("wdir")))
+        assert len(deleted_dirs) == 0
+        deleted_files = glob.glob(
+            str(out_dir.joinpath("wdir").joinpath("*").joinpath("TaskWithCleanup").joinpath("*tmp.out")))
+        assert len(deleted_files) == 0
 
 
 if __name__ == '__main__':

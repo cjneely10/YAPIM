@@ -1,5 +1,5 @@
 """Task provides the primary API methods with which users will interact."""
-
+import glob
 import logging
 import os
 import shutil
@@ -35,15 +35,31 @@ class TaskExecutionError(RuntimeError):
     """
 
 
-def clean(*directories: Union[Path, str]):
-    """Remove directories in this Task's working directory prior to calling run()"""
+def clean(*paths: Union[Path, str]):
+    """
+    Remove files/directories in this Task's working directory after run() completes
+
+    Example:
+        @clean("tmp", "a*.out")
+
+    Prior to performing delete operation, each path is concatenated with the record's working directory:
+        glob.glob(self.wdir.joinpath(path))
+
+    :param paths: Relative paths to remove
+    :return:
+    """
+
     def method(func: Callable):
         def fxn(self):
-            for directory in directories:
-                out_dir = self.wdir.joinpath(directory)
-                if out_dir.exists():
-                    shutil.rmtree(out_dir)
             func(self)
+            for glob_path in paths:
+                for out_fd in glob.glob(str(self.wdir.joinpath(glob_path))):
+                    out_fd = Path(out_fd).resolve()
+                    if out_fd.exists():
+                        if out_fd.is_dir():
+                            shutil.rmtree(out_fd, ignore_errors=True)
+                        else:
+                            os.remove(out_fd)
 
         return fxn
 
@@ -197,7 +213,7 @@ class Task(BaseTask, ABC):
 
         :return: List of arguments to pass to calling program
         """
-        return ConfigManager.flags_to_list(self.config_manager, self, config_param)
+        return self.config_manager.flags_to_list(self, config_param)
 
     @property
     def is_slurm(self) -> bool:
@@ -246,12 +262,11 @@ class Task(BaseTask, ABC):
             return TaskResult(self.record_id, self.name, self.output)
 
         if not self.is_complete:
+            task_name = (self.task_scope() + " " if self.task_scope() != ConfigManager.ROOT else "") + \
+                        (self.name if self.task_scope() == ConfigManager.ROOT else f"(using {self.name})")
             with Task.print_lock:
                 if self.display_messages:
-                    print(colors.green & colors.bold | "\nRunning:\n  %s" % (
-                            (self.task_scope() + " " if self.task_scope() != ConfigManager.ROOT else "")
-                            + (self.name if self.task_scope() == ConfigManager.ROOT else f"(using {self.name})")
-                    ))
+                    print(colors.green & colors.bold | "\nRunning:\n  %s" % task_name)
                 _str = "In progress:  {}".format(str(self.record_id))
                 logging.info(_str)
                 if self.display_messages:
@@ -263,8 +278,9 @@ class Task(BaseTask, ABC):
             self.try_run()
             end_time = time.time()
             with Task.print_lock:
-                _str = "Is complete:  {} ({:.3f}{})".format(str(self.record_id),
-                                                            *Task._parse_time(end_time - start_time))
+                _str = "Is complete:  record_id:{}  task:{}  ({:.3f}{})".format(str(self.record_id), task_name,
+                                                                                *Task._parse_time(
+                                                                                    end_time - start_time))
                 logging.info(_str)
                 if self.display_messages:
                     print(colors.blue & colors.bold | _str)
@@ -332,6 +348,12 @@ class Task(BaseTask, ABC):
 
     def set_is_complete(self):
         """ Check all required output data to see if any part of task need to be completed
+
+        A task is considered complete if all Path or string values in `self.output` exist in the record's working
+        directory
+
+        If a string/Path value does not exist, or if there are no strings/Paths defined as output values for this task,
+        then it is considered incomplete and its `self.run()` method will be called
 
         :return: Boolean representing if task has all required output
         """

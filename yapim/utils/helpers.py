@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Union
 
 
-def touch(_path: str):
+def touch(_path: Union[str, Path]):
     """ Mimic linux "touch" command
 
     :param _path: Empty file path to create, or to check if it exists
