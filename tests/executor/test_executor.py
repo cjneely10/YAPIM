@@ -281,6 +281,12 @@ class TestExecutor(unittest.TestCase):
         deferred_files = glob.glob(
             str(out_dir.joinpath("wdir").joinpath("*").joinpath("TaskWithCleanup").joinpath("*.deferred.out")))
         assert len(deferred_files) == 0
+        partially_kept = glob.glob(
+            str(out_dir.joinpath("wdir").joinpath("*").joinpath("TaskWithCleanup").joinpath("keep")))
+        assert len(partially_kept) == 10
+        removed_from_partially_kept = glob.glob(
+            str(out_dir.joinpath("wdir").joinpath("*").joinpath("TaskWithCleanup").joinpath("keep").joinpath("file.out")))
+        assert len(removed_from_partially_kept) == 0
 
 
 if __name__ == '__main__':
