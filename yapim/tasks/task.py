@@ -1,14 +1,12 @@
 """Task provides the primary API methods with which users will interact."""
-import glob
 import logging
 import os
-import shutil
 import threading
 import time
 import traceback
 from abc import ABC
 from pathlib import Path
-from typing import Tuple, List, Union, Optional, Callable
+from typing import Tuple, List, Union, Optional
 
 # pylint: disable=no-member
 from plumbum import local, colors, ProcessExecutionError
@@ -33,37 +31,6 @@ class TaskExecutionError(RuntimeError):
     Wrapper for error within running a task associated with an error in config lookup or other utility- or setup-
     related issues
     """
-
-
-def clean(*paths: Union[Path, str]):
-    """
-    Remove files/directories in this Task's working directory after run() completes
-
-    Example:
-        @clean("tmp", "a*.out")
-
-    Prior to performing delete operation, each path is concatenated with the record's working directory:
-        glob.glob(self.wdir.joinpath(path))
-
-    :param paths: Relative paths to remove
-    :return:
-    """
-
-    def method(func: Callable):
-        def fxn(self):
-            func(self)
-            for glob_path in paths:
-                for out_fd in glob.glob(str(self.wdir.joinpath(glob_path))):
-                    out_fd = Path(out_fd).resolve()
-                    if out_fd.exists():
-                        if out_fd.is_dir():
-                            shutil.rmtree(out_fd, ignore_errors=True)
-                        else:
-                            os.remove(out_fd)
-
-        return fxn
-
-    return method
 
 
 # pylint: disable=line-too-long,fixme
