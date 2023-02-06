@@ -20,7 +20,11 @@ class TaskWithCleanup(Task):
     def depends() -> List[DependencyInput]:
         pass
 
-    @clean("wdir", "*tmp.out", "{self.record_id}.deferred.out", Path("keep").joinpath("file.out"))
+    @clean("wdir",
+           "*tmp.out",
+           "{self.record_id}.deferred.out",
+           Path("keep").joinpath("file.out"),
+           Path("keep").joinpath("{self.record_id}.deferred.out"))
     def run(self):
         touch(self.output["retained_files"])
         touch(self.wdir.joinpath(f"{self.record_id}tmp.out"))
@@ -29,3 +33,4 @@ class TaskWithCleanup(Task):
         keep_dir = self.wdir.joinpath("keep")
         os.mkdir(keep_dir)
         touch(keep_dir.joinpath("file.out"))
+        touch(keep_dir.joinpath(f"{self.record_id}.deferred.out"))
