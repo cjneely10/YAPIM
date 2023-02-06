@@ -278,6 +278,9 @@ class TestExecutor(unittest.TestCase):
         deleted_files = glob.glob(
             str(out_dir.joinpath("wdir").joinpath("*").joinpath("TaskWithCleanup").joinpath("*tmp.out")))
         assert len(deleted_files) == 0
+        deferred_files = glob.glob(
+            str(out_dir.joinpath("wdir").joinpath("*").joinpath("TaskWithCleanup").joinpath("*.deferred.out")))
+        assert len(deferred_files) == 0
 
 
 if __name__ == '__main__':
