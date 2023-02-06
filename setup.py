@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='yapim',
-    version='0.3.2',
+    version='0.3.3',
     description='Pipeline generation tool',
     url='',
     author='Christopher Neely',
