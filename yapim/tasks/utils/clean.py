@@ -15,8 +15,8 @@ class _DeferredFString:
     See:
     https://stackoverflow.com/questions/42497625/how-to-postpone-defer-the-evaluation-of-f-strings
     """
-    def __init__(self, payload: str):
-        self.payload = payload
+    def __init__(self, payload: Union[Path, str]):
+        self.payload = str(payload)
 
     def __str__(self):
         _vars = currentframe().f_back.f_globals.copy()
@@ -28,8 +28,8 @@ def clean(*paths: Union[Path, str]):
     """
     Remove files/directories in this Task's working directory after run() completes
 
-    Example:
-        @clean("tmp", "a*.out", "{self.record_id}.tmp.out")
+    Examples:
+        @clean("tmp", "a*.out", "{self.record_id}.tmp.out", Path("dd").joinpath("tmp.out"))
 
     Note that strings will be interpolated as deferred f-strings
 
