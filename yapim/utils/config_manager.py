@@ -50,6 +50,11 @@ class MissingDependenciesError(ValueError):
     pass
 
 
+class InvalidConfigFileError(KeyError):
+    """Raise if configuration file is missing Task or Dependency definitions"""
+    pass
+
+
 class ConfigManager:
     """ConfigManager handles parsing user-passed config file"""
     ROOT = "root"
@@ -104,6 +109,17 @@ class ConfigManager:
         if task_data[0] == ConfigManager.ROOT:
             return self.config[task_data[1]]
         return self.config[task_data[0]]
+
+    def config_supports_pipeline_tasks(self, task_lists: List[List]):
+        """Validate that all tasks have defined configuration sections"""
+        for task_list in task_lists:
+            for task in task_list:
+                task_identifier = task.get()
+                try:
+                    self.get(task_identifier)
+                except KeyError as k_err:
+                    raise InvalidConfigFileError(f"Required task {'.'.join(task_identifier)} "
+                                                 f"is missing configuration definition") from k_err
 
     # pylint: disable=raise-missing-from
     def _validate_global(self):

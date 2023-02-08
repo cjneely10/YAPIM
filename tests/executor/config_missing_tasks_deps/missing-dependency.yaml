@@ -1,0 +1,45 @@
+---  # document start
+
+###########################################
+## Pipeline input section
+INPUT:
+  root: all
+
+## Global settings
+GLOBAL:
+  # Maximum threads/cpus to use in analysis
+  MaxThreads: 10
+  # Maximum memory to use (in GB)
+  MaxMemory: 100
+
+###########################################
+
+SLURM:
+  ## Set to True if using SLURM
+  USE_CLUSTER: false
+  ## Pass any flags you wish below
+  ## DO NOT PASS the following:
+  ## --nodes, --ntasks, --mem, --cpus-per-task
+  --qos: unlim
+  --job-name: EukMS
+  user-id: uid
+
+A:
+  threads: 1
+  memory: 40
+  time: "4:00:00"
+
+B:
+  threads: 1
+  memory: 40
+  time: "4:00:00"
+  dependencies:
+    Q:
+      program: cat
+
+C:
+  threads: 1
+  memory: 40
+  time: "4:00:00"
+
+...  # document end

@@ -23,7 +23,7 @@ class YAPIM(cli.Application):
     """
     Create and run Yet Another PIpeline (Manager)
     """
-    VERSION = "0.3.3"
+    VERSION = "0.3.4"
 
     def main(self, *args):
         if args:
@@ -177,14 +177,19 @@ class YAPIMRunner(cli.Application):
 
     def main(self, *args):
         pipeline_data = PackageLoader(self.pipeline_pkl_path).validate_pipeline_pkl()
-        Executor(
-            pipeline_data["loader"](self.input_directory, self.output_directory, *args),
-            self.config_path,
-            self.output_directory,
-            pipeline_data["tasks"],
-            pipeline_data["dependencies"],
-            self.display_status
-        ).run()
+        try:
+            Executor(
+                pipeline_data["loader"](self.input_directory, self.output_directory, *args),
+                self.config_path,
+                self.output_directory,
+                pipeline_data["tasks"],
+                pipeline_data["dependencies"],
+                self.display_status
+            ).run()
+        # pylint: disable=broad-except
+        except BaseException as err:
+            print(err)
+            sys.exit(1)
 
 
 if __name__ == "__main__":

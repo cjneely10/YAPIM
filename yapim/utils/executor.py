@@ -25,6 +25,8 @@ class Executor:
     """YAPIM executor generates a topologically-sorted list of Tasks to complete. AggregateTasks break TaskLists -
     execution of Task list ends at an AggregateTask and waits for complete input to reach this point before
     proceeding"""
+    # pylint: disable=fixme
+    # TODO: Execute AggregateTasks in parallel (when possible)
     def __init__(self,
                  input_data: InputLoader,
                  config_path: Union[Path, str],
@@ -59,12 +61,8 @@ class Executor:
         self.input_data_dict = Executor._load_input_data(input_data)
         self.config_manager = None
         self.display_messages = display_status_messages
-        try:
-            self.config_manager = ConfigManager(config_path, input_data.storage_directory())
-        # pylint: disable=broad-except
-        except BaseException as err:
-            print(err)
-            sys.exit(1)
+        self.config_manager = ConfigManager(config_path, input_data.storage_directory())
+        self.config_manager.config_supports_pipeline_tasks(self.task_list)
         TaskChainDistributor.initialize_class()
         TaskChainDistributor.set_allocations(self.config_manager)
         TaskChainDistributor.results.update(self.input_data_dict)

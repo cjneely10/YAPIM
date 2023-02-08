@@ -9,6 +9,7 @@ from plumbum import CommandNotFound
 
 from yapim import TaskExecutionError
 from yapim.tasks.utils.base_task import BaseTask
+from yapim.utils.config_manager import InvalidConfigFileError
 from yapim.utils.dependency_graph import DependencyGraphGenerationError
 from yapim.utils.executor import Executor
 from yapim.utils.extension_loader import ExtensionLoader
@@ -268,13 +269,13 @@ class TestExecutor(unittest.TestCase):
             "post_run_cleanup/tasks",
         ).run()
         out_dir = Path(__file__).parent.joinpath("post_run_cleanup-out")
-        assert out_dir.exists()
+        self.assertTrue(out_dir.exists())
         result_files = glob.glob(
             str(out_dir.joinpath("wdir").joinpath("*").joinpath("TaskWithCleanup").joinpath("*.txt")))
-        assert len(result_files) == 10
+        self.assertEqual(len(result_files), 10)
         deleted_dirs = glob.glob(
             str(out_dir.joinpath("wdir").joinpath("*").joinpath("TaskWithCleanup").joinpath("wdir")))
-        assert len(deleted_dirs) == 0
+        self.assertEqual(len(deleted_dirs), 0)
         deleted_files = glob.glob(
             str(out_dir.joinpath("wdir").joinpath("*").joinpath("TaskWithCleanup").joinpath("*tmp.out")))
         assert len(deleted_files) == 0
@@ -288,6 +289,25 @@ class TestExecutor(unittest.TestCase):
         assert len(removed_from_partially_kept) == 0
         deferred_removed_from_partially_kept = glob.glob(str(keep_path.joinpath("*.deferred.out")))
         assert len(deferred_removed_from_partially_kept) == 0
+
+    def test_incomplete_config_file(self):
+        with self.assertRaises(InvalidConfigFileError):
+            Executor(
+                TestExecutor.SimpleLoader(10),
+                TestExecutor.file.joinpath("config_missing_tasks_deps").joinpath("missing-task.yaml"),
+                TestExecutor.file.joinpath("config_missing_tasks_deps"),
+                "config_missing_tasks_deps/tasks",
+                ["config_missing_tasks_deps/dependencies"]
+            ).run()
+
+        with self.assertRaises(InvalidConfigFileError):
+            Executor(
+                TestExecutor.SimpleLoader(10),
+                TestExecutor.file.joinpath("config_missing_tasks_deps").joinpath("missing-dependency.yaml"),
+                TestExecutor.file.joinpath("config_missing_tasks_deps"),
+                "config_missing_tasks_deps/tasks",
+                ["config_missing_tasks_deps/dependencies"]
+            ).run()
 
 
 if __name__ == '__main__':
